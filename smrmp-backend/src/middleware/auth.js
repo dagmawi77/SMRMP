@@ -1,7 +1,12 @@
-const jwt = require('jsonwebtoken');
+const { Op } = require('sequelize');
 const { User } = require('../models');
+const { getSupabaseAuth } = require('../config/supabase');
 const { sendError } = require('../utils/apiResponse');
 
+/**
+ * Verifies a Supabase Auth access token, then loads the matching staff profile
+ * from public.users (by auth user id, with email fallback during migration).
+ */
 const protect = async (req, res, next) => {
   try {
     let token;
@@ -14,19 +19,33 @@ const protect = async (req, res, next) => {
       return sendError(res, 401, 'Authentication required.');
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findByPk(decoded.id);
+    const { data, error } = await getSupabaseAuth().auth.getUser(token);
 
-    if (!user || !user.is_active) {
+    if (error || !data?.user) {
+      return sendError(res, 401, 'Invalid or expired authentication token.');
+    }
+
+    const authUser = data.user;
+    const email = authUser.email?.toLowerCase();
+
+    const user = await User.findOne({
+      where: {
+        is_active: true,
+        [Op.or]: [
+          { id: authUser.id },
+          ...(email ? [{ email }] : []),
+        ],
+      },
+    });
+
+    if (!user) {
       return sendError(res, 401, 'User not found or deactivated.');
     }
 
     req.user = user;
+    req.authUser = authUser;
     return next();
   } catch (error) {
-    if (error.name === 'TokenExpiredError') {
-      return sendError(res, 401, 'Session expired. Please log in again.');
-    }
     return sendError(res, 401, 'Invalid authentication token.');
   }
 };
