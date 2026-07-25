@@ -7,6 +7,7 @@ const ticketRoutes = require('./ticketRoutes');
 const aiRoutes = require('./aiRoutes');
 const userRoutes = require('./userRoutes');
 const roleRoutes = require('./roleRoutes');
+const notificationRoutes = require('./notificationRoutes');
 
 const router = require('express').Router();
 
@@ -19,5 +20,6 @@ router.use('/tickets', ticketRoutes);
 router.use('/ai', aiRoutes);
 router.use('/users', userRoutes);
 router.use('/roles', roleRoutes);
+router.use('/notifications', notificationRoutes);
 
 module.exports = router;
