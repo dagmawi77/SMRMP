@@ -7,6 +7,7 @@ import {
   EyeSlashIcon,
 } from '@heroicons/react/24/outline';
 import useAuth from '../../hooks/useAuth';
+import getApiErrorMessage from '../../utils/apiError';
 import LandingFooter from '../landing/components/LandingFooter';
 import LandingNav from '../landing/components/LandingNav';
 
@@ -39,17 +40,24 @@ export default function LoginPage() {
       return;
     }
 
+    // Mirrors the API's own validation so the form answers before a round trip.
+    if (credentials.password.length < 6) {
+      setErrorMessage('Passwords are at least 6 characters long.');
+      return;
+    }
+
     setIsSubmitting(true);
     setErrorMessage('');
 
     try {
       await login(credentials);
     } catch (error) {
-      const message = error.response?.data?.message
-        || (error.message === 'Unexpected login response from server'
-          ? 'Server returned an invalid response. Check that the backend auth API is implemented.'
-          : 'The email or password entered does not match an active staff account.');
-      setErrorMessage(message);
+      setErrorMessage(
+        getApiErrorMessage(
+          error,
+          'The email or password entered does not match an active staff account.',
+        ),
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -242,10 +250,13 @@ export default function LoginPage() {
               </form>
 
               <div className="mt-6 rounded-lg bg-smrmp-green/20 p-4 text-sm text-smrmp-parchment/80">
-                <p className="mb-2 font-medium text-smrmp-gold">Demo credentials</p>
-                <p>Admin: admin@adwa.museum</p>
-                <p>Curator: curator@adwa.museum</p>
+                <p className="mb-2 font-medium text-smrmp-gold">Demo accounts</p>
+                <p>Admin: admin@smrmp.dev</p>
+                <p>Curator: curator@smrmp.dev</p>
                 <p>Password: Demo@2026!</p>
+                <p className="mt-2 text-xs text-smrmp-parchment/60">
+                  Requires <code className="text-smrmp-parchment/80">npm run auth:sync</code> (service role key).
+                </p>
               </div>
 
               <p className="mt-6 border-t border-white/10 pt-5 text-xs leading-5 text-smrmp-parchment/50">
