@@ -17,6 +17,7 @@ import TicketDetailPage from './pages/tickets/TicketDetailPage';
 import VisitorRegistrationPage from './pages/visitor/VisitorRegistrationPage';
 import ExhibitionDashboardPage from './pages/exhibitions/ExhibitionDashboardPage';
 import UsersPage from './pages/users/UsersPage';
+import SetPasswordPage from './pages/auth/SetPasswordPage';
 
 export default function App() {
   useSessionRestore();
@@ -28,6 +29,7 @@ export default function App() {
           {/* Public routes */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/set-password" element={<SetPasswordPage />} />
           <Route path="/artifact/:code" element={<PublicArtifactPage />} />
           <Route path="/tickets/buy" element={<TicketPurchasePage />} />
           <Route path="/tickets/verify" element={<TicketVerificationPage />} />
