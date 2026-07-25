@@ -6,7 +6,8 @@ import LandingPage from './pages/landing/LandingPage';
 import LoginPage from './pages/auth/LoginPage';
 import ChangePasswordPage from './pages/auth/ChangePasswordPage';
 import SetPasswordPage from './pages/auth/SetPasswordPage';
-import DashboardPage from './pages/dashboard/DashboardPage';
+import RoleDashboard from './pages/dashboard/RoleDashboard';
+import AssignedTasksPage from './pages/maintenance/AssignedTasksPage';
 import ArtifactsPage from './pages/artifacts/ArtifactsPage';
 import AddArtifactPage from './pages/artifacts/AddArtifactPage';
 import ArtifactDetailPage from './pages/artifacts/ArtifactDetailPage';
@@ -19,7 +20,6 @@ import TicketManagementPage from './pages/tickets/TicketManagementPage';
 import TicketDetailPage from './pages/tickets/TicketDetailPage';
 import VisitorRegistrationPage from './pages/visitor/VisitorRegistrationPage';
 import ExhibitionDashboardPage from './pages/exhibitions/ExhibitionDashboardPage';
-import MaintenanceDashboardPage from './pages/maintenance/MaintenanceDashboardPage';
 import CreateExhibitionPage from './pages/exhibitions/CreateExhibitionPage';
 import UsersPage from './pages/users/UsersPage';
 import AdminRolesPage from './pages/admin/AdminRolesPage';
@@ -66,7 +66,7 @@ export default function App() {
           <Route
             path="/tickets/manage"
             element={(
-              <PrivateRoute permissions="tickets.list">
+              <PrivateRoute permissions="tickets.list" excludeRoles={['maintenance']}>
                 <TicketManagementPage />
               </PrivateRoute>
             )}
@@ -74,7 +74,7 @@ export default function App() {
           <Route
             path="/tickets/manage/:id"
             element={(
-              <PrivateRoute permissions="tickets.list">
+              <PrivateRoute permissions="tickets.list" excludeRoles={['maintenance']}>
                 <TicketDetailPage />
               </PrivateRoute>
             )}
@@ -83,7 +83,7 @@ export default function App() {
             path="/dashboard"
             element={(
               <PrivateRoute permissions="dashboard.read">
-                <DashboardPage />
+                <RoleDashboard />
               </PrivateRoute>
             )}
           />
@@ -104,13 +104,14 @@ export default function App() {
             )}
           />
           <Route
-            path="/maintenance/*"
+            path="/maintenance/tasks"
             element={(
-              <PrivateRoute roles={['maintenance']}>
-                <MaintenanceDashboardPage />
+              <PrivateRoute permissions="maintenance.read" roles={['maintenance']}>
+                <AssignedTasksPage />
               </PrivateRoute>
             )}
           />
+          <Route path="/maintenance/*" element={<Navigate to="/dashboard" replace />} />
           <Route
             path="/exhibitions/new"
             element={(

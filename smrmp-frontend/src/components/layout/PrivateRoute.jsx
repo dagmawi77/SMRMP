@@ -7,12 +7,14 @@ import { ROLE_REDIRECTS } from '../../utils/constants';
  * @param {object} props
  * @param {import('react').ReactNode} props.children
  * @param {string[]} [props.roles] legacy role allow-list
+ * @param {string[]} [props.excludeRoles] roles denied even when they hold the required permissions
  * @param {string|string[]} [props.permissions] required permission(s) — all must match unless anyPermission
  * @param {boolean} [props.anyPermission] if true, any listed permission is enough
  */
 export default function PrivateRoute({
   children,
   roles,
+  excludeRoles,
   permissions,
   anyPermission = false,
 }) {
@@ -37,6 +39,17 @@ export default function PrivateRoute({
     return <Navigate to="/change-password" replace />;
   }
 
+  const redirectHome = () => {
+    const roleHome = ROLE_REDIRECTS[user?.role] || '/';
+    return (
+      <Navigate to={roleHome === location.pathname ? '/' : roleHome} replace />
+    );
+  };
+
+  if (excludeRoles?.length && hasRole(...excludeRoles)) {
+    return redirectHome();
+  }
+
   const requiredPerms = permissions
     ? Array.isArray(permissions)
       ? permissions
@@ -48,19 +61,10 @@ export default function PrivateRoute({
       ? canAny(...requiredPerms)
       : requiredPerms.every((p) => can(p));
     if (!allowed) {
-      const roleHome = ROLE_REDIRECTS[user?.role] || '/';
-      return (
-        <Navigate
-          to={roleHome === location.pathname ? '/' : roleHome}
-          replace
-        />
-      );
+      return redirectHome();
     }
   } else if (roles?.length && !hasRole(...roles)) {
-    const roleHome = ROLE_REDIRECTS[user?.role] || '/';
-    return (
-      <Navigate to={roleHome === location.pathname ? '/' : roleHome} replace />
-    );
+    return redirectHome();
   }
 
   return children;

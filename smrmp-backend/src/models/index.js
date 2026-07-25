@@ -12,6 +12,7 @@ const Ticket = require('./Ticket');
 const TicketType = require('./TicketType');
 const AuditLog = require('./AuditLog');
 const VisitorFeedback = require('./VisitorFeedback');
+const MaintenanceRequest = require('./MaintenanceRequest');
 
 // ─── RBAC ASSOCIATIONS ───────────────────────────────────────────
 Role.belongsToMany(Permission, {
@@ -116,4 +117,5 @@ module.exports = {
   TicketType,
   AuditLog,
   VisitorFeedback,
+  MaintenanceRequest,
 };
