@@ -26,6 +26,7 @@ import { useArtifacts } from '../../hooks/useArtifacts';
 import useAuthStore from '../../store/authStore';
 import { aiApi } from '../../api/aiApi';
 import { ARTIFACT_CATEGORIES, CONDITION_STATUSES } from '../../utils/constants';
+import getApiErrorMessage from '../../utils/apiError';
 import toast from 'react-hot-toast';
 
 export default function ArtifactsPage() {
@@ -46,7 +47,7 @@ export default function ArtifactsPage() {
     page: 1,
   });
 
-  const { data, isLoading } = useArtifacts(filters);
+  const { data, isLoading, isError, error, refetch } = useArtifacts(filters);
   const artifacts = data?.artifacts || data || [];
   const pagination = data?.pagination;
 
@@ -77,7 +78,7 @@ export default function ArtifactsPage() {
       }
       toast.success('AI Natural Language Search completed');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'AI search fallback active');
+      toast.error(getApiErrorMessage(err, 'AI search failed'));
     } finally {
       setIsAiSearching(false);
     }
@@ -212,6 +213,20 @@ export default function ArtifactsPage() {
           </button>
         </div>
       </div>
+
+      {isError && !isLoading && (
+        <Alert variant="error" className="mb-4 text-xs">
+          <span className="font-bold">Could not load artifacts: </span>
+          {getApiErrorMessage(error, 'Failed to load artifact catalog')}
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="ml-2 underline font-semibold"
+          >
+            Retry
+          </button>
+        </Alert>
+      )}
 
       {/* Catalog View: Grid (Default) or Table */}
       {viewMode === 'grid' ? (
