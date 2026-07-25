@@ -8,9 +8,10 @@ import {
   ChevronRightIcon,
   Squares2X2Icon,
   TicketIcon,
+  WrenchScrewdriverIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
-import { NAV_ITEMS } from '../../utils/constants';
+import { NAV_ITEMS, ROLE_REDIRECTS } from '../../utils/constants';
 import useAuthStore from '../../store/authStore';
 import useUiStore from '../../store/uiStore';
 
@@ -18,6 +19,7 @@ const navIconMap = {
   '/dashboard': Squares2X2Icon,
   '/artifacts': ArchiveBoxIcon,
   '/exhibitions': BuildingLibraryIcon,
+  '/maintenance': WrenchScrewdriverIcon,
   '/tickets': TicketIcon,
 };
 
@@ -40,10 +42,14 @@ export default function Sidebar() {
   const location = useLocation();
   const { user, hasRole } = useAuthStore();
   const { isMobileOpen, isCollapsed, closeMobile, toggleCollapsed } = useUiStore();
-  const [isExhibitionsOpen, setIsExhibitionsOpen] = useState(location.pathname.startsWith('/exhibitions'));
+  const [openMenus, setOpenMenus] = useState({
+    '/exhibitions': location.pathname.startsWith('/exhibitions'),
+  });
 
   useEffect(() => {
-    if (location.pathname.startsWith('/exhibitions')) setIsExhibitionsOpen(true);
+    if (location.pathname.startsWith('/exhibitions')) {
+      setOpenMenus((prev) => ({ ...prev, '/exhibitions': true }));
+    }
   }, [location.pathname]);
 
   const portalTitle = getPortalTitle(user?.role);
@@ -52,6 +58,8 @@ export default function Sidebar() {
   );
 
   const isPathActive = (path) => location.pathname === path || (path !== '/dashboard' && location.pathname.startsWith(`${path}/`));
+
+  const homePath = ROLE_REDIRECTS[user?.role] || '/dashboard';
 
   return (
     <>
@@ -72,7 +80,7 @@ export default function Sidebar() {
         } ${isCollapsed ? 'lg:w-20' : 'lg:w-64'}`}
       >
         <div className="relative flex items-center justify-between border-b border-[#E2D6C5] bg-[#FAF6F0] px-5 py-5">
-          <Link to="/dashboard" onClick={closeMobile} className="group flex min-w-0 items-center gap-3">
+          <Link to={homePath} onClick={closeMobile} className="group flex min-w-0 items-center gap-3">
             <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#D4A017]/40 bg-[#FAF0D8] text-lg transition-transform group-hover:scale-105">
               <span aria-hidden="true">🏛️</span>
               <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#374B07] ring-2 ring-[#FAF6F0]" />
@@ -125,6 +133,8 @@ export default function Sidebar() {
             }
 
             const childActive = item.children.some((child) => isPathActive(child.path));
+            const isMenuOpen = !!openMenus[item.path];
+
             return (
               <div key={item.path}>
                 <div className={`group flex items-center rounded-xl text-sm font-semibold transition-all duration-200 ${active ? 'bg-[#E4EEDC] text-[#243205]' : 'text-[#5C4233] hover:bg-[#FAF0E4] hover:text-[#2B1B12]'}`}>
@@ -140,17 +150,17 @@ export default function Sidebar() {
                   {(!isCollapsed || isMobileOpen) && (
                     <button
                       type="button"
-                      aria-label={`${isExhibitionsOpen ? 'Collapse' : 'Expand'} ${item.label} menu`}
-                      aria-expanded={isExhibitionsOpen}
-                      onClick={() => setIsExhibitionsOpen((open) => !open)}
+                      aria-label={`${isMenuOpen ? 'Collapse' : 'Expand'} ${item.label} menu`}
+                      aria-expanded={isMenuOpen}
+                      onClick={() => setOpenMenus((prev) => ({ ...prev, [item.path]: !prev[item.path] }))}
                       className="mr-2 rounded-lg p-1.5 text-[#7C4A2D] transition hover:bg-[#FAF0E4] focus:outline-none focus:ring-2 focus:ring-smrmp-gold/60"
                     >
-                      <ChevronDownIcon className={`h-4 w-4 transition-transform ${isExhibitionsOpen ? 'rotate-180' : ''}`} />
+                      <ChevronDownIcon className={`h-4 w-4 transition-transform ${isMenuOpen ? 'rotate-180' : ''}`} />
                     </button>
                   )}
                 </div>
 
-                {(!isCollapsed || isMobileOpen) && isExhibitionsOpen && (
+                {(!isCollapsed || isMobileOpen) && isMenuOpen && (
                   <div className="ml-5 mt-1 space-y-0.5 border-l border-[#D8C8B8] pl-3">
                     {item.children.map((child) => {
                       const childIsActive = isPathActive(child.path);

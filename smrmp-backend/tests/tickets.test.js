@@ -1,4 +1,10 @@
+jest.mock('../src/config/supabase');
+
 const request = require('supertest');
+const {
+  registerAuthUser,
+  resetAuthMock,
+} = require('../src/config/supabase');
 const app = require('../src/app');
 const { sequelize, User, TicketType } = require('../src/models');
 
@@ -8,18 +14,30 @@ describe('Phase 3 — Tickets + Payments (complete)', () => {
 
   beforeAll(async () => {
     await sequelize.sync({ force: true });
+    resetAuthMock();
 
-    await User.create({
+    const admin = await User.create({
       name: 'Admin',
       email: 'admin@adwa.museum',
-      password: 'Demo@2026!',
+      password: null,
       role: 'admin',
     });
-    await User.create({
+    const visitor = await User.create({
       name: 'Visitor',
       email: 'visitor@test.com',
-      password: 'Demo@2026!',
+      password: null,
       role: 'visitor',
+    });
+
+    registerAuthUser({
+      id: admin.id,
+      email: 'admin@adwa.museum',
+      password: 'Demo@2026!',
+    });
+    registerAuthUser({
+      id: visitor.id,
+      email: 'visitor@test.com',
+      password: 'Demo@2026!',
     });
 
     await TicketType.bulkCreate([

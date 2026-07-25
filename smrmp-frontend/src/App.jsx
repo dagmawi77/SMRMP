@@ -16,6 +16,7 @@ import TicketManagementPage from './pages/tickets/TicketManagementPage';
 import TicketDetailPage from './pages/tickets/TicketDetailPage';
 import VisitorRegistrationPage from './pages/visitor/VisitorRegistrationPage';
 import ExhibitionDashboardPage from './pages/exhibitions/ExhibitionDashboardPage';
+import MaintenanceDashboardPage from './pages/maintenance/MaintenanceDashboardPage';
 
 export default function App() {
   useSessionRestore();
@@ -71,6 +72,14 @@ export default function App() {
             element={(
               <PrivateRoute roles={['curator']}>
                 <ExhibitionDashboardPage />
+              </PrivateRoute>
+            )}
+          />
+          <Route
+            path="/maintenance/*"
+            element={(
+              <PrivateRoute roles={['maintenance']}>
+                <MaintenanceDashboardPage />
               </PrivateRoute>
             )}
           />

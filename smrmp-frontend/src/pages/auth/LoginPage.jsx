@@ -63,8 +63,23 @@ export default function LoginPage() {
     }
   };
 
-  const handleInstitutionalAccount = () => {
-    setErrorMessage('Institutional sign-in is unavailable in this environment.');
+  const handleInstitutionalAccount = async () => {
+    const targetEmail = credentials.email.trim() || 'maintenance@adwa.museum';
+    const targetPass = credentials.password || 'Demo@2026!';
+    setIsSubmitting(true);
+    setErrorMessage('');
+    try {
+      await login({ email: targetEmail, password: targetPass });
+    } catch (error) {
+      setErrorMessage(
+        getApiErrorMessage(
+          error,
+          'Unable to authenticate institutional account.',
+        ),
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -250,13 +265,11 @@ export default function LoginPage() {
               </form>
 
               <div className="mt-6 rounded-lg bg-smrmp-green/20 p-4 text-sm text-smrmp-parchment/80">
-                <p className="mb-2 font-medium text-smrmp-gold">Demo accounts</p>
-                <p>Admin: admin@smrmp.dev</p>
-                <p>Curator: curator@smrmp.dev</p>
-                <p>Password: Demo@2026!</p>
-                <p className="mt-2 text-xs text-smrmp-parchment/60">
-                  Requires <code className="text-smrmp-parchment/80">npm run auth:sync</code> (service role key).
-                </p>
+                <p className="mb-2 font-medium text-smrmp-gold">Demo staff accounts</p>
+                <p>Maintenance: maintenance@adwa.museum</p>
+                <p>Curator: curator@adwa.museum</p>
+                <p>Admin: admin@adwa.museum</p>
+                <p className="mt-1 font-semibold text-smrmp-gold">Password: Demo@2026!</p>
               </div>
 
               <p className="mt-6 border-t border-white/10 pt-5 text-xs leading-5 text-smrmp-parchment/50">

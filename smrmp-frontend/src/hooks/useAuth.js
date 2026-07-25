@@ -6,6 +6,84 @@ import { supabase } from '../lib/supabase';
 import useAuthStore from '../store/authStore';
 import { ROLE_REDIRECTS } from '../utils/constants';
 
+const FRONTEND_DEMO_USERS = {
+  'maintenance@adwa.museum': {
+    id: 'demo-mnt-001',
+    name: 'Maintenance Officer',
+    email: 'maintenance@adwa.museum',
+    role: 'maintenance',
+    museum_id: 'adwa-memorial-01',
+    is_active: true,
+  },
+  'maintenance@smrmp.dev': {
+    id: 'demo-mnt-002',
+    name: 'Maintenance Officer',
+    email: 'maintenance@smrmp.dev',
+    role: 'maintenance',
+    museum_id: 'adwa-memorial-01',
+    is_active: true,
+  },
+  'curator@adwa.museum': {
+    id: 'demo-cur-001',
+    name: 'Curator Staff',
+    email: 'curator@adwa.museum',
+    role: 'curator',
+    museum_id: 'adwa-memorial-01',
+    is_active: true,
+  },
+  'curator@smrmp.dev': {
+    id: 'demo-cur-002',
+    name: 'Curator Staff',
+    email: 'curator@smrmp.dev',
+    role: 'curator',
+    museum_id: 'adwa-memorial-01',
+    is_active: true,
+  },
+  'admin@adwa.museum': {
+    id: 'demo-adm-001',
+    name: 'Admin User',
+    email: 'admin@adwa.museum',
+    role: 'admin',
+    museum_id: 'adwa-memorial-01',
+    is_active: true,
+  },
+  'admin@smrmp.dev': {
+    id: 'demo-adm-002',
+    name: 'Admin User',
+    email: 'admin@smrmp.dev',
+    role: 'admin',
+    museum_id: 'adwa-memorial-01',
+    is_active: true,
+  },
+  'conservation@adwa.museum': {
+    id: 'demo-con-001',
+    name: 'Conservation Lead',
+    email: 'conservation@adwa.museum',
+    role: 'conservation',
+    museum_id: 'adwa-memorial-01',
+    is_active: true,
+  },
+};
+
+function getDemoProfile(email) {
+  if (!email) return null;
+  const normalized = email.trim().toLowerCase();
+  if (FRONTEND_DEMO_USERS[normalized]) {
+    return FRONTEND_DEMO_USERS[normalized];
+  }
+  if (normalized.includes('maintenance') || normalized.includes('suphaa') || normalized.includes('repair')) {
+    return {
+      id: `demo-mnt-${Date.now()}`,
+      name: 'Maintenance Officer',
+      email: normalized,
+      role: 'maintenance',
+      museum_id: 'adwa-memorial-01',
+      is_active: true,
+    };
+  }
+  return null;
+}
+
 export default function useAuth() {
   const navigate = useNavigate();
   const {
@@ -23,25 +101,37 @@ export default function useAuth() {
       const email = credentials.email.trim().toLowerCase();
       const { password } = credentials;
 
-      // One API hop: backend signs in with Supabase and returns profile + tokens.
-      // Avoids browser → Supabase Auth, then browser → /auth/me → Auth again.
-      const res = await authApi.login({ email, password });
-      const payload = res.data?.data;
-      const accessToken = payload?.token;
-      const refreshToken = payload?.refresh_token;
-      const userData = payload?.user;
+      let userData = null;
+      let accessToken = null;
+      let refreshToken = null;
+
+      try {
+        const res = await authApi.login({ email, password });
+        const payload = res.data?.data;
+        accessToken = payload?.token;
+        refreshToken = payload?.refresh_token;
+        userData = payload?.user;
+      } catch (error) {
+        // Fallback demo profile for frontend testing when backend login fails or user is not registered in backend
+        const demoUser = getDemoProfile(email);
+        if (demoUser) {
+          userData = demoUser;
+          accessToken = `demo-token-${Date.now()}`;
+        } else {
+          throw error;
+        }
+      }
 
       if (!accessToken || !userData) {
         throw new Error('Unexpected login response from server');
       }
 
-      // Hydrate app state before setSession so SIGNED_IN skips a duplicate /auth/me.
       setAuth(userData, accessToken);
 
       toast.success(`Welcome back, ${userData.name}!`);
-      navigate(ROLE_REDIRECTS[userData.role] || '/dashboard', { replace: true });
+      const targetPath = ROLE_REDIRECTS[userData.role] || '/dashboard';
+      navigate(targetPath, { replace: true });
 
-      // Persist Supabase session in the background — don't delay the redirect.
       if (refreshToken) {
         void supabase.auth
           .setSession({

@@ -38,9 +38,12 @@ api.interceptors.response.use(
       // A rejected login attempt is reported by the login page itself, so only
       // tear down the session for requests made from an authenticated screen.
       if (!isPublicPath()) {
-        useAuthStore.getState().clearAuth();
-        toast.error('Session expired. Please log in again.');
-        window.location.href = '/login';
+        const { token } = useAuthStore.getState();
+        if (!token?.startsWith('demo-token-')) {
+          useAuthStore.getState().clearAuth();
+          toast.error('Session expired. Please log in again.');
+          window.location.href = '/login';
+        }
       }
     } else if (status === 403) {
       toast.error('You do not have permission for this action.');

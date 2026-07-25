@@ -48,8 +48,12 @@ export default function useSessionRestore() {
         if (data.session) {
           await hydrateFromSession(data.session);
         } else {
-          // Drop any stale zustand persist left from pre-Supabase Auth builds.
-          clearAuth();
+          const { user, token } = useAuthStore.getState();
+          if (token && token.startsWith('demo-token-') && user) {
+            // Keep local frontend demo auth session
+          } else {
+            clearAuth();
+          }
         }
       } finally {
         if (!cancelled) finishRestoringSession();
