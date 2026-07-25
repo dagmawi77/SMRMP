@@ -78,7 +78,7 @@ export default function TicketDetailPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tickets-list'] });
       toast.success('Ticket deleted successfully');
-      navigate('/tickets');
+      navigate('/tickets/manage');
     },
     onError: (err) => {
       toast.error(err.response?.data?.message || 'Failed to delete ticket');
@@ -126,7 +126,7 @@ export default function TicketDetailPage() {
           <p className="text-xs text-[#6E5445]">
             {error?.response?.data?.message || 'No ticket matching this ID was found in the database.'}
           </p>
-          <Button variant="primary" onClick={() => navigate('/tickets')}>
+          <Button variant="primary" onClick={() => navigate('/tickets/manage')}>
             <ArrowLeftIcon className="h-4 w-4" />
             <span>Return to Tickets Management</span>
           </Button>
@@ -149,7 +149,7 @@ export default function TicketDetailPage() {
           <div className="flex items-center gap-3">
             <button
               type="button"
-              onClick={() => navigate('/tickets')}
+              onClick={() => navigate('/tickets/manage')}
               className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[#E2D6C5] bg-[#FAF6F0] text-[#7C4A2D] hover:bg-[#FAF0E4] hover:text-[#2B1B12] transition-colors"
               title="Back to Tickets"
             >

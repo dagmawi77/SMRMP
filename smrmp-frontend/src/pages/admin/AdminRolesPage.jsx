@@ -116,8 +116,8 @@ export default function AdminRolesPage() {
         title="Roles & permissions"
         description="Create roles and edit the permission matrix (PUT /api/roles/:id/permissions)."
         showBack
-        backPath="/admin"
-        backLabel="Back to Access control"
+        backPath="/admin/users"
+        backLabel="Back to User accounts"
         action={(
           <Link to="/admin/permissions" className="text-xs font-bold text-[#374B07] hover:underline">
             View permission catalog →

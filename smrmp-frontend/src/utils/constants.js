@@ -65,11 +65,16 @@ export const NAV_ITEMS = [
   { label: 'Dashboard', path: '/dashboard', permissions: ['dashboard.read'] },
   { label: 'Artifacts', path: '/artifacts', permissions: ['artifacts.read'] },
   { label: 'Exhibitions', path: '/exhibitions', permissions: ['exhibitions.read'] },
-  { label: 'Tickets', path: '/tickets', roles: ['admin', 'visitor'] },
+  { label: 'Tickets', path: '/tickets/manage', permissions: ['tickets.list'] },
   {
     label: 'Access control',
-    path: '/admin',
+    path: '/admin/users',
     permissions: ['users.read', 'roles.read'],
+    children: [
+      { label: 'User accounts', path: '/admin/users' },
+      { label: 'Roles & matrix', path: '/admin/roles' },
+      { label: 'Permission catalog', path: '/admin/permissions' },
+    ],
   },
 ];
 
