@@ -10,6 +10,7 @@ import LocationMovementHistory from './LocationMovementHistory';
 import DuplicateDetectorModal from './DuplicateDetectorModal';
 import { formatDate } from '../../utils/formatters';
 import { useUpdateArtifact } from '../../hooks/useArtifacts';
+import getApiErrorMessage from '../../utils/apiError';
 import { CalendarIcon, SparklesIcon, TagIcon, CheckCircleIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
@@ -28,28 +29,26 @@ export default function ArtifactDetail({ artifact, qrDataUrl }) {
   if (!artifact) return null;
 
   const handleApproveAI = () => {
-    setIsApproving(true);
-    if (artifact.id) {
-      updateMutation.mutate(
-        { id: artifact.id, data: { description_source: 'ai_approved' } },
-        {
-          onSuccess: () => {
-            setDescSource('ai_approved');
-            toast.success('AI Catalog Description officially approved by curator!');
-            setIsApproving(false);
-          },
-          onError: () => {
-            setDescSource('ai_approved');
-            toast.success('AI Catalog Description officially approved by curator!');
-            setIsApproving(false);
-          },
-        }
-      );
-    } else {
-      setDescSource('ai_approved');
-      toast.success('AI Catalog Description officially approved by curator!');
-      setIsApproving(false);
+    if (!artifact.id) {
+      toast.error('Artifact ID is missing');
+      return;
     }
+
+    setIsApproving(true);
+    updateMutation.mutate(
+      { id: artifact.id, data: { description_source: 'ai_approved' } },
+      {
+        onSuccess: () => {
+          setDescSource('ai_approved');
+          toast.success('AI catalog description approved');
+          setIsApproving(false);
+        },
+        onError: (error) => {
+          toast.error(getApiErrorMessage(error, 'Failed to approve description'));
+          setIsApproving(false);
+        },
+      }
+    );
   };
 
   return (
