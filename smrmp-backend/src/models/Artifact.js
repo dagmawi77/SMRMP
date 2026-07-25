@@ -42,8 +42,20 @@ const Artifact = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    staff_notes: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
     description: {
       type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    amharic_description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    video_url: {
+      type: DataTypes.STRING(1000),
       allowNull: true,
     },
     ai_description: {

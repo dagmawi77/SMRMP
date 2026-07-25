@@ -38,7 +38,10 @@ export default function ArtifactForm({ onSubmit, loading, initialData, onCancel 
     historical_period: data?.historical_period || '',
     origin: data?.origin || '',
     materials: data?.materials || '',
+    staff_notes: data?.staff_notes || '',
     description: data?.description || '',
+    amharic_description: data?.amharic_description || '',
+    video_url: data?.video_url || '',
     location: data?.location || '',
     condition_status: data?.condition_status || 'good',
     is_on_loan: Boolean(data?.is_on_loan),
@@ -81,6 +84,9 @@ export default function ArtifactForm({ onSubmit, loading, initialData, onCancel 
     setAiDraft(result);
     if (result.description?.full_description) {
       setValue('description', result.description.full_description);
+    }
+    if (result.description?.amharic_description) {
+      setValue('amharic_description', result.description.amharic_description);
     }
     if (result.description?.keywords?.length) {
       setValue('keywords', result.description.keywords.join(', '));
@@ -164,6 +170,12 @@ export default function ArtifactForm({ onSubmit, loading, initialData, onCancel 
           placeholder="e.g. battle, 1896, shield, commander"
           {...register('keywords')}
         />
+        <Input
+          label="Video URL (YouTube, Vimeo, MP4)"
+          placeholder="e.g. https://www.youtube.com/watch?v=... or https://vimeo.com/..."
+          hint="Link to a video documentary, archival footage, or 3D rotation video"
+          {...register('video_url')}
+        />
         <div className="flex items-center gap-3 pt-6">
           <label className="flex items-center gap-2.5 cursor-pointer text-xs font-bold text-[#2B1B12]">
             <input
@@ -176,10 +188,31 @@ export default function ArtifactForm({ onSubmit, loading, initialData, onCancel 
         </div>
       </div>
 
+      <div className="rounded-2xl border border-[#D4A017]/40 bg-[#FAF0D8]/50 p-4 sm:p-5 space-y-2.5">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-bold uppercase tracking-wider text-[#7C4A2D] flex items-center gap-1.5">
+            <SparklesIcon className="h-4 w-4 text-smrmp-gold" />
+            Curator Notes / Source Text (Read by AI)
+          </label>
+          <span className="text-[11px] font-semibold text-[#8C5D38] bg-[#FAF0D8] px-2 py-0.5 rounded border border-smrmp-gold/30">
+            AI Context Input
+          </span>
+        </div>
+        <p className="text-[11px] text-[#6E5445] leading-normal">
+          Enter raw historical notes, inscriptions, catalog records, or background details here. When you click <strong>Generate AI Description</strong>, the AI reads this text along with the metadata above to synthesize a complete, culturally respectful museum narrative.
+        </p>
+        <textarea
+          rows={3}
+          className="w-full rounded-xl border border-[#E2D6C5] bg-[#FFFDF9] p-3 text-xs text-[#2B1B12] outline-none transition-all placeholder:text-[#A08878] focus:border-smrmp-gold focus:ring-2 focus:ring-smrmp-gold/20"
+          placeholder="e.g. Inscribed in Ge'ez on the rim: 'For Emperor Menelik II, 1896'. Donated by Dejazmach's family. Mention the bronze fittings..."
+          {...register('staff_notes')}
+        />
+      </div>
+
       <div>
         <div className="mb-2 flex items-center justify-between">
           <label className="text-xs font-semibold uppercase tracking-wider text-[#5C4233]">
-            Description
+            English Description
           </label>
           <AIDescriptionBtn
             artifactData={formValues}
@@ -188,14 +221,31 @@ export default function ArtifactForm({ onSubmit, loading, initialData, onCancel 
           />
         </div>
         <textarea
-          rows={5}
+          rows={4}
           className="w-full rounded-xl border border-[#E2D6C5] bg-[#FFFDF9] p-4 text-xs text-[#2B1B12] outline-none transition-all placeholder:text-[#A08878] focus:border-smrmp-green focus:ring-2 focus:ring-smrmp-green/20"
-          placeholder="Detailed narrative, historical context, and conservation history..."
+          placeholder="Detailed narrative, historical context, and conservation history in English..."
           {...register('description')}
+        />
+      </div>
+
+      <div>
+        <div className="mb-2 flex items-center justify-between">
+          <label className="text-xs font-bold uppercase tracking-wider text-[#7C4A2D] flex items-center gap-1">
+            <span>የአማርኛ መግለጫ (Amharic Catalog Narrative)</span>
+          </label>
+          <span className="text-[10px] font-bold text-[#8C5D38] bg-[#FAF0D8] px-2 py-0.5 rounded border border-smrmp-gold/30">
+            አማርኛ / Amharic
+          </span>
+        </div>
+        <textarea
+          rows={4}
+          className="w-full rounded-xl border border-[#E2D6C5] bg-[#FFFDF9] p-4 text-xs text-[#2B1B12] outline-none transition-all placeholder:text-[#A08878] focus:border-smrmp-gold focus:ring-2 focus:ring-smrmp-gold/20"
+          placeholder="የቅርሱ ታሪካዊ መግለጫ፣ አመጣጥ እና ዝርዝር መረጃ በአማርኛ..."
+          {...register('amharic_description')}
         />
         {aiDraft && (
           <Alert variant="ai" title="AI Draft — Pending Curator Approval" className="mt-3">
-            Review and edit the AI-generated narrative before saving. Confidence level:{' '}
+            Review and edit the AI-generated English and Amharic narratives before saving. Confidence level:{' '}
             <span className="font-bold">{aiDraft.description?.confidence_level || 'standard'}</span>.
           </Alert>
         )}

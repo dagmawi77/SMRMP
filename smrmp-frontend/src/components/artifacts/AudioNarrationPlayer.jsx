@@ -8,7 +8,7 @@ import {
   LanguageIcon,
 } from '@heroicons/react/24/outline';
 
-export default function AudioNarrationPlayer({ artifactName, description, origin, period }) {
+export default function AudioNarrationPlayer({ artifactName, description, amharicDescription, origin, period }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
@@ -21,7 +21,7 @@ export default function AudioNarrationPlayer({ artifactName, description, origin
 
   const defaultNarrativeEn = description || `${artifactName} is a historical asset preserved at the Adwa Victory Memorial Museum. Hailing from ${origin || 'Ethiopia'} during the ${period || 'historical era'}, it embodies rich heritage and craftsmanship.`;
 
-  const narrativeAm = `${artifactName} በአድዋ ድል መታሰቢያ ሙዚየም ውስጥ የሚገኝ ታሪካዊ ቅርስ ነው። ${period || 'በታሪካዊው ዘመን'} የተሠራው ይህ ቅርስ የኢትዮጵያን የጀግንነት ታሪክ እና ባህላዊ ቅርስ ያንፀባርቃል።`;
+  const narrativeAm = amharicDescription || `${artifactName} በአድዋ ድል መታሰቢያ ሙዚየም ውስጥ የሚገኝ ታሪካዊ ቅርስ ነው። ${period || 'በታሪካዊው ዘመን'} የተሠራው ይህ ቅርስ የኢትዮጵያን የጀግንነት ታሪክ እና ባህላዊ ቅርስ ያንፀባርቃል።`;
 
   const currentNarrative = language === 'am' ? narrativeAm : defaultNarrativeEn;
 
