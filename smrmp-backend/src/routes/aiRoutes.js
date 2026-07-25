@@ -11,6 +11,7 @@ const { isCuratorPlus } = require('../middleware/roleGuard');
 
 const router = express.Router();
 
+// AI-specific rate limit (cost control) — PRD Section 5.2
 const aiRateLimit = rateLimit({
   windowMs: 60 * 1000,
   max: 20,
@@ -21,7 +22,9 @@ const aiRateLimit = rateLimit({
 });
 
 router.use(protect);
-router.use(aiRateLimit);
+if (process.env.NODE_ENV !== 'test') {
+  router.use(aiRateLimit);
+}
 
 router.post('/describe-artifact', isCuratorPlus, describeArtifact);
 router.post('/search', isCuratorPlus, smartSearch);

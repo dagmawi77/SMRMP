@@ -34,6 +34,7 @@ jest.mock('../src/services/aiService', () => ({
       title: 'Monthly Summary',
       generated_at: new Date().toISOString(),
       content: 'Draft report',
+      sections: { summary: { total_artifacts: 1 } },
       raw_data: {},
     },
     ai_label: 'AI-Generated Draft | Review before distribution',
@@ -44,7 +45,7 @@ jest.mock('../src/services/aiService', () => ({
 const app = require('../src/app');
 const { sequelize, User, Artifact } = require('../src/models');
 
-describe('AI API', () => {
+describe('AI API — Phase 2', () => {
   let token;
 
   beforeAll(async () => {
@@ -70,15 +71,31 @@ describe('AI API', () => {
     token = login.body.data.token;
   });
 
-  test('POST /api/ai/describe-artifact returns draft label', async () => {
+  test('POST /api/ai/describe-artifact matches Section 4 shape', async () => {
     const res = await request(app)
       .post('/api/ai/describe-artifact')
       .set('Authorization', `Bearer ${token}`)
       .send({ name: 'Spear', category: 'weapon' });
 
     expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
     expect(res.body.data.ai_label).toContain('AI Draft');
     expect(res.body.data.description.curator_review_required).toBe(true);
+    expect(res.body.data.model_used).toBeDefined();
+    expect(res.body.data.tokens_used).toBeDefined();
+    expect(res.body.data.success).toBeUndefined();
+  });
+
+  test('POST /api/ai/search returns filters, interpretation, artifacts', async () => {
+    const res = await request(app)
+      .post('/api/ai/search')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ query: 'weapons from Adwa' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.filters).toBeDefined();
+    expect(res.body.data.interpretation).toBeDefined();
+    expect(Array.isArray(res.body.data.artifacts)).toBe(true);
   });
 
   test('POST /api/ai/ask rejects blocked topics', async () => {
@@ -97,5 +114,23 @@ describe('AI API', () => {
       .send({ report_type: 'invalid_type' });
 
     expect(res.status).toBe(400);
+  });
+
+  test('POST /api/ai/generate-report returns sections + ai_label', async () => {
+    const res = await request(app)
+      .post('/api/ai/generate-report')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ report_type: 'monthly_summary' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.report.sections).toBeDefined();
+    expect(res.body.data.ai_label).toContain('AI-Generated Draft');
+  });
+
+  test('AI routes require authentication', async () => {
+    const res = await request(app)
+      .post('/api/ai/ask')
+      .send({ question: 'How many artifacts?' });
+    expect(res.status).toBe(401);
   });
 });

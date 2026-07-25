@@ -7,7 +7,9 @@ const {
 } = require('../services/aiService');
 const { Artifact, ArtifactImage } = require('../models');
 const { sendSuccess, sendError } = require('../utils/apiResponse');
+const { logTokenUsage } = require('../utils/tokenLogger');
 
+// POST /api/ai/describe-artifact — Section 4 + Section 5
 const describeArtifact = async (req, res) => {
   try {
     const {
@@ -36,7 +38,23 @@ const describeArtifact = async (req, res) => {
       staff_notes,
     });
 
-    return sendSuccess(res, 200, 'AI description generated', result);
+    logTokenUsage({
+      endpoint: '/ai/describe-artifact',
+      model: result.model_used,
+      tokensUsed: result.tokens_used,
+      userId: req.user?.id,
+    });
+
+    // Section 4 contract (no nested service "success" flag)
+    return sendSuccess(res, 200, 'AI description generated', {
+      description: {
+        ...result.description,
+        curator_review_required: true,
+      },
+      ai_label: result.ai_label,
+      model_used: result.model_used,
+      tokens_used: result.tokens_used,
+    });
   } catch (error) {
     if (error.message.includes('quota')) {
       return sendError(
@@ -54,6 +72,7 @@ const describeArtifact = async (req, res) => {
   }
 };
 
+// POST /api/ai/search
 const smartSearch = async (req, res) => {
   try {
     const { query } = req.body;
@@ -63,7 +82,7 @@ const smartSearch = async (req, res) => {
     }
 
     const interpreted = await interpretSearchQuery(query);
-    const { filters } = interpreted;
+    const { filters = {} } = interpreted;
     const where = {};
 
     if (filters.name) where.name = { [Op.iLike]: `%${filters.name}%` };
@@ -100,11 +119,10 @@ const smartSearch = async (req, res) => {
       order: [['created_at', 'DESC']],
     });
 
+    // Section 4: filters, interpretation, artifacts
     return sendSuccess(res, 200, 'Smart search complete', {
-      query,
-      interpretation: interpreted.interpretation,
       filters: interpreted.filters,
-      count: artifacts.length,
+      interpretation: interpreted.interpretation,
       artifacts,
     });
   } catch (error) {
@@ -117,6 +135,7 @@ const smartSearch = async (req, res) => {
   }
 };
 
+// POST /api/ai/generate-report — Auth: Admin, Curator (Curator+)
 const generateReportHandler = async (req, res) => {
   try {
     const { report_type } = req.body;
@@ -137,7 +156,22 @@ const generateReportHandler = async (req, res) => {
     }
 
     const result = await generateReport(report_type);
-    return sendSuccess(res, 200, 'Report generated', result);
+
+    logTokenUsage({
+      endpoint: '/ai/generate-report',
+      tokensUsed: result.tokens_used,
+      userId: req.user?.id,
+    });
+
+    return sendSuccess(res, 200, 'Report generated', {
+      report: {
+        title: result.report.title,
+        generated_at: result.report.generated_at,
+        content: result.report.content,
+        sections: result.report.sections,
+      },
+      ai_label: result.ai_label,
+    });
   } catch (error) {
     return sendError(
       res,
@@ -148,6 +182,7 @@ const generateReportHandler = async (req, res) => {
   }
 };
 
+// POST /api/ai/ask
 const askAssistant = async (req, res) => {
   try {
     const { question } = req.body;
@@ -167,7 +202,18 @@ const askAssistant = async (req, res) => {
     }
 
     const result = await answerMuseumQuestion(question);
-    return sendSuccess(res, 200, 'Answer generated', result);
+
+    logTokenUsage({
+      endpoint: '/ai/ask',
+      tokensUsed: result.tokens_used,
+      userId: req.user?.id,
+    });
+
+    return sendSuccess(res, 200, 'Answer generated', {
+      answer: result.answer,
+      data_sources: result.data_sources,
+      timestamp: result.timestamp,
+    });
   } catch (error) {
     return sendError(
       res,

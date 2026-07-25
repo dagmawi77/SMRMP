@@ -270,6 +270,12 @@ official distribution | Generated: ${new Date().toISOString()}"`;
           .replace(/\b\w/g, (l) => l.toUpperCase())} — ${reportData.period}`,
         generated_at: reportData.generated_at,
         content: completion.choices[0].message.content,
+        // Section 4 requires sections; keep raw_data for internal use
+        sections: {
+          period: reportData.period,
+          summary: reportData.summary,
+          report_type: reportData.report_type,
+        },
         raw_data: reportData,
       },
       ai_label: 'AI-Generated Draft | Review before distribution',

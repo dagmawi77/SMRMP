@@ -3,6 +3,9 @@ const { Artifact, Exhibition, Ticket } = require('../models');
 const { sendSuccess, sendError } = require('../utils/apiResponse');
 const { startOfDay, startOfMonth, daysAgo } = require('../utils/dateHelpers');
 
+const toCount = (value) => Number(value) || 0;
+
+// GET /api/dashboard/stats — BE-DASH-001 / Section 4
 const getStats = async (req, res) => {
   try {
     const today = startOfDay();
@@ -54,6 +57,7 @@ const getStats = async (req, res) => {
   }
 };
 
+// GET /api/dashboard/charts — BE-DASH-002 / Section 4
 const getChartData = async (req, res) => {
   try {
     const categoryData = await Artifact.findAll({
@@ -83,9 +87,18 @@ const getChartData = async (req, res) => {
     });
 
     return sendSuccess(res, 200, 'Chart data retrieved', {
-      categories: categoryData,
-      conservation_status: conservationData,
-      visitor_trend: visitorTrend,
+      categories: categoryData.map((row) => ({
+        category: row.category,
+        count: toCount(row.count),
+      })),
+      conservation_status: conservationData.map((row) => ({
+        condition_status: row.condition_status,
+        count: toCount(row.count),
+      })),
+      visitor_trend: visitorTrend.map((row) => ({
+        date: row.date,
+        count: toCount(row.count),
+      })),
     });
   } catch (error) {
     return sendError(res, 500, 'Failed to load chart data', error.message);

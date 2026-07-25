@@ -13,26 +13,13 @@ const User = sequelize.define(
     name: {
       type: DataTypes.STRING(255),
       allowNull: false,
-<<<<<<< HEAD
-      validate: {
-        notEmpty: true,
-        len: [2, 255],
-      },
-=======
       validate: { notEmpty: true, len: [2, 255] },
->>>>>>> 0f005c99d2a9ec51477d9d1957078fd8acffbfad
     },
     email: {
       type: DataTypes.STRING(255),
       allowNull: false,
       unique: true,
-<<<<<<< HEAD
-      validate: {
-        isEmail: true,
-      },
-=======
       validate: { isEmail: true },
->>>>>>> 0f005c99d2a9ec51477d9d1957078fd8acffbfad
     },
     password: {
       type: DataTypes.STRING(255),
@@ -70,11 +57,6 @@ const User = sequelize.define(
     updatedAt: 'updated_at',
     hooks: {
       beforeCreate: async (user) => {
-<<<<<<< HEAD
-        user.password = await bcrypt.hash(user.password, 12);
-      },
-      beforeUpdate: async (user) => {
-=======
         if (user.email) user.email = user.email.toLowerCase();
         user.password = await bcrypt.hash(user.password, 12);
       },
@@ -82,7 +64,6 @@ const User = sequelize.define(
         if (user.changed('email') && user.email) {
           user.email = user.email.toLowerCase();
         }
->>>>>>> 0f005c99d2a9ec51477d9d1957078fd8acffbfad
         if (user.changed('password')) {
           user.password = await bcrypt.hash(user.password, 12);
         }

@@ -12,13 +12,7 @@ const Artifact = sequelize.define(
     name: {
       type: DataTypes.STRING(500),
       allowNull: false,
-<<<<<<< HEAD
-      validate: {
-        notEmpty: true,
-      },
-=======
       validate: { notEmpty: true },
->>>>>>> 0f005c99d2a9ec51477d9d1957078fd8acffbfad
     },
     category: {
       type: DataTypes.ENUM(
@@ -82,26 +76,12 @@ const Artifact = sequelize.define(
     created_by: {
       type: DataTypes.UUID,
       allowNull: true,
-<<<<<<< HEAD
-      references: {
-        model: 'users',
-        key: 'id',
-      },
-=======
       references: { model: 'users', key: 'id' },
->>>>>>> 0f005c99d2a9ec51477d9d1957078fd8acffbfad
     },
     last_edited_by: {
       type: DataTypes.UUID,
       allowNull: true,
-<<<<<<< HEAD
-      references: {
-        model: 'users',
-        key: 'id',
-      },
-=======
       references: { model: 'users', key: 'id' },
->>>>>>> 0f005c99d2a9ec51477d9d1957078fd8acffbfad
     },
   },
   {
