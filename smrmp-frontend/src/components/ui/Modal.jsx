@@ -38,13 +38,13 @@ export default function Modal({ open, isOpen, onClose, title, children, size = '
         onClick={onClose}
       />
       <div
-        className={`relative w-full ${sizes[size]} max-h-[90vh] overflow-y-auto rounded-2xl border border-smrmp-gold/30 bg-[#FAF6F0] text-[#2B1B12] shadow-2xl transition-all`}
+        className={`relative w-full ${sizes[size]} max-h-[90vh] flex flex-col rounded-2xl border border-smrmp-gold/30 bg-[#FAF6F0] text-[#2B1B12] shadow-2xl transition-all overflow-hidden`}
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? 'modal-title' : undefined}
       >
         {title && (
-          <div className="flex items-center justify-between border-b border-[#E2D6C5] bg-[#EFE5D8]/80 px-6 py-4">
+          <div className="flex items-center justify-between border-b border-[#E2D6C5] bg-[#EFE5D8]/80 px-6 py-4 shrink-0">
             <h2 id="modal-title" className="font-display text-lg font-bold text-[#2B1B12]">
               {title}
             </h2>
@@ -57,7 +57,7 @@ export default function Modal({ open, isOpen, onClose, title, children, size = '
             </button>
           </div>
         )}
-        <div className="p-6">{children}</div>
+        <div className="p-6 overflow-y-auto flex-1">{children}</div>
       </div>
     </div>
   );

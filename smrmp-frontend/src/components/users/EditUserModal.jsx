@@ -5,9 +5,6 @@ import {
   PhoneIcon,
   BuildingOfficeIcon,
   ShieldCheckIcon,
-  KeyIcon,
-  EyeIcon,
-  EyeSlashIcon,
 } from '@heroicons/react/24/outline';
 import Modal from '../ui/Modal';
 import Input from '../ui/Input';
@@ -21,7 +18,6 @@ import toast from 'react-hot-toast';
 
 export default function EditUserModal({ user, isOpen, onClose, onSuccess }) {
   const updateUserMutation = useUpdateUser();
-  const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
   const [formData, setFormData] = useState({
@@ -30,7 +26,6 @@ export default function EditUserModal({ user, isOpen, onClose, onSuccess }) {
     phone: '',
     department: 'Administration & IT',
     role: 'curator',
-    password: '',
     status: 'active',
   });
 
@@ -44,7 +39,6 @@ export default function EditUserModal({ user, isOpen, onClose, onSuccess }) {
         phone: user.phone || '',
         department: user.department || 'Administration & IT',
         role: user.role && user.role !== 'visitor' ? user.role : 'curator',
-        password: '',
         status: user.status || 'active',
       });
       setErrorMsg('');
@@ -78,10 +72,6 @@ export default function EditUserModal({ user, isOpen, onClose, onSuccess }) {
       errors.role = 'Role selection is required';
     }
 
-    if (formData.password && formData.password.length < 6) {
-      errors.password = 'Password must be at least 6 characters';
-    }
-
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -101,10 +91,6 @@ export default function EditUserModal({ user, isOpen, onClose, onSuccess }) {
         role: formData.role,
         status: formData.status,
       };
-
-      if (formData.password.trim()) {
-        payload.password = formData.password.trim();
-      }
 
       await updateUserMutation.mutateAsync({
         id: user.id,
@@ -191,32 +177,6 @@ export default function EditUserModal({ user, isOpen, onClose, onSuccess }) {
             error={formErrors.role}
             required
           />
-
-          {/* Optional Password Update */}
-          <div className="relative">
-            <Input
-              label="New Password (leave blank to keep existing)"
-              name="password"
-              type={showPassword ? 'text' : 'password'}
-              placeholder="••••••••"
-              icon={KeyIcon}
-              value={formData.password}
-              onChange={handleChange}
-              error={formErrors.password}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-[38px] text-[#7C4A2D] hover:text-[#2B1B12]"
-              title={showPassword ? 'Hide password' : 'Show password'}
-            >
-              {showPassword ? (
-                <EyeSlashIcon className="h-4 w-4" />
-              ) : (
-                <EyeIcon className="h-4 w-4" />
-              )}
-            </button>
-          </div>
 
           {/* Account Status Toggle */}
           <div className="space-y-1.5">
