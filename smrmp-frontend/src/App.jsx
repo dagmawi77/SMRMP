@@ -8,8 +8,12 @@ import DashboardPage from './pages/dashboard/DashboardPage';
 import ArtifactsPage from './pages/artifacts/ArtifactsPage';
 import AddArtifactPage from './pages/artifacts/AddArtifactPage';
 import ArtifactDetailPage from './pages/artifacts/ArtifactDetailPage';
+import EditArtifactPage from './pages/artifacts/EditArtifactPage';
 import PublicArtifactPage from './pages/visitor/PublicArtifactPage';
 import TicketPurchasePage from './pages/tickets/TicketPurchasePage';
+import TicketVerificationPage from './pages/tickets/TicketVerificationPage';
+import TicketManagementPage from './pages/tickets/TicketManagementPage';
+import TicketDetailPage from './pages/tickets/TicketDetailPage';
 import VisitorRegistrationPage from './pages/visitor/VisitorRegistrationPage';
 
 export default function App() {
@@ -23,10 +27,28 @@ export default function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/artifact/:code" element={<PublicArtifactPage />} />
-          <Route path="/tickets" element={<TicketPurchasePage />} />
+          <Route path="/tickets/buy" element={<TicketPurchasePage />} />
+          <Route path="/tickets/verify" element={<TicketVerificationPage />} />
+          <Route path="/tickets/verify/:code" element={<TicketVerificationPage />} />
           <Route path="/register" element={<VisitorRegistrationPage />} />
 
           {/* Protected staff routes */}
+          <Route
+            path="/tickets"
+            element={(
+              <PrivateRoute roles={['curator']}>
+                <TicketManagementPage />
+              </PrivateRoute>
+            )}
+          />
+          <Route
+            path="/tickets/:id"
+            element={(
+              <PrivateRoute roles={['curator']}>
+                <TicketDetailPage />
+              </PrivateRoute>
+            )}
+          />
           <Route
             path="/dashboard"
             element={(
@@ -56,6 +78,14 @@ export default function App() {
             element={(
               <PrivateRoute roles={['admin', 'curator', 'conservation', 'researcher']}>
                 <ArtifactDetailPage />
+              </PrivateRoute>
+            )}
+          />
+          <Route
+            path="/artifacts/:id/edit"
+            element={(
+              <PrivateRoute roles={['admin', 'curator']}>
+                <EditArtifactPage />
               </PrivateRoute>
             )}
           />
