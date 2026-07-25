@@ -25,8 +25,14 @@ router.post(
   createValidation,
   createArtifact
 );
+<<<<<<< HEAD
 router.get('/:id', requirePermission('artifacts.read'), getArtifactById);
 router.put('/:id', requirePermission('artifacts.update'), updateArtifact);
 router.delete('/:id', requirePermission('artifacts.delete'), deleteArtifact);
+=======
+router.get('/:id', isCatalogReader, getArtifactById);
+router.put('/:id', isCuratorPlus, uploadHandler.array('images', 5), updateArtifact);
+router.delete('/:id', isAdmin, deleteArtifact);
+>>>>>>> 3ca739a9eaad6200a8d402037808bf1bfc854ffa
 
 module.exports = router;

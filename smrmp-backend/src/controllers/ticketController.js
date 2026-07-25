@@ -1,6 +1,6 @@
 ﻿/**
- * BE-TKT-001 — Ticket controller: list, purchase, verify
- * APIs aligned with PRD Section 4 (+ staff list required by BE-TKT-001).
+ * BE-TKT-001 — Ticket controller: list, purchase, verify, CRUD tickets & types
+ * APIs aligned with PRD Section 4 (+ staff list & CRUD required by BE-TKT-001).
  */
 const { Op } = require('sequelize');
 const { body } = require('express-validator');
@@ -32,25 +32,104 @@ const purchaseValidation = [
   validateRequest,
 ];
 
-/** GET /api/tickets/types — Public catalog list */
-const getTicketTypes = async (_req, res) => {
+/** GET /api/tickets/types — Public catalog list (or all types if staff requested) */
+const getTicketTypes = async (req, res) => {
   try {
+    const where = {};
+    if (!req.query.all && !req.query.include_inactive) {
+      where.is_active = true;
+    }
     const types = await TicketType.findAll({
-      where: { is_active: true },
+      where,
       order: [['price_etb', 'ASC']],
-      attributes: ['type', 'label', 'price_etb', 'description'],
     });
 
     return sendSuccess(res, 200, 'Ticket types retrieved', {
       ticket_types: types.map((t) => ({
+        id: t.id,
         type: t.type,
         label: t.label,
         price_etb: Number(t.price_etb),
         description: t.description,
+        is_active: t.is_active,
+        created_at: t.created_at,
       })),
     });
   } catch (error) {
     return sendError(res, 500, 'Failed to retrieve ticket types', error.message);
+  }
+};
+
+/** POST /api/tickets/types — Create new ticket type (Staff) */
+const createTicketType = async (req, res) => {
+  try {
+    const { type, label, price_etb, description, is_active = true } = req.body;
+    if (!type || !label || price_etb === undefined) {
+      return sendError(res, 400, 'type, label, and price_etb are required');
+    }
+
+    const normalizedType = String(type).trim().toLowerCase().replace(/\s+/g, '_');
+    const existing = await TicketType.findOne({ where: { type: normalizedType } });
+    if (existing) {
+      return sendError(res, 400, 'Ticket type with this identifier already exists');
+    }
+
+    const newType = await TicketType.create({
+      type: normalizedType,
+      label: String(label).trim(),
+      price_etb: Number(price_etb),
+      description: description ? String(description).trim() : null,
+      is_active: Boolean(is_active),
+    });
+
+    return sendSuccess(res, 201, 'Ticket type created successfully', {
+      ticket_type: newType,
+    });
+  } catch (error) {
+    return sendError(res, 500, 'Failed to create ticket type', error.message);
+  }
+};
+
+/** PUT /api/tickets/types/:id — Update existing ticket type (Staff) */
+const updateTicketType = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { label, price_etb, description, is_active } = req.body;
+
+    const ticketType = await TicketType.findByPk(id);
+    if (!ticketType) {
+      return sendError(res, 404, 'Ticket type not found');
+    }
+
+    if (label !== undefined) ticketType.label = String(label).trim();
+    if (price_etb !== undefined) ticketType.price_etb = Number(price_etb);
+    if (description !== undefined) ticketType.description = String(description).trim();
+    if (is_active !== undefined) ticketType.is_active = Boolean(is_active);
+
+    await ticketType.save();
+
+    return sendSuccess(res, 200, 'Ticket type updated successfully', {
+      ticket_type: ticketType,
+    });
+  } catch (error) {
+    return sendError(res, 500, 'Failed to update ticket type', error.message);
+  }
+};
+
+/** DELETE /api/tickets/types/:id — Delete ticket type (Staff) */
+const deleteTicketType = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const ticketType = await TicketType.findByPk(id);
+    if (!ticketType) {
+      return sendError(res, 404, 'Ticket type not found');
+    }
+
+    await ticketType.destroy();
+
+    return sendSuccess(res, 200, 'Ticket type deleted successfully');
+  } catch (error) {
+    return sendError(res, 500, 'Failed to delete ticket type', error.message);
   }
 };
 
@@ -105,7 +184,7 @@ const listTickets = async (req, res) => {
   }
 };
 
-/** POST /api/tickets/purchase — Public purchase + sandbox payment */
+/** POST /api/tickets/purchase — Public purchase or staff ticket issue */
 const purchaseTicket = async (req, res) => {
   try {
     const {
@@ -118,7 +197,7 @@ const purchaseTicket = async (req, res) => {
     } = req.body;
 
     const catalog = await TicketType.findOne({
-      where: { type: ticket_type, is_active: true },
+      where: { type: ticket_type },
     });
 
     if (!catalog) {
@@ -166,10 +245,14 @@ const purchaseTicket = async (req, res) => {
         qr_ticket_code: ticket.qr_ticket_code,
         ticket_type: ticket.ticket_type,
         quantity: ticket.quantity,
+        unit_price: Number(ticket.unit_price),
         total_amount: Number(ticket.total_amount),
         visitor_name: ticket.visitor_name,
+        visitor_phone: ticket.visitor_phone,
         visit_date: ticket.visit_date,
+        payment_method: ticket.payment_method,
         status: ticket.status,
+        created_at: ticket.created_at,
       },
       payment_simulation: toPaymentSimulationResponse(payment),
       qr_data_url: qrDataUrl,
@@ -181,6 +264,72 @@ const purchaseTicket = async (req, res) => {
       'Ticket purchase failed',
       error.message
     );
+  }
+};
+
+/** GET /api/tickets/:id — Get detailed info for a single booked ticket */
+const getTicketById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    let ticket = await Ticket.findByPk(id);
+    if (!ticket) {
+      ticket = await Ticket.findOne({ where: { qr_ticket_code: id } });
+    }
+    if (!ticket) {
+      return sendError(res, 404, 'Ticket not found');
+    }
+    return sendSuccess(res, 200, 'Ticket details retrieved', { ticket });
+  } catch (error) {
+    return sendError(res, 500, 'Failed to retrieve ticket details', error.message);
+  }
+};
+
+/** PATCH /api/tickets/:id — Update booked ticket status or details (Staff) */
+const updateTicket = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { visitor_name, visitor_phone, visit_date, status, payment_status } = req.body;
+
+    const ticket = await Ticket.findByPk(id);
+    if (!ticket) {
+      return sendError(res, 404, 'Ticket not found');
+    }
+
+    if (visitor_name !== undefined) ticket.visitor_name = String(visitor_name).trim();
+    if (visitor_phone !== undefined) ticket.visitor_phone = String(visitor_phone).trim();
+    if (visit_date !== undefined) ticket.visit_date = formatDateOnly(visit_date);
+    if (status !== undefined) {
+      ticket.status = status;
+      if (status === 'used' && !ticket.used_at) {
+        ticket.used_at = new Date();
+      }
+    }
+    if (payment_status !== undefined) ticket.payment_status = payment_status;
+
+    await ticket.save();
+
+    return sendSuccess(res, 200, 'Ticket updated successfully', {
+      ticket,
+    });
+  } catch (error) {
+    return sendError(res, 500, 'Failed to update ticket', error.message);
+  }
+};
+
+/** DELETE /api/tickets/:id — Delete or cancel booked ticket (Staff) */
+const deleteTicket = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const ticket = await Ticket.findByPk(id);
+    if (!ticket) {
+      return sendError(res, 404, 'Ticket not found');
+    }
+
+    await ticket.destroy();
+
+    return sendSuccess(res, 200, 'Ticket deleted successfully');
+  } catch (error) {
+    return sendError(res, 500, 'Failed to delete ticket', error.message);
   }
 };
 
@@ -232,8 +381,14 @@ const verifyTicket = async (req, res) => {
 
 module.exports = {
   getTicketTypes,
+  createTicketType,
+  updateTicketType,
+  deleteTicketType,
   listTickets,
+  getTicketById,
   purchaseTicket,
+  updateTicket,
+  deleteTicket,
   verifyTicket,
   purchaseValidation,
 };

@@ -232,6 +232,7 @@ export default function RegistrationForm({ onSuccess }) {
               options={GENDER_OPTIONS}
               error={errors.gender?.message}
               placeholder="Select gender"
+              value={watch('gender')}
               {...register('gender', rules.gender)}
             />
             <Input
@@ -248,6 +249,7 @@ export default function RegistrationForm({ onSuccess }) {
               options={NATIONALITY_OPTIONS}
               error={errors.nationality?.message}
               placeholder="Select nationality"
+              value={watch('nationality')}
               {...register('nationality', rules.nationality)}
             />
             <Input

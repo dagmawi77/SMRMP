@@ -58,7 +58,8 @@ const Select = forwardRef(function Select(
   }, [options]);
 
   const selectedOption = useMemo(() => {
-    return normalizedOptions.find((opt) => opt.value === String(currentValue ?? ''));
+    const val = String(currentValue ?? '').toLowerCase();
+    return normalizedOptions.find((opt) => opt.value.toLowerCase() === val);
   }, [normalizedOptions, currentValue]);
 
   const filteredOptions = useMemo(() => {

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon, XMarkIcon, QrCodeIcon } from '@heroicons/react/24/outline';
 
 const navItems = [
   { label: 'The shift', href: '/#shift' },
@@ -21,21 +21,32 @@ export default function LandingNav() {
           <span className="text-xs font-semibold uppercase tracking-[0.3em]">Digital Custodians</span>
         </Link>
 
-        <div className="hidden items-center gap-10 text-xs font-medium uppercase tracking-widest md:flex">
+        <div className="hidden items-center gap-8 text-xs font-medium uppercase tracking-widest md:flex">
           {navItems.map((item) => (
             <a key={item.href} href={item.href} className="nav-link" onClick={closeMenu}>
               {item.label}
             </a>
           ))}
+          <Link to="/tickets/verify" className="nav-link text-smrmp-gold font-bold" onClick={closeMenu}>
+            Verify Ticket
+          </Link>
           <Link to="/login" className="nav-link" onClick={closeMenu}>
             Staff login
           </Link>
         </div>
 
         <div className="flex items-center gap-3">
+          <Link
+            to="/tickets/verify"
+            className="inline-flex items-center gap-2 border border-smrmp-gold/60 bg-smrmp-gold/10 px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-smrmp-gold shadow-[0_0_15px_rgba(212,160,23,0.15)] transition-all duration-300 hover:bg-smrmp-gold hover:text-black"
+            onClick={closeMenu}
+          >
+            <QrCodeIcon className="h-3.5 w-3.5" />
+            <span>Verify Ticket</span>
+          </Link>
           <a
             href="/#footer"
-            className="hidden border border-smrmp-gold/40 px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest text-smrmp-gold shadow-[0_0_20px_rgba(212,160,23,0.1)] transition-all duration-500 hover:bg-smrmp-gold hover:text-black sm:inline-flex"
+            className="hidden border border-white/20 px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest text-smrmp-parchment transition-all duration-500 hover:bg-white hover:text-black lg:inline-flex"
           >
             Begin a pilot conversation
           </a>
@@ -60,7 +71,11 @@ export default function LandingNav() {
                 {item.label}
               </a>
             ))}
-            <Link to="/login" className="nav-link w-fit text-smrmp-gold" onClick={closeMenu}>
+            <Link to="/tickets/verify" className="nav-link w-fit text-smrmp-gold font-bold flex items-center gap-1.5" onClick={closeMenu}>
+              <QrCodeIcon className="h-4 w-4" />
+              <span>Verify Ticket</span>
+            </Link>
+            <Link to="/login" className="nav-link w-fit text-smrmp-parchment" onClick={closeMenu}>
               Staff login
             </Link>
             <a href="/#footer" className="mt-2 w-fit text-smrmp-gold" onClick={closeMenu}>

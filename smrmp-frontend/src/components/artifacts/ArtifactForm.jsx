@@ -1,4 +1,4 @@
-﻿import { useCallback, useRef, useState } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import Input from '../ui/Input';
@@ -11,6 +11,20 @@ import { CloudArrowUpIcon, SparklesIcon, XMarkIcon } from '@heroicons/react/24/o
 
 const IMAGE_ACCEPT = 'image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp';
 
+const formatInitialKeywords = (kw) => {
+  if (!kw) return '';
+  if (Array.isArray(kw)) return kw.join(', ');
+  if (typeof kw === 'string') {
+    try {
+      const parsed = JSON.parse(kw);
+      if (Array.isArray(parsed)) return parsed.join(', ');
+    } catch (_e) {
+      return kw;
+    }
+  }
+  return String(kw);
+};
+
 export default function ArtifactForm({ onSubmit, loading, initialData, onCancel }) {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
@@ -18,25 +32,35 @@ export default function ArtifactForm({ onSubmit, loading, initialData, onCancel 
   const [isDragActive, setIsDragActive] = useState(false);
   const [aiDraft, setAiDraft] = useState(null);
 
+  const getFormDefaults = (data) => ({
+    name: data?.name || '',
+    category: data?.category || '',
+    historical_period: data?.historical_period || '',
+    origin: data?.origin || '',
+    materials: data?.materials || '',
+    description: data?.description || '',
+    location: data?.location || '',
+    condition_status: data?.condition_status || 'good',
+    is_on_loan: Boolean(data?.is_on_loan),
+    keywords: formatInitialKeywords(data?.keywords),
+  });
+
   const {
     register,
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors },
   } = useForm({
-    defaultValues: initialData || {
-      name: '',
-      category: '',
-      historical_period: '',
-      origin: '',
-      materials: '',
-      description: '',
-      location: '',
-      condition_status: 'good',
-      is_on_loan: false,
-    },
+    defaultValues: getFormDefaults(initialData),
   });
+
+  useEffect(() => {
+    if (initialData) {
+      reset(getFormDefaults(initialData));
+    }
+  }, [initialData, reset]);
 
   const formValues = watch();
 
@@ -102,6 +126,7 @@ export default function ArtifactForm({ onSubmit, loading, initialData, onCancel 
           required
           options={ARTIFACT_CATEGORIES}
           error={errors.category?.message}
+          value={formValues.category}
           {...register('category', { required: 'Category is required' })}
         />
         <Input
@@ -130,6 +155,8 @@ export default function ArtifactForm({ onSubmit, loading, initialData, onCancel 
         <Select
           label="Condition Status"
           options={CONDITION_STATUSES}
+          error={errors.condition_status?.message}
+          value={formValues.condition_status}
           {...register('condition_status')}
         />
         <Input
@@ -178,6 +205,27 @@ export default function ArtifactForm({ onSubmit, loading, initialData, onCancel 
         <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-[#5C4233]">
           Upload Artifact Images (max 5)
         </label>
+        {initialData?.images && initialData.images.length > 0 && (
+          <div className="mb-4">
+            <p className="text-[11px] font-bold text-[#6E5445] mb-2 uppercase tracking-wider">Current Images</p>
+            <div className="flex flex-wrap gap-3">
+              {initialData.images.map((img, idx) => (
+                <div key={img.id || idx} className="relative group">
+                  <img
+                    src={img.file_url}
+                    alt="Artifact preview"
+                    className="h-20 w-20 rounded-xl object-cover border border-[#E2D6C5] shadow-2xs"
+                  />
+                  {img.is_primary && (
+                    <span className="absolute bottom-1 left-1 bg-smrmp-gold text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-xs">
+                      Primary
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         <div
           role="button"
           tabIndex={0}
@@ -266,7 +314,7 @@ export default function ArtifactForm({ onSubmit, loading, initialData, onCancel 
         </Button>
         <Button type="submit" variant="primary" size="lg" loading={loading}>
           <SparklesIcon className="h-4 w-4" />
-          <span>Save Artifact Record</span>
+          <span>{initialData ? 'Update Artifact Record' : 'Save Artifact Record'}</span>
         </Button>
       </div>
     </form>

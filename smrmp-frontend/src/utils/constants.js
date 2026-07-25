@@ -16,7 +16,7 @@ export const ROLE_REDIRECTS = {
   conservation: '/dashboard',
   maintenance: '/dashboard',
   researcher: '/artifacts',
-  visitor: '/tickets',
+  visitor: '/tickets/buy',
 };
 
 export const ARTIFACT_CATEGORIES = [
@@ -62,6 +62,7 @@ export const PAYMENT_METHODS = [
 ];
 
 export const NAV_ITEMS = [
+<<<<<<< HEAD
   { label: 'Dashboard', path: '/dashboard', permissions: ['dashboard.read'] },
   { label: 'Artifacts', path: '/artifacts', permissions: ['artifacts.read'] },
   { label: 'Tickets', path: '/tickets', roles: ['admin', 'visitor'] },
@@ -70,4 +71,36 @@ export const NAV_ITEMS = [
     path: '/admin',
     permissions: ['users.read', 'roles.read'],
   },
+=======
+  { label: 'Dashboard', path: '/dashboard', roles: ['admin', 'curator', 'conservation', 'maintenance'] },
+  { label: 'Artifacts', path: '/artifacts', roles: ['admin', 'curator', 'conservation', 'researcher'] },
+  { label: 'Exhibitions', path: '/exhibitions', roles: ['curator'] },
+  { label: 'Tickets', path: '/tickets', roles: ['admin', 'curator', 'visitor'] },
+  { label: 'Users', path: '/users', roles: ['admin'] },
+>>>>>>> 3ca739a9eaad6200a8d402037808bf1bfc854ffa
 ];
+
+export const STAFF_ROLE_OPTIONS = [
+  { value: 'admin', label: 'Administrator', description: 'Full system configuration, security & user management' },
+  { value: 'curator', label: 'Curator', description: 'Exhibition management, cataloging & ticketing control' },
+  { value: 'conservation', label: 'Conservation Specialist', description: 'Artifact condition logging, environmental monitoring & restoration' },
+  { value: 'maintenance', label: 'Maintenance Staff', description: 'Facility maintenance, casing security & physical upkeep' },
+  { value: 'researcher', label: 'Researcher', description: 'Archival research, historical notes & documentation access' },
+];
+
+export const DEPARTMENT_OPTIONS = [
+  { value: 'Administration & IT', label: 'Administration & IT' },
+  { value: 'Curatorial & Exhibitions', label: 'Curatorial & Exhibitions' },
+  { value: 'Conservation & Restoration', label: 'Conservation & Restoration' },
+  { value: 'Facilities & Maintenance', label: 'Facilities & Maintenance' },
+  { value: 'Research & Archival', label: 'Research & Archival' },
+];
+
+export const ROLE_BADGE_VARIANTS = {
+  admin: 'gold',
+  curator: 'good',
+  conservation: 'excellent',
+  maintenance: 'poor',
+  researcher: 'purple',
+  visitor: 'default',
+};

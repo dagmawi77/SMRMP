@@ -20,7 +20,13 @@ api.interceptors.request.use((config) => {
 
 const isPublicPath = () => {
   const { pathname } = window.location;
-  return pathname.startsWith('/login') || pathname.startsWith('/artifact/');
+  return (
+    pathname === '/' ||
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/artifact/') ||
+    pathname.startsWith('/tickets') ||
+    pathname.startsWith('/register')
+  );
 };
 
 api.interceptors.response.use(

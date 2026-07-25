@@ -10,9 +10,10 @@ const QR_OPTIONS = {
 };
 
 /** BE artifact QR — ART-XXXXXXXX */
-const generateArtifactQR = async () => {
-  const qrCode = `ART-${uuidv4().split('-')[0].toUpperCase()}`;
-  const publicUrl = `${process.env.FRONTEND_URL}/artifact/${qrCode}`;
+const generateArtifactQR = async (code) => {
+  const qrCode = code || `ART-${uuidv4().split('-')[0].toUpperCase()}`;
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  const publicUrl = `${frontendUrl}/artifact/${qrCode}`;
   const qrDataUrl = await QRCode.toDataURL(publicUrl, QR_OPTIONS);
   return { qrCode, qrDataUrl, publicUrl };
 };

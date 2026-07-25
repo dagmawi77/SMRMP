@@ -9,14 +9,24 @@ import DashboardPage from './pages/dashboard/DashboardPage';
 import ArtifactsPage from './pages/artifacts/ArtifactsPage';
 import AddArtifactPage from './pages/artifacts/AddArtifactPage';
 import ArtifactDetailPage from './pages/artifacts/ArtifactDetailPage';
+import EditArtifactPage from './pages/artifacts/EditArtifactPage';
 import PublicArtifactPage from './pages/visitor/PublicArtifactPage';
 import TicketPurchasePage from './pages/tickets/TicketPurchasePage';
+<<<<<<< HEAD
 import TelebirrPaygatePage from './pages/tickets/TelebirrPaygatePage';
 import VisitorRegistrationPage from './pages/visitor/VisitorRegistrationPage';
 import AdminAccessPage from './pages/admin/AdminAccessPage';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
 import AdminRolesPage from './pages/admin/AdminRolesPage';
 import AdminPermissionsPage from './pages/admin/AdminPermissionsPage';
+=======
+import TicketVerificationPage from './pages/tickets/TicketVerificationPage';
+import TicketManagementPage from './pages/tickets/TicketManagementPage';
+import TicketDetailPage from './pages/tickets/TicketDetailPage';
+import VisitorRegistrationPage from './pages/visitor/VisitorRegistrationPage';
+import ExhibitionDashboardPage from './pages/exhibitions/ExhibitionDashboardPage';
+import UsersPage from './pages/users/UsersPage';
+>>>>>>> 3ca739a9eaad6200a8d402037808bf1bfc854ffa
 
 export default function App() {
   useSessionRestore();
@@ -28,8 +38,14 @@ export default function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/artifact/:code" element={<PublicArtifactPage />} />
+<<<<<<< HEAD
           <Route path="/tickets" element={<TicketPurchasePage />} />
           <Route path="/tickets/telebirr/paygate" element={<TelebirrPaygatePage />} />
+=======
+          <Route path="/tickets/buy" element={<TicketPurchasePage />} />
+          <Route path="/tickets/verify" element={<TicketVerificationPage />} />
+          <Route path="/tickets/verify/:code" element={<TicketVerificationPage />} />
+>>>>>>> 3ca739a9eaad6200a8d402037808bf1bfc854ffa
           <Route path="/register" element={<VisitorRegistrationPage />} />
 
           <Route
@@ -41,6 +57,22 @@ export default function App() {
             )}
           />
 
+          <Route
+            path="/tickets"
+            element={(
+              <PrivateRoute roles={['curator']}>
+                <TicketManagementPage />
+              </PrivateRoute>
+            )}
+          />
+          <Route
+            path="/tickets/:id"
+            element={(
+              <PrivateRoute roles={['curator']}>
+                <TicketDetailPage />
+              </PrivateRoute>
+            )}
+          />
           <Route
             path="/dashboard"
             element={(
@@ -54,6 +86,14 @@ export default function App() {
             element={(
               <PrivateRoute permissions="artifacts.read">
                 <ArtifactsPage />
+              </PrivateRoute>
+            )}
+          />
+          <Route
+            path="/exhibitions/*"
+            element={(
+              <PrivateRoute roles={['curator']}>
+                <ExhibitionDashboardPage />
               </PrivateRoute>
             )}
           />
@@ -74,14 +114,22 @@ export default function App() {
             )}
           />
           <Route
+<<<<<<< HEAD
             path="/admin"
             element={(
               <PrivateRoute permissions={['users.read', 'roles.read']} anyPermission>
                 <AdminAccessPage />
+=======
+            path="/artifacts/:id/edit"
+            element={(
+              <PrivateRoute roles={['admin', 'curator']}>
+                <EditArtifactPage />
+>>>>>>> 3ca739a9eaad6200a8d402037808bf1bfc854ffa
               </PrivateRoute>
             )}
           />
           <Route
+<<<<<<< HEAD
             path="/admin/users"
             element={(
               <PrivateRoute permissions="users.read">
@@ -102,6 +150,12 @@ export default function App() {
             element={(
               <PrivateRoute permissions="roles.read">
                 <AdminPermissionsPage />
+=======
+            path="/users"
+            element={(
+              <PrivateRoute roles={['admin']}>
+                <UsersPage />
+>>>>>>> 3ca739a9eaad6200a8d402037808bf1bfc854ffa
               </PrivateRoute>
             )}
           />

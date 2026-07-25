@@ -1,6 +1,8 @@
-﻿import Badge from '../ui/Badge';
+﻿import { useNavigate } from 'react-router-dom';
+import Badge from '../ui/Badge';
 import { formatDate } from '../../utils/formatters';
-import { ArrowRightIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { ArrowRightIcon, MapPinIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
+import useAuthStore from '../../store/authStore';
 
 const categoryIcons = {
   weapon: '⚔️',
@@ -15,6 +17,9 @@ const categoryIcons = {
 };
 
 export default function ArtifactTable({ artifacts, loading, onRowClick }) {
+  const navigate = useNavigate();
+  const { hasRole } = useAuthStore();
+
   const columns = [
     {
       key: 'name',
@@ -74,9 +79,24 @@ export default function ArtifactTable({ artifacts, loading, onRowClick }) {
     },
     {
       key: 'action',
-      label: '',
-      render: () => (
-        <ArrowRightIcon className="h-4 w-4 text-[#A08878] group-hover:text-[#374B07] group-hover:translate-x-1 transition-all" />
+      label: 'Actions',
+      render: (row) => (
+        <div className="flex items-center justify-end gap-2">
+          {hasRole('admin', 'curator') && (
+            <button
+              type="button"
+              title="Edit Artifact"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/artifacts/${row.id}/edit`);
+              }}
+              className="p-1.5 rounded-lg text-[#6E5445] hover:text-[#374B07] hover:bg-[#EFE5D8] transition-colors"
+            >
+              <PencilSquareIcon className="h-4 w-4" />
+            </button>
+          )}
+          <ArrowRightIcon className="h-4 w-4 text-[#A08878] group-hover:text-[#374B07] group-hover:translate-x-1 transition-all" />
+        </div>
       ),
     },
   ];

@@ -7,13 +7,42 @@ const { startOfMonth } = require('../utils/dateHelpers');
 let openaiClient = null;
 const getOpenAI = () => {
   if (!openaiClient) {
-    openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const apiKey = process.env.OPENAI_API_KEY;
+    const baseURL =
+      process.env.OPENAI_BASE_URL ||
+      (apiKey && apiKey.startsWith('sk-or-')
+        ? 'https://openrouter.ai/api/v1'
+        : undefined);
+
+    const clientOptions = { apiKey };
+    if (baseURL) {
+      clientOptions.baseURL = baseURL;
+      clientOptions.defaultHeaders = {
+        'HTTP-Referer': process.env.FRONTEND_URL || 'http://localhost:3000',
+        'X-Title': 'SMRMP Museum Platform',
+      };
+    }
+    openaiClient = new OpenAI(clientOptions);
   }
   return openaiClient;
 };
 
-const AI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+const AI_MODEL = process.env.OPENAI_MODEL || 'openai/gpt-4o-mini';
 const MAX_TOKENS = 1500;
+
+const parseJsonResponse = (content) => {
+  if (!content) return {};
+  let cleaned = content.trim();
+  // Strip markdown code fences if present
+  cleaned = cleaned.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+  // If there's leading/trailing text around JSON, extract the JSON object
+  const firstBrace = cleaned.indexOf('{');
+  const lastBrace = cleaned.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    cleaned = cleaned.substring(firstBrace, lastBrace + 1);
+  }
+  return JSON.parse(cleaned);
+};
 
 const generateArtifactDescription = async (artifactData) => {
   const {
@@ -72,7 +101,7 @@ Output this exact JSON structure:
       response_format: { type: 'json_object' },
     });
 
-    const parsed = JSON.parse(completion.choices[0].message.content);
+    const parsed = parseJsonResponse(completion.choices[0].message.content);
 
     return {
       success: true,
@@ -134,7 +163,7 @@ Output format:
       response_format: { type: 'json_object' },
     });
 
-    return JSON.parse(completion.choices[0].message.content);
+    return parseJsonResponse(completion.choices[0].message.content);
   } catch (_error) {
     return {
       filters: { name: query },
