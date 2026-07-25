@@ -1,11 +1,11 @@
-﻿const { body } = require('express-validator');
+const { body } = require('express-validator');
 const { Exhibition, Artifact, ExhibitionArtifact } = require('../models');
 const { sendSuccess, sendError } = require('../utils/apiResponse');
 const { paginate } = require('../utils/pagination');
 const { writeAuditLog } = require('../middleware/auditLogger');
 const validateRequest = require('../middleware/validateRequest');
 
-const STATUSES = ['draft', 'upcoming', 'active', 'ended'];
+const STATUSES = ['draft', 'planning', 'upcoming', 'active', 'closed', 'ended', 'cancelled'];
 
 const createValidation = [
   body('name').trim().notEmpty(),
@@ -78,16 +78,23 @@ const createExhibition = async (req, res) => {
       start_date,
       end_date,
       location,
+      gallery,
+      theme,
+      expected_visitors,
+      actual_visitors,
       artifact_ids = [],
     } = req.body;
 
     const exhibition = await Exhibition.create({
       name,
       description,
-      status: status || 'draft',
+      status: status || 'planning',
       start_date,
       end_date,
-      location,
+      gallery: gallery || location || 'Main Hall',
+      theme: theme || 'General',
+      expected_visitors,
+      actual_visitors,
       created_by: req.user.id,
     });
 
@@ -125,7 +132,10 @@ const updateExhibition = async (req, res) => {
     const exhibition = await Exhibition.findByPk(req.params.id);
     if (!exhibition) return sendError(res, 404, 'Exhibition not found');
 
-    const { artifact_ids, ...fields } = req.body;
+    const { artifact_ids, location, ...fields } = req.body;
+    if (location && !fields.gallery) {
+      fields.gallery = location;
+    }
     await exhibition.update(fields);
 
     if (Array.isArray(artifact_ids)) {

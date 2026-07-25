@@ -19,6 +19,7 @@ import TicketManagementPage from './pages/tickets/TicketManagementPage';
 import TicketDetailPage from './pages/tickets/TicketDetailPage';
 import VisitorRegistrationPage from './pages/visitor/VisitorRegistrationPage';
 import ExhibitionDashboardPage from './pages/exhibitions/ExhibitionDashboardPage';
+import CreateExhibitionPage from './pages/exhibitions/CreateExhibitionPage';
 import UsersPage from './pages/users/UsersPage';
 import AdminRolesPage from './pages/admin/AdminRolesPage';
 import AdminPermissionsPage from './pages/admin/AdminPermissionsPage';
@@ -94,12 +95,32 @@ export default function App() {
             )}
           />
           <Route
-            path="/exhibitions/*"
+            path="/exhibitions"
             element={(
               <PrivateRoute permissions="exhibitions.read">
                 <ExhibitionDashboardPage />
               </PrivateRoute>
             )}
+          />
+          <Route
+            path="/exhibitions/new"
+            element={(
+              <PrivateRoute permissions="exhibitions.read">
+                <CreateExhibitionPage />
+              </PrivateRoute>
+            )}
+          />
+          <Route
+            path="/exhibitions/:id/edit"
+            element={(
+              <PrivateRoute permissions="exhibitions.read">
+                <CreateExhibitionPage />
+              </PrivateRoute>
+            )}
+          />
+          <Route
+            path="/exhibitions/*"
+            element={<Navigate to="/exhibitions" replace />}
           />
           <Route
             path="/artifacts/new"
