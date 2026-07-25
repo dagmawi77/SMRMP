@@ -760,26 +760,16 @@ export default function ExhibitionDashboardPage() {
                       icon={MagnifyingGlassIcon}
                       className="w-full sm:w-72"
                     />
-                    <div className="flex items-center gap-1.5 w-full sm:w-auto">
-                      <Select
-                        placeholder="All Categories"
-                        value={categoryFilter}
-                        onChange={(e) => setCategoryFilter(e.target.value)}
-                        options={[
-                          { value: '', label: 'All Categories' },
-                          ...categories.map((c) => ({ value: c.name, label: c.name })),
-                        ]}
-                        className="w-full sm:w-48"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowAddCategoryModal(true)}
-                        title="Add New Category"
-                        className="rounded-xl border border-[#D6C5AE] bg-[#EFE3D1] p-2 text-[#4A3525] hover:bg-[#E2D6C5] transition"
-                      >
-                        <PlusIcon className="h-4 w-4" />
-                      </button>
-                    </div>
+                    <Select
+                      placeholder="All Categories"
+                      value={categoryFilter}
+                      onChange={(e) => setCategoryFilter(e.target.value)}
+                      options={[
+                        { value: '', label: 'All Categories' },
+                        ...categories.map((c) => ({ value: c.name, label: c.name })),
+                      ]}
+                      className="w-full sm:w-48"
+                    />
                     <Select
                       placeholder="All Statuses"
                       value={statusFilter}
