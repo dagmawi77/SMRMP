@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   BuildingLibraryIcon,
   CalendarDaysIcon,
   ChatBubbleLeftEllipsisIcon,
-  ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   IdentificationIcon,
@@ -31,10 +30,10 @@ const iconMap = {
 function isPathActive(pathname, path) {
   if (path === '/portal') return pathname === '/portal' || pathname === '/portal/';
   if (path === '/portal/tickets') {
-    return pathname === '/portal/tickets' || pathname.startsWith('/portal/tickets/pass/');
+    return pathname === '/portal/tickets' || pathname.startsWith('/portal/tickets/');
   }
   if (path === '/portal/bookings') {
-    return pathname === '/portal/bookings';
+    return pathname === '/portal/bookings' || pathname.startsWith('/portal/bookings/');
   }
   return pathname === path || pathname.startsWith(`${path}/`);
 }
@@ -47,22 +46,6 @@ export default function VisitorSidebar() {
     closeVisitorMobile,
     toggleVisitorCollapsed,
   } = useUiStore();
-
-  const [openMenus, setOpenMenus] = useState(() => {
-    const initial = {};
-    if (location.pathname.startsWith('/portal/tickets')) initial['/portal/tickets'] = true;
-    if (location.pathname.startsWith('/portal/bookings')) initial['/portal/bookings'] = true;
-    return initial;
-  });
-
-  useEffect(() => {
-    if (location.pathname.startsWith('/portal/tickets')) {
-      setOpenMenus((prev) => ({ ...prev, '/portal/tickets': true }));
-    }
-    if (location.pathname.startsWith('/portal/bookings')) {
-      setOpenMenus((prev) => ({ ...prev, '/portal/bookings': true }));
-    }
-  }, [location.pathname]);
 
   useEffect(() => {
     closeVisitorMobile();
@@ -148,101 +131,27 @@ export default function VisitorSidebar() {
                 {section.items.map((item) => {
                   const Icon = iconMap[item.icon] || Squares2X2Icon;
                   const active = isPathActive(location.pathname, item.path);
-                  const hasChildren = item.children?.length > 0;
-
-                  if (!hasChildren) {
-                    return (
-                      <Link
-                        key={`${section.id}-${item.path}-${item.label}`}
-                        to={item.path}
-                        onClick={closeVisitorMobile}
-                        title={!showLabels ? item.label : undefined}
-                        aria-current={active ? 'page' : undefined}
-                        className={`group flex items-center gap-3.5 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all duration-200 ${
-                          active
-                            ? 'bg-[#E4EEDC] text-[#243205]'
-                            : 'text-[#5C4233] hover:bg-[#FAF0E4] hover:text-[#2B1B12]'
-                        } ${showLabels ? '' : 'justify-center px-2'}`}
-                      >
-                        <Icon
-                          className={`h-5 w-5 shrink-0 transition-transform duration-200 group-hover:scale-110 ${
-                            active ? 'text-[#374B07]' : 'text-[#7C4A2D] group-hover:text-[#2B1B12]'
-                          }`}
-                        />
-                        {showLabels ? <span className="truncate">{item.label}</span> : null}
-                      </Link>
-                    );
-                  }
-
-                  const childActive = item.children.some((child) =>
-                    isPathActive(location.pathname, child.path),
-                  );
-                  const menuOpen = Boolean(openMenus[item.path]);
 
                   return (
-                    <div key={item.path} className="relative">
-                      <div
-                        className={`flex items-center rounded-xl text-sm font-semibold transition-all duration-200 ${
-                          active || childActive
-                            ? 'bg-[#E4EEDC] text-[#243205]'
-                            : 'text-[#5C4233] hover:bg-[#FAF0E4] hover:text-[#2B1B12]'
+                    <Link
+                      key={`${section.id}-${item.path}-${item.label}`}
+                      to={item.path}
+                      onClick={closeVisitorMobile}
+                      title={!showLabels ? item.label : undefined}
+                      aria-current={active ? 'page' : undefined}
+                      className={`group flex items-center gap-3.5 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all duration-200 ${
+                        active
+                          ? 'bg-[#E4EEDC] text-[#243205]'
+                          : 'text-[#5C4233] hover:bg-[#FAF0E4] hover:text-[#2B1B12]'
+                      } ${showLabels ? '' : 'justify-center px-2'}`}
+                    >
+                      <Icon
+                        className={`h-5 w-5 shrink-0 transition-transform duration-200 group-hover:scale-110 ${
+                          active ? 'text-[#374B07]' : 'text-[#7C4A2D] group-hover:text-[#2B1B12]'
                         }`}
-                      >
-                        <Link
-                          to={item.path}
-                          onClick={closeVisitorMobile}
-                          title={!showLabels ? item.label : undefined}
-                          className={`flex min-w-0 flex-1 items-center gap-3.5 px-3.5 py-2.5 ${
-                            showLabels ? '' : 'justify-center px-2'
-                          }`}
-                        >
-                          <Icon
-                            className={`h-5 w-5 shrink-0 transition-transform duration-200 group-hover:scale-110 ${
-                              active || childActive ? 'text-[#374B07]' : 'text-[#7C4A2D]'
-                            }`}
-                          />
-                          {showLabels ? <span className="truncate">{item.label}</span> : null}
-                        </Link>
-                        {showLabels ? (
-                          <button
-                            type="button"
-                            aria-label={`${menuOpen ? 'Collapse' : 'Expand'} ${item.label}`}
-                            aria-expanded={menuOpen}
-                            onClick={() =>
-                              setOpenMenus((prev) => ({ ...prev, [item.path]: !prev[item.path] }))
-                            }
-                            className="mr-2 rounded-lg p-1.5 text-[#7C4A2D] transition hover:bg-[#FAF0E4] focus:outline-none focus:ring-2 focus:ring-smrmp-gold/60"
-                          >
-                            <ChevronDownIcon
-                              className={`h-4 w-4 transition-transform ${menuOpen ? 'rotate-180' : ''}`}
-                            />
-                          </button>
-                        ) : null}
-                      </div>
-
-                      {showLabels && menuOpen ? (
-                        <div className="ml-5 mt-1 space-y-0.5 border-l border-[#D8C8B8] pl-3">
-                          {item.children.map((child) => {
-                            const childIsActive = isPathActive(location.pathname, child.path);
-                            return (
-                              <Link
-                                key={child.path + child.label}
-                                to={child.path}
-                                onClick={closeVisitorMobile}
-                                aria-current={childIsActive ? 'page' : undefined}
-                                className={`block border-l-2 px-2.5 py-2 text-[11px] leading-tight transition ${
-                                  childIsActive
-                                    ? 'border-smrmp-gold bg-[#F7F1E9] font-bold text-smrmp-green'
-                                    : 'border-transparent text-[#7C6657] hover:bg-[#FAF0E4] hover:text-[#2B1B12]'
-                                }`}
-                              >
-                                {child.label}
-                              </Link>
-                            );
-                          })}
-                        </div>
-                      ) : null}
-                    </div>
+                      />
+                      {showLabels ? <span className="truncate">{item.label}</span> : null}
+                    </Link>
                   );
                 })}
               </div>

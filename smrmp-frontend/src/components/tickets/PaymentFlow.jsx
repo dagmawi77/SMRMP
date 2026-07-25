@@ -1,14 +1,10 @@
 ﻿import { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import Alert from '../ui/Alert';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Select from '../ui/Select';
-import {
-  TELEBIRR_SESSION_KEY,
-  buildTelebirrCheckoutSession,
-} from '../../utils/telebirrCheckout';
-import { PAYMENT_METHODS, MUSEUM_NAME } from '../../utils/constants';
+import TelebirrPaygateInline from './TelebirrPaygateInline';
+import { PAYMENT_METHODS } from '../../utils/constants';
 import { CreditCardIcon } from '@heroicons/react/24/outline';
 
 export default function PaymentFlow({
@@ -17,15 +13,13 @@ export default function PaymentFlow({
   totalAmount,
   ticketType,
   quantity,
-  visitDate,
 }) {
-  const navigate = useNavigate();
-  const location = useLocation();
   const [form, setForm] = useState({
     visitor_name: '',
     visitor_phone: '',
     payment_method: 'telebirr',
   });
+  const [showTelebirr, setShowTelebirr] = useState(false);
   const [processing, setProcessing] = useState(false);
 
   const handleChange = (e) => {
@@ -35,23 +29,8 @@ export default function PaymentFlow({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Exact Telebirr H5 paygate redirect (sandbox clone)
     if (form.payment_method === 'telebirr') {
-      const session = buildTelebirrCheckoutSession({
-        amount: totalAmount,
-        phone: form.visitor_phone,
-        visitor_name: form.visitor_name,
-        ticket_type: ticketType,
-        quantity,
-        visit_date: visitDate,
-        merchantName: MUSEUM_NAME,
-      });
-      // Return into the portal purchase route when checkout started there
-      session.returnPath = location.pathname.startsWith('/portal')
-        ? '/portal/tickets/buy'
-        : '/tickets';
-      sessionStorage.setItem(TELEBIRR_SESSION_KEY, JSON.stringify(session));
-      navigate('/tickets/telebirr/paygate');
+      setShowTelebirr(true);
       return;
     }
 
@@ -61,13 +40,33 @@ export default function PaymentFlow({
     onSubmit(form);
   };
 
+  const handleTelebirrSuccess = (paymentRef, phone) => {
+    onSubmit({
+      ...form,
+      visitor_phone: phone || form.visitor_phone,
+      payment_method: 'telebirr',
+      payment_reference: paymentRef,
+    });
+  };
+
+  if (showTelebirr) {
+    return (
+      <TelebirrPaygateInline
+        amount={totalAmount}
+        subject={`Museum Ticket — ${String(ticketType || 'pass').replace(/_/g, ' ')} × ${quantity}`}
+        initialPhone={form.visitor_phone}
+        onSuccess={handleTelebirrSuccess}
+        onCancel={() => setShowTelebirr(false)}
+      />
+    );
+  }
+
   const isProcessing = processing || loading;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <Alert variant="warning" title="SANDBOX DEMO MODE">
-        Telebirr opens the exact H5 paygate checkout pages (Confirm → PIN → Success). No real
-        money is charged.
+        Telebirr opens the exact H5 paygate checkout screens in place. No real money is charged.
       </Alert>
 
       <Input
@@ -99,9 +98,9 @@ export default function PaymentFlow({
         <div className="flex items-start gap-3 rounded-2xl border border-[#8DC63F]/40 bg-[#F3F9EB] px-4 py-3">
           <img src="/telebirr-logo.svg" alt="" className="mt-0.5 h-7 w-auto object-contain" />
           <div>
-            <p className="text-xs font-bold text-[#5A7A20]">Redirect to telebirr paygate</p>
+            <p className="text-xs font-bold text-[#5A7A20]">telebirr paygate checkout</p>
             <p className="mt-0.5 text-[11px] text-[#3D4F28]">
-              You will leave this page and open the Telebirr Confirm Payment → PIN → Result screens.
+              Confirm your phone number and enter your PIN directly here to complete payment.
             </p>
           </div>
         </div>

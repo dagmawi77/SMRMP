@@ -20,6 +20,7 @@ export default function PortalMembershipPage() {
     <>
       <PortalPageHeader
         showTitle={false}
+        showBack={false}
         icon={IdentificationIcon}
         title="My membership"
         description="Your digital membership card and history."
