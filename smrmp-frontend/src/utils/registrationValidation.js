@@ -62,57 +62,56 @@ export function buildRegistrationRules(t) {
   };
 }
 
-const DEMO_STORE_KEY = 'smrmp_registered_visitors';
+import { authApi } from '../api/authApi';
+import getApiErrorMessage from './apiError';
 
-export function getRegisteredVisitors() {
+/**
+ * Registers a visitor via POST /api/auth/register.
+ * Throws an Error with `.code` for the registration form to map to UI copy.
+ */
+export async function registerVisitor(data) {
   try {
-    return JSON.parse(localStorage.getItem(DEMO_STORE_KEY) || '[]');
-  } catch {
-    return [];
-  }
-}
+    const res = await authApi.register({
+      firstName: data.firstName.trim(),
+      lastName: data.lastName.trim(),
+      gender: data.gender,
+      dateOfBirth: data.dateOfBirth,
+      nationality: data.nationality,
+      nationalId: data.nationalId.trim(),
+      username: data.username.trim(),
+      email: data.email.trim(),
+      mobilePhone: data.mobilePhone.trim(),
+      password: data.password,
+      confirmPassword: data.confirmPassword,
+    });
 
-export async function mockRegisterVisitor(data, { simulateError } = {}) {
-  await new Promise((r) => setTimeout(r, 1200));
+    return res.data?.data?.user;
+  } catch (error) {
+    const err = new Error(
+      getApiErrorMessage(error, 'Something went wrong on our end. Please try again later.'),
+    );
 
-  if (simulateError === 'network') {
-    const err = new Error('Network Error');
-    err.code = 'NETWORK';
+    if (!error.response) {
+      err.code = 'NETWORK';
+      throw err;
+    }
+
+    const apiCode = error.response.data?.errors?.code;
+    if (apiCode === 'DUPLICATE_EMAIL' || apiCode === 'DUPLICATE_USERNAME') {
+      err.code = apiCode;
+      throw err;
+    }
+
+    const status = error.response.status;
+    if (status === 409) {
+      const message = String(error.response.data?.message || '').toLowerCase();
+      err.code = message.includes('username') ? 'DUPLICATE_USERNAME' : 'DUPLICATE_EMAIL';
+      throw err;
+    }
+
+    err.code = status >= 500 ? 'SERVER' : 'VALIDATION';
     throw err;
   }
-  if (simulateError === 'server') {
-    const err = new Error('Server error');
-    err.code = 'SERVER';
-    throw err;
-  }
-
-  const existing = getRegisteredVisitors();
-  const email = data.email.trim().toLowerCase();
-  const username = data.username.trim().toLowerCase();
-
-  if (existing.some((v) => v.email === email)) {
-    const err = new Error('Duplicate email');
-    err.code = 'DUPLICATE_EMAIL';
-    throw err;
-  }
-  if (existing.some((v) => v.username === username)) {
-    const err = new Error('Duplicate username');
-    err.code = 'DUPLICATE_USERNAME';
-    throw err;
-  }
-
-  const record = {
-    id: crypto.randomUUID?.() || String(Date.now()),
-    email,
-    username,
-    firstName: data.firstName,
-    lastName: data.lastName,
-    nationalId: data.nationalId,
-    registeredAt: new Date().toISOString(),
-  };
-  existing.push(record);
-  localStorage.setItem(DEMO_STORE_KEY, JSON.stringify(existing));
-  return record;
 }
 
 export { EMAIL_RE, PHONE_RE, NATIONAL_ID_RE };
