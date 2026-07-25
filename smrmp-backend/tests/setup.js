@@ -1,16 +1,21 @@
 const path = require('path');
+
+// Ensure test environment uses local database settings to protect remote/Supabase DB
+process.env.NODE_ENV = 'test';
+process.env.DB_HOST = process.env.TEST_DB_HOST || 'localhost';
+process.env.DB_PORT = process.env.TEST_DB_PORT || '5435';
+process.env.DB_NAME = process.env.TEST_DB_NAME || 'smrmp_db_test';
+process.env.DB_USER = process.env.TEST_DB_USER || 'smrmp_user';
+process.env.DB_PASSWORD = process.env.TEST_DB_PASSWORD || 'smrmp_pass';
+process.env.DB_SSL = 'false';
+
+// Load .env, but preserve test DB overrides set above
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
-process.env.NODE_ENV = 'test';
-process.env.PORT = process.env.PORT || '5001';
-process.env.FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
-process.env.API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:5001';
-process.env.DB_HOST = process.env.DB_HOST || 'localhost';
-process.env.DB_PORT = process.env.DB_PORT || '5435';
-// Always isolate tests from the development database
-process.env.DB_NAME = process.env.DB_NAME_TEST || 'smrmp_db_test';
-process.env.DB_USER = process.env.DB_USER || 'smrmp_user';
-process.env.DB_PASSWORD = process.env.DB_PASSWORD || 'smrmp_pass';
+// Safety guard: NEVER allow tests with sync({ force: true }) to run against Supabase
+if (process.env.DB_HOST && process.env.DB_HOST.includes('supabase.com')) {
+  throw new Error('CRITICAL SAFETY BLOCK: Tests are configured to target Supabase. Halting to prevent database wipe.');
+}
 process.env.SUPABASE_URL =
   process.env.SUPABASE_URL || 'https://example.supabase.co';
 process.env.SUPABASE_ANON_KEY =
