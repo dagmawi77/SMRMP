@@ -6,8 +6,8 @@ import { ROLE_REDIRECTS } from '../../utils/constants';
 /**
  * @param {object} props
  * @param {import('react').ReactNode} props.children
- * @param {string[]} [props.roles] legacy role allow-list
- * @param {string|string[]} [props.permissions] required permission(s) — all must match unless anyPermission
+ * @param {string[]} [props.roles] required role allow-list (any match)
+ * @param {string|string[]} [props.permissions] required permission(s)
  * @param {boolean} [props.anyPermission] if true, any listed permission is enough
  */
 export default function PrivateRoute({
@@ -33,8 +33,26 @@ export default function PrivateRoute({
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (user?.must_change_password && location.pathname !== '/change-password') {
-    return <Navigate to="/change-password" replace />;
+  if (user?.must_change_password) {
+    const passwordPath = user?.role === 'visitor' ? '/portal/change-password' : '/change-password';
+    if (location.pathname !== passwordPath && location.pathname !== '/change-password') {
+      return <Navigate to={passwordPath} replace />;
+    }
+  }
+
+  const deny = () => {
+    const roleHome = ROLE_REDIRECTS[user?.role] || '/';
+    return (
+      <Navigate
+        to={roleHome === location.pathname ? '/' : roleHome}
+        replace
+      />
+    );
+  };
+
+  // Role gate (AND with permissions when both are set)
+  if (roles?.length && !hasRole(...roles)) {
+    return deny();
   }
 
   const requiredPerms = permissions
@@ -47,20 +65,7 @@ export default function PrivateRoute({
     const allowed = anyPermission
       ? canAny(...requiredPerms)
       : requiredPerms.every((p) => can(p));
-    if (!allowed) {
-      const roleHome = ROLE_REDIRECTS[user?.role] || '/';
-      return (
-        <Navigate
-          to={roleHome === location.pathname ? '/' : roleHome}
-          replace
-        />
-      );
-    }
-  } else if (roles?.length && !hasRole(...roles)) {
-    const roleHome = ROLE_REDIRECTS[user?.role] || '/';
-    return (
-      <Navigate to={roleHome === location.pathname ? '/' : roleHome} replace />
-    );
+    if (!allowed) return deny();
   }
 
   return children;
