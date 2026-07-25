@@ -3,6 +3,7 @@ import { ArrowLeftIcon, CheckCircleIcon, ShieldCheckIcon } from '@heroicons/reac
 import { useArtifactByQR } from '../../hooks/useArtifacts';
 import Badge from '../../components/ui/Badge';
 import Spinner from '../../components/ui/Spinner';
+import Logo, { LogoMark } from '../../components/ui/Logo';
 import AudioNarrationPlayer from '../../components/artifacts/AudioNarrationPlayer';
 import { MUSEUM_NAME } from '../../utils/constants';
 
@@ -28,7 +29,7 @@ export default function PublicArtifactPage() {
     return (
       <div className="visitor-shell flex min-h-screen items-center justify-center bg-smrmp-parchment px-4 text-[#2B1B12]">
         <div className="max-w-sm text-center">
-          <div className="mb-4 text-6xl">🏛️</div>
+          <LogoMark className="mx-auto mb-4 h-20 w-20 rounded-3xl" imgClassName="h-12 w-auto" decorative />
           <h1 className="font-display text-2xl font-bold text-[#2B1B12]">
             Artifact Not Found
           </h1>
@@ -64,7 +65,7 @@ export default function PublicArtifactPage() {
             >
               <ArrowLeftIcon className="h-4 w-4" />
             </button>
-            <span className="text-2xl">🏛️</span>
+            <Logo className="h-9 w-auto" decorative />
             <div>
               <p className="text-sm font-bold text-smrmp-gold">{MUSEUM_NAME}</p>
               <p className="text-xs text-smrmp-parchment/70">Digital Artifact Explorer</p>

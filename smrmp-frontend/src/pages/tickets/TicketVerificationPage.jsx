@@ -11,7 +11,6 @@ import {
   ArrowPathIcon,
   ArrowLeftIcon,
   MagnifyingGlassIcon,
-  BuildingLibraryIcon,
   UserIcon,
   CalendarIcon,
   TicketIcon,
@@ -22,6 +21,7 @@ import {
 import { ticketApi } from '../../api/ticketApi';
 import { MUSEUM_NAME } from '../../utils/constants';
 import { formatDate, formatCurrency } from '../../utils/formatters';
+import Logo from '../../components/ui/Logo';
 
 export default function TicketVerificationPage() {
   const { code: routeCode } = useParams();
@@ -183,9 +183,7 @@ export default function TicketVerificationPage() {
       <header className="sticky top-0 z-40 border-b border-smrmp-gold/30 bg-[#1C120B]/95 px-6 py-4 backdrop-blur-md text-smrmp-parchment shadow-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-smrmp-gold/20 border border-smrmp-gold/40 text-smrmp-gold group-hover:bg-smrmp-gold group-hover:text-black transition-all">
-              <BuildingLibraryIcon className="h-5 w-5" />
-            </div>
+            <Logo className="h-10 w-auto transition-transform group-hover:scale-105" decorative />
             <div>
               <span className="font-display text-lg font-bold tracking-tight text-white block leading-tight">
                 {MUSEUM_NAME}

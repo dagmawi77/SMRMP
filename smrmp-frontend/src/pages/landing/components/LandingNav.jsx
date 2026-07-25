@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Bars3Icon, XMarkIcon, QrCodeIcon } from '@heroicons/react/24/outline';
+import Logo from '../../../components/ui/Logo';
 
 const navItems = [
   { label: 'Exhibitions', href: '/#exhibitions' },
@@ -16,11 +17,7 @@ export default function LandingNav() {
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6">
         <div className="flex items-center gap-8">
           <Link to="/" className="flex items-center gap-4" onClick={closeMenu} aria-label="SMRMP home">
-            <img
-              src="/adwa-logo.svg"
-              alt="Adwa Victory Memorial Museum"
-              className="h-10 w-auto shrink-0"
-            />
+            <Logo className="h-10 w-auto" />
             <span className="text-xs font-semibold uppercase tracking-[0.3em]">Digital Custodians</span>
           </Link>
 

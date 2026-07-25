@@ -1,6 +1,7 @@
 ﻿import Alert from '../ui/Alert';
 import { formatCurrency, formatDate } from '../../utils/formatters';
-import { BuildingLibraryIcon, CheckBadgeIcon } from '@heroicons/react/24/outline';
+import { CheckBadgeIcon } from '@heroicons/react/24/outline';
+import Logo from '../ui/Logo';
 
 export default function DigitalTicket({ ticket, paymentInfo }) {
   if (!ticket) return null;
@@ -17,8 +18,8 @@ export default function DigitalTicket({ ticket, paymentInfo }) {
 
       <div className="overflow-hidden rounded-3xl border border-smrmp-gold/40 bg-[#FAF6F0] shadow-xl transition-all text-[#2B1B12]">
         <div className="bg-gradient-to-r from-[#1C120B] via-[#241710] to-[#120D08] px-6 py-5 text-center text-smrmp-parchment border-b border-smrmp-gold/30">
+          <Logo className="mx-auto mb-3 h-14 w-auto" decorative />
           <div className="flex items-center justify-center gap-2 text-smrmp-gold text-xs uppercase tracking-widest font-bold">
-            <BuildingLibraryIcon className="h-4 w-4" />
             <span>Digital Museum Pass</span>
           </div>
           <p className="font-display mt-1.5 text-xl font-bold tracking-tight text-white">

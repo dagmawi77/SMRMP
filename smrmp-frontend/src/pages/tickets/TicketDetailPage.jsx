@@ -14,7 +14,6 @@ import {
   PencilSquareIcon,
   TrashIcon,
   PrinterIcon,
-  BuildingLibraryIcon,
   BanknotesIcon,
   CreditCardIcon,
   ClockIcon,
@@ -28,6 +27,7 @@ import Modal from '../../components/ui/Modal';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import Spinner from '../../components/ui/Spinner';
+import Logo from '../../components/ui/Logo';
 import { ticketApi } from '../../api/ticketApi';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 
@@ -214,8 +214,8 @@ export default function TicketDetailPage() {
           <div className="lg:col-span-5 space-y-4">
             <div className="rounded-3xl border border-smrmp-gold/40 bg-[#FAF6F0] p-6 shadow-xl text-[#2B1B12] text-center relative overflow-hidden">
               <div className="bg-gradient-to-r from-[#1C120B] via-[#241710] to-[#120D08] -mx-6 -mt-6 p-5 text-smrmp-parchment border-b border-smrmp-gold/30 mb-6">
+                <Logo className="mx-auto mb-3 h-14 w-auto" decorative />
                 <div className="flex items-center justify-center gap-2 text-smrmp-gold text-xs uppercase tracking-widest font-bold">
-                  <BuildingLibraryIcon className="h-4 w-4" />
                   <span>Adwa Victory Memorial Museum</span>
                 </div>
                 <h3 className="font-display text-lg font-bold text-white mt-1">

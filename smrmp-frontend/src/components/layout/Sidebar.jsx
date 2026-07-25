@@ -15,6 +15,7 @@ import {
 import { NAV_ITEMS } from '../../utils/constants';
 import useAuthStore from '../../store/authStore';
 import useUiStore from '../../store/uiStore';
+import { LogoMark } from '../ui/Logo';
 
 const navIconMap = {
   '/dashboard': Squares2X2Icon,
@@ -100,8 +101,8 @@ export default function Sidebar() {
       >
         <div className="relative flex items-center justify-between border-b border-[#E2D6C5] bg-[#FAF6F0] px-5 py-5">
           <Link to="/dashboard" onClick={closeMobile} className="group flex min-w-0 items-center gap-3">
-            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#D4A017]/40 bg-[#FAF0D8] text-lg transition-transform group-hover:scale-105">
-              <span aria-hidden="true">🏛️</span>
+            <div className="relative shrink-0 transition-transform group-hover:scale-105">
+              <LogoMark className="h-10 w-10" imgClassName="h-6 w-auto" decorative />
               <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#374B07] ring-2 ring-[#FAF6F0]" />
             </div>
             {(!isCollapsed || isMobileOpen) && (

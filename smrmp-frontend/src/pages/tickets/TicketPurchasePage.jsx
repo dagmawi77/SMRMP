@@ -6,10 +6,11 @@ import TicketSelector from '../../components/tickets/TicketSelector';
 import PaymentFlow from '../../components/tickets/PaymentFlow';
 import DigitalTicket from '../../components/tickets/DigitalTicket';
 import Button from '../../components/ui/Button';
+import Logo from '../../components/ui/Logo';
 import { ticketApi } from '../../api/ticketApi';
 import { MUSEUM_NAME } from '../../utils/constants';
 import { TELEBIRR_RESULT_KEY } from '../../utils/telebirrCheckout';
-import { ArrowLeftIcon, BuildingLibraryIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 
 export default function TicketPurchasePage() {
   const location = useLocation();
@@ -136,8 +137,8 @@ export default function TicketPurchasePage() {
     <div className="visitor-shell min-h-screen bg-smrmp-parchment font-sans text-[#2B1B12]">
       <header className="bg-gradient-to-r from-[#1C120B] via-[#241710] to-[#120D08] px-6 py-8 text-smrmp-parchment shadow-md border-b border-smrmp-gold/30">
         <div className="mx-auto max-w-2xl text-center">
+          <Logo className="mx-auto mb-3 h-14 w-auto" decorative />
           <div className="flex items-center justify-center gap-2 text-smrmp-gold text-xs font-bold uppercase tracking-widest mb-1">
-            <BuildingLibraryIcon className="h-4 w-4" />
             <span>{MUSEUM_NAME}</span>
           </div>
           <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white">

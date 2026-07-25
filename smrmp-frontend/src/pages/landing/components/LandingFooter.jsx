@@ -1,4 +1,5 @@
 import { contactLinks, platformLinks } from '../landingData';
+import Logo from '../../../components/ui/Logo';
 
 function FooterLinks({ title, links }) {
   return (
@@ -22,11 +23,7 @@ export default function LandingFooter() {
         <div className="mb-20 grid gap-16 md:mb-24 md:grid-cols-2 md:gap-24">
           <div>
             <div className="mb-10 flex items-center gap-4">
-              <img
-                src="/adwa-logo.svg"
-                alt="Adwa Victory Memorial Museum"
-                className="h-14 w-auto"
-              />
+              <Logo className="h-14 w-auto" />
             </div>
             <p className="mb-12 max-w-xl font-display text-2xl italic leading-relaxed text-smrmp-parchment/60 md:text-3xl">
               Built for museums, archives, galleries, and the heritage institutions that protect our collective memory.
