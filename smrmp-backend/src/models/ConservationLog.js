@@ -12,12 +12,18 @@ const ConservationLog = sequelize.define(
     artifact_id: {
       type: DataTypes.UUID,
       allowNull: false,
-      references: { model: 'artifacts', key: 'id' },
+      references: {
+        model: 'artifacts',
+        key: 'id',
+      },
     },
     inspector_id: {
       type: DataTypes.UUID,
       allowNull: true,
-      references: { model: 'users', key: 'id' },
+      references: {
+        model: 'users',
+        key: 'id',
+      },
     },
     condition_before: {
       type: DataTypes.ENUM('excellent', 'good', 'fair', 'poor', 'critical'),
@@ -43,8 +49,13 @@ const ConservationLog = sequelize.define(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+    restoration_notes: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
     inspected_at: {
       type: DataTypes.DATE,
+      allowNull: false,
       defaultValue: DataTypes.NOW,
     },
   },

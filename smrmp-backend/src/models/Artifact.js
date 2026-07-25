@@ -12,7 +12,9 @@ const Artifact = sequelize.define(
     name: {
       type: DataTypes.STRING(500),
       allowNull: false,
-      validate: { notEmpty: true },
+      validate: {
+        notEmpty: true,
+      },
     },
     category: {
       type: DataTypes.ENUM(
@@ -76,12 +78,18 @@ const Artifact = sequelize.define(
     created_by: {
       type: DataTypes.UUID,
       allowNull: true,
-      references: { model: 'users', key: 'id' },
+      references: {
+        model: 'users',
+        key: 'id',
+      },
     },
     last_edited_by: {
       type: DataTypes.UUID,
       allowNull: true,
-      references: { model: 'users', key: 'id' },
+      references: {
+        model: 'users',
+        key: 'id',
+      },
     },
   },
   {

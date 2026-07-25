@@ -1,3 +1,7 @@
+/**
+ * Telebirr sandbox payment service — PRD Section 4.2
+ * MVP: always simulate. Real Telebirr H5 Pay is out of scope.
+ */
 const crypto = require('crypto');
 
 class TelebirrService {
@@ -7,14 +11,11 @@ class TelebirrService {
     this.shortCode = process.env.TELEBIRR_SHORT_CODE;
     this.publicKey = process.env.TELEBIRR_PUBLIC_KEY;
     this.baseUrl = process.env.TELEBIRR_BASE_URL;
-    this.isSandbox = process.env.NODE_ENV !== 'production';
+    this.isSandbox = true; // MVP always sandbox
   }
 
-  /**
-   * MVP: sandbox simulation only (PRD). Real Telebirr is Phase 2.
-   */
   async initiatePayment(payload) {
-    // Simulate processing delay outside test runs
+    // PRD: simulate ~2s processing delay (skip in tests)
     if (process.env.NODE_ENV !== 'test') {
       await new Promise((resolve) => setTimeout(resolve, 2000));
     }
@@ -33,6 +34,7 @@ class TelebirrService {
     };
   }
 
+  /** Kept for Phase-2 real Telebirr wiring (not used in MVP). */
   _buildPayload(payload) {
     return {
       appid: this.appId,
@@ -43,7 +45,7 @@ class TelebirrService {
       subject: payload.description,
       timeout_express: '120m',
       timestamp: Math.floor(Date.now() / 1000).toString(),
-      total_amount: payload.amount.toString(),
+      total_amount: String(payload.amount),
       trade_type: 'Payment',
       payee_note: 'Museum Ticket',
     };

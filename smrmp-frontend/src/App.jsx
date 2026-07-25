@@ -10,6 +10,7 @@ import AddArtifactPage from './pages/artifacts/AddArtifactPage';
 import ArtifactDetailPage from './pages/artifacts/ArtifactDetailPage';
 import PublicArtifactPage from './pages/visitor/PublicArtifactPage';
 import TicketPurchasePage from './pages/tickets/TicketPurchasePage';
+import VisitorRegistrationPage from './pages/visitor/VisitorRegistrationPage';
 
 export default function App() {
   useSessionRestore();
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/artifact/:code" element={<PublicArtifactPage />} />
           <Route path="/tickets" element={<TicketPurchasePage />} />
+          <Route path="/register" element={<VisitorRegistrationPage />} />
 
           {/* Protected staff routes */}
           <Route

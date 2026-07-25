@@ -16,13 +16,18 @@ const User = sequelize.define(
     name: {
       type: DataTypes.STRING(255),
       allowNull: false,
-      validate: { notEmpty: true, len: [2, 255] },
+      validate: {
+        notEmpty: true,
+        len: [2, 255],
+      },
     },
     email: {
       type: DataTypes.STRING(255),
       allowNull: false,
       unique: true,
-      validate: { isEmail: true },
+      validate: {
+        isEmail: true,
+      },
     },
     // Legacy column — passwords are managed by Supabase Auth now.
     password: {

@@ -12,7 +12,10 @@ const ArtifactImage = sequelize.define(
     artifact_id: {
       type: DataTypes.UUID,
       allowNull: false,
-      references: { model: 'artifacts', key: 'id' },
+      references: {
+        model: 'artifacts',
+        key: 'id',
+      },
       onDelete: 'CASCADE',
     },
     file_path: {
@@ -20,7 +23,7 @@ const ArtifactImage = sequelize.define(
       allowNull: false,
     },
     file_url: {
-      type: DataTypes.STRING(500),
+      type: DataTypes.STRING(1000),
       allowNull: false,
     },
     is_primary: {
