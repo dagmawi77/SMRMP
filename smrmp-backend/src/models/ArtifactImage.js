@@ -12,7 +12,10 @@ const ArtifactImage = sequelize.define(
     artifact_id: {
       type: DataTypes.UUID,
       allowNull: false,
-      references: { model: 'artifacts', key: 'id' },
+      references: {
+        model: 'artifacts',
+        key: 'id',
+      },
       onDelete: 'CASCADE',
     },
     file_path: {
@@ -20,19 +23,21 @@ const ArtifactImage = sequelize.define(
       allowNull: false,
     },
     file_url: {
-      type: DataTypes.STRING(500),
+      type: DataTypes.STRING(1000),
       allowNull: false,
     },
     is_primary: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+    uploaded_at: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
   },
   {
     tableName: 'artifact_images',
-    timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
+    timestamps: false,
   }
 );
 
