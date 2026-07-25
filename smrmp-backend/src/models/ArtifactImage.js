@@ -27,12 +27,17 @@ const ArtifactImage = sequelize.define(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+    uploaded_at: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
   },
   {
     tableName: 'artifact_images',
+    // Live DB uses uploaded_at (see 002_align_artifact_images.sql), not created_at/updated_at.
     timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
+    createdAt: 'uploaded_at',
+    updatedAt: false,
   }
 );
 

@@ -1,7 +1,10 @@
 ﻿const { DataTypes } = require('sequelize');
-const bcrypt = require('bcryptjs');
 const sequelize = require('../config/database');
 
+/**
+ * Staff profile table. Authentication (password / session) is owned by
+ * Supabase Auth (auth.users). Prefer public.users.id === auth.users.id.
+ */
 const User = sequelize.define(
   'User',
   {
@@ -21,9 +24,10 @@ const User = sequelize.define(
       unique: true,
       validate: { isEmail: true },
     },
+    // Legacy column — passwords are managed by Supabase Auth now.
     password: {
       type: DataTypes.STRING(255),
-      allowNull: false,
+      allowNull: true,
     },
     role: {
       type: DataTypes.ENUM(
@@ -56,25 +60,17 @@ const User = sequelize.define(
     createdAt: 'created_at',
     updatedAt: 'updated_at',
     hooks: {
-      beforeCreate: async (user) => {
+      beforeCreate: (user) => {
         if (user.email) user.email = user.email.toLowerCase();
-        user.password = await bcrypt.hash(user.password, 12);
       },
-      beforeUpdate: async (user) => {
+      beforeUpdate: (user) => {
         if (user.changed('email') && user.email) {
           user.email = user.email.toLowerCase();
-        }
-        if (user.changed('password')) {
-          user.password = await bcrypt.hash(user.password, 12);
         }
       },
     },
   }
 );
-
-User.prototype.comparePassword = async function comparePassword(candidatePassword) {
-  return bcrypt.compare(candidatePassword, this.password);
-};
 
 User.prototype.toJSON = function toJSON() {
   const values = { ...this.get() };
