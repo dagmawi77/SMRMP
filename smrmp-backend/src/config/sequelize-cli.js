@@ -1,39 +1,34 @@
 require('dotenv').config();
 
-const sslOptions =
-  process.env.DB_SSL === 'true'
-    ? { require: true, rejectUnauthorized: false }
-    : undefined;
+const { resolveDbEnv, useSsl } = require('./dbEnv');
+
+const db = resolveDbEnv();
+const sslOptions = useSsl()
+  ? { require: true, rejectUnauthorized: false }
+  : undefined;
+
+const shared = {
+  username: db.username,
+  password: db.password,
+  database: db.database,
+  host: db.host,
+  port: db.port,
+  dialect: 'postgres',
+  dialectOptions: sslOptions ? { ssl: sslOptions } : {},
+};
 
 module.exports = {
   development: {
-    username: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    host: process.env.DB_HOST,
-    port: Number(process.env.DB_PORT) || 5432,
-    dialect: 'postgres',
+    ...shared,
     logging: console.log,
-    dialectOptions: sslOptions ? { ssl: sslOptions } : {},
   },
   test: {
-    username: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME_TEST || `${process.env.DB_NAME}_test`,
-    host: process.env.DB_HOST,
-    port: Number(process.env.DB_PORT) || 5432,
-    dialect: 'postgres',
+    ...shared,
+    database: process.env.DB_NAME_TEST || `${db.database}_test`,
     logging: false,
-    dialectOptions: sslOptions ? { ssl: sslOptions } : {},
   },
   production: {
-    username: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    host: process.env.DB_HOST,
-    port: Number(process.env.DB_PORT) || 5432,
-    dialect: 'postgres',
+    ...shared,
     logging: false,
-    dialectOptions: sslOptions ? { ssl: sslOptions } : {},
   },
 };

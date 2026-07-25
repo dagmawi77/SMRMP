@@ -14,10 +14,11 @@ const { getSupabaseAdmin } = require('../src/config/supabase');
 
 const DEMO_PASSWORD = process.env.DEMO_AUTH_PASSWORD || 'Demo@2026!';
 
+// Must match seeders/20260725170100-demo-data.js staff emails
 const DEMO_EMAILS = [
-  'admin@smrmp.dev',
-  'curator@smrmp.dev',
-  'conservation@smrmp.dev',
+  'admin@adwa.museum',
+  'curator@adwa.museum',
+  'conservation@adwa.museum',
 ];
 
 async function upsertAuthUser(profile) {

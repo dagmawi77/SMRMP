@@ -1,15 +1,9 @@
 /**
- * Environment validation — PRD Section 2.1 + Section 6 master list.
- * Application fails fast on startup if required variables are missing.
+ * Environment validation — fails fast on startup if required vars are missing.
+ * Auth is Supabase Auth (not local JWT). DB accepts DB_* or DATABASE_URL.
  */
-const required = [
+const alwaysRequired = [
   'NODE_ENV',
-  'PORT',
-  'DB_HOST',
-  'DB_PORT',
-  'DB_NAME',
-  'DB_USER',
-  'DB_PASSWORD',
   'SUPABASE_URL',
   'SUPABASE_ANON_KEY',
   'CLOUDINARY_CLOUD_NAME',
@@ -26,11 +20,25 @@ const required = [
   'API_BASE_URL',
 ];
 
+const dbDiscrete = ['DB_HOST', 'DB_PORT', 'DB_NAME', 'DB_USER', 'DB_PASSWORD'];
+
+function isBlank(key) {
+  const value = process.env[key];
+  return value === undefined || value === null || String(value).trim() === '';
+}
+
 function validateEnv() {
-  const missing = required.filter((key) => {
-    const value = process.env[key];
-    return value === undefined || value === null || String(value).trim() === '';
-  });
+  const missing = alwaysRequired.filter(isBlank);
+
+  // PORT is set automatically by Render; required locally
+  if (isBlank('PORT') && process.env.NODE_ENV !== 'production') {
+    missing.push('PORT');
+  }
+
+  const hasDatabaseUrl = !isBlank('DATABASE_URL');
+  if (!hasDatabaseUrl) {
+    missing.push(...dbDiscrete.filter(isBlank));
+  }
 
   if (missing.length) {
     throw new Error(
@@ -39,4 +47,7 @@ function validateEnv() {
   }
 }
 
-module.exports = { validateEnv, required };
+module.exports = {
+  validateEnv,
+  required: [...alwaysRequired, ...dbDiscrete, 'PORT', 'DATABASE_URL'],
+};

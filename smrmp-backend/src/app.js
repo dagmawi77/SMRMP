@@ -8,6 +8,9 @@ const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
 
+// Required behind Render / reverse proxies so rate-limit + req.ip use the real client IP
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet());
 app.use(

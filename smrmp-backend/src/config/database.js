@@ -1,37 +1,31 @@
 const { Sequelize } = require('sequelize');
+const { resolveDbEnv, useSsl } = require('./dbEnv');
 
-const useSsl = process.env.DB_SSL === 'true';
+const db = resolveDbEnv();
+const sslEnabled = useSsl();
 
-// Prefer IPv4 to avoid ENETUNREACH on networks without working IPv6
-const dialectOptions = {
-  ...(useSsl
-    ? {
-        ssl: {
-          require: true,
-          rejectUnauthorized: false,
-        },
-      }
-    : {}),
-};
+const dialectOptions = sslEnabled
+  ? {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
+    }
+  : {};
 
-const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
-  {
-    host: process.env.DB_HOST,
-    port: Number(process.env.DB_PORT) || 5432,
-    dialect: 'postgres',
-    logging: process.env.NODE_ENV === 'development' ? console.log : false,
-    dialectOptions,
-    pool: {
-      max: 10,
-      // Keep one warm connection so the first login after idle isn't a cold SSL open.
-      min: 1,
-      acquire: 30000,
-      idle: 30000,
-    },
-  }
-);
+const sequelize = new Sequelize(db.database, db.username, db.password, {
+  host: db.host,
+  port: db.port,
+  dialect: 'postgres',
+  logging: process.env.NODE_ENV === 'development' ? console.log : false,
+  dialectOptions,
+  pool: {
+    max: 10,
+    // Keep one warm connection so the first login after idle isn't a cold SSL open.
+    min: 1,
+    acquire: 30000,
+    idle: 30000,
+  },
+});
 
 module.exports = sequelize;
