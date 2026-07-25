@@ -1,19 +1,16 @@
-function toISODate(value) {
-  if (!value) return null;
-  const date = value instanceof Date ? value : new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date.toISOString();
-}
+const startOfDay = (date = new Date()) => {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
 
-function startOfDay(value = new Date()) {
-  const date = new Date(value);
-  date.setHours(0, 0, 0, 0);
-  return date;
-}
+const startOfMonth = (date = new Date()) =>
+  new Date(date.getFullYear(), date.getMonth(), 1);
 
-function endOfDay(value = new Date()) {
-  const date = new Date(value);
-  date.setHours(23, 59, 59, 999);
-  return date;
-}
+const daysAgo = (days) => {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  return d;
+};
 
-module.exports = { toISODate, startOfDay, endOfDay };
+module.exports = { startOfDay, startOfMonth, daysAgo };

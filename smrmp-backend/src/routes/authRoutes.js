@@ -1,6 +1,16 @@
 ﻿const express = require('express');
+const {
+  login,
+  logout,
+  getMe,
+  loginValidation,
+} = require('../controllers/authController');
+const { protect } = require('../middleware/auth');
+
 const router = express.Router();
 
-// TODO: wire authRoutes handlers
+router.post('/login', loginValidation, login);
+router.post('/logout', protect, logout);
+router.get('/me', protect, getMe);
 
 module.exports = router;
