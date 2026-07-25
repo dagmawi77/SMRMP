@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Html5QrcodeScanner } from 'html5-qrcode';
-import { QrCodeIcon, XMarkIcon, SparklesIcon, CameraIcon } from '@heroicons/react/24/outline';
+import { QrCodeIcon, XMarkIcon, CameraIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
 export default function QRScannerModal({ isOpen, onClose }) {
@@ -75,12 +75,6 @@ export default function QRScannerModal({ isOpen, onClose }) {
     navigate(`/artifact/${clean}`);
   };
 
-  const handleDemoScan = (demoCode) => {
-    toast.success(`Scanned Demo QR: ${demoCode}`);
-    onClose();
-    navigate(`/artifact/${demoCode}`);
-  };
-
   if (!isOpen) return null;
 
   return (
@@ -117,27 +111,6 @@ export default function QRScannerModal({ isOpen, onClose }) {
           )}
         </div>
 
-        {/* Quick Demo QR Selector */}
-        <div className="mb-4 rounded-xl bg-[#FAF0D8] p-3 border border-smrmp-gold/40 text-xs">
-          <div className="flex items-center gap-1.5 font-bold text-[#7C4A2D] mb-2">
-            <SparklesIcon className="h-4 w-4 text-smrmp-gold" />
-            <span>Quick Test Demo QR Codes:</span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {['ART-001', 'ART-002', 'ART-ADWA-003'].map((code) => (
-              <button
-                key={code}
-                type="button"
-                onClick={() => handleDemoScan(code)}
-                className="rounded-lg bg-white px-2.5 py-1 font-mono text-[11px] font-bold text-[#2B1B12] border border-[#D4A017]/40 hover:bg-smrmp-gold hover:text-black transition-colors"
-              >
-                🔍 {code}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Manual Code Fallback Input */}
         <form onSubmit={handleManualSubmit} className="pt-2 border-t border-[#E2D6C5]">
           <label className="block text-[11px] font-bold uppercase tracking-wider text-[#5C4233] mb-1">
             Or Enter QR Code Manually:
@@ -145,7 +118,7 @@ export default function QRScannerModal({ isOpen, onClose }) {
           <div className="flex gap-2">
             <input
               type="text"
-              placeholder="e.g. ART-001 or UUID"
+              placeholder="e.g. ART-SEED001"
               value={manualCode}
               onChange={(e) => setManualCode(e.target.value)}
               className="flex-1 rounded-xl border border-[#E2D6C5] bg-[#FFFDF9] px-3.5 py-2 text-xs font-mono text-[#2B1B12] outline-none focus:border-smrmp-green focus:ring-2 focus:ring-smrmp-green/20"

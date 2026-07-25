@@ -9,6 +9,7 @@ import {
   QrCodeIcon,
 } from '@heroicons/react/24/outline';
 import { authApi } from '../../api/authApi';
+import { supabase } from '../../lib/supabase';
 import useAuthStore from '../../store/authStore';
 import useUiStore from '../../store/uiStore';
 import QRScannerModal from '../artifacts/QRScannerModal';
@@ -24,6 +25,11 @@ export default function Navbar() {
       await authApi.logout();
     } catch {
       // proceed with local logout even if API fails
+    }
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // ignore
     }
     clearAuth();
     toast.success('Logged out successfully');
