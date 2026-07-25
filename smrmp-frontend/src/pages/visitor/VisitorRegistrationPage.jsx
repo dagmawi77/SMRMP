@@ -6,7 +6,7 @@ import RegistrationForm from '../../components/registration/RegistrationForm';
 import RegistrationSuccess from '../../components/registration/RegistrationSuccess';
 
 function RegistrationPageContent() {
-  const { t, language, setLanguage, languages } = useRegistrationUi();
+  const { t } = useRegistrationUi();
   const [registeredName, setRegisteredName] = useState(null);
 
   if (registeredName) {
@@ -43,9 +43,9 @@ function RegistrationPageContent() {
           />
           <div aria-hidden="true" className="absolute inset-0 bg-smrmp-green/15 mix-blend-multiply" />
 
-          <div className="relative z-10 mx-auto w-full max-w-2xl">
-            <div className="glass-panel p-6 sm:p-8 lg:p-10">
-              <div className="mb-8 flex flex-wrap items-start justify-between gap-4 border-b border-white/10 pb-5">
+          <div className="relative z-10 mx-auto w-full max-w-xl">
+            <div className="glass-panel rounded-2xl sm:rounded-3xl p-6 sm:p-8">
+              <div className="mb-8 border-b border-white/10 pb-5">
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-smrmp-gold">Visitor access</p>
                   <h1
@@ -55,21 +55,6 @@ function RegistrationPageContent() {
                     {t.pageTitle}
                   </h1>
                   <p className="mt-2 max-w-xl text-sm font-light leading-relaxed text-smrmp-parchment/70">{t.welcome}</p>
-                </div>
-                <div className="shrink-0">
-                  <label className="sr-only" htmlFor="reg-lang">Language</label>
-                  <select
-                    id="reg-lang"
-                    value={language}
-                    onChange={(e) => setLanguage(e.target.value)}
-                    className="h-10 rounded-xl border border-white/15 bg-black/40 px-3 text-xs font-medium text-smrmp-parchment outline-none focus:border-smrmp-gold/50 focus:ring-2 focus:ring-smrmp-gold/25"
-                  >
-                    {languages.map((lang) => (
-                      <option key={lang.code} value={lang.code} className="bg-[#1f150d] text-smrmp-parchment">
-                        {lang.label}
-                      </option>
-                    ))}
-                  </select>
                 </div>
               </div>
 
