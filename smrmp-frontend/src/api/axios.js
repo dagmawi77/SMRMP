@@ -1,35 +1,44 @@
 ﻿import axios from 'axios';
 import toast from 'react-hot-toast';
+import useAuthStore from '../store/authStore';
+
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: API_BASE_URL,
   timeout: 30000,
   headers: { 'Content-Type': 'application/json' },
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('smrmp_token');
+  const { token } = useAuthStore.getState();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
+const isPublicPath = () => {
+  const { pathname } = window.location;
+  return pathname.startsWith('/login') || pathname.startsWith('/artifact/');
+};
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const message = error.response?.data?.message || 'Something went wrong';
+    const status = error.response?.status;
 
-    if (error.response?.status === 401) {
-      localStorage.removeItem('smrmp_token');
-      localStorage.removeItem('smrmp_user');
-      if (!window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/artifact/')) {
-        window.location.href = '/login';
+    if (status === 401) {
+      // A rejected login attempt is reported by the login page itself, so only
+      // tear down the session for requests made from an authenticated screen.
+      if (!isPublicPath()) {
+        useAuthStore.getState().clearAuth();
         toast.error('Session expired. Please log in again.');
+        window.location.href = '/login';
       }
-    } else if (error.response?.status === 403) {
+    } else if (status === 403) {
       toast.error('You do not have permission for this action.');
-    } else if (error.response?.status >= 500) {
+    } else if (status >= 500) {
       toast.error('Server error. Please try again.');
     }
 
