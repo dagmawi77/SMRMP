@@ -34,6 +34,35 @@ const User = sequelize.define(
       type: DataTypes.STRING(255),
       allowNull: true,
     },
+    username: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+      unique: true,
+      validate: {
+        len: [3, 50],
+        is: /^[a-zA-Z0-9._-]+$/,
+      },
+    },
+    phone: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+    },
+    gender: {
+      type: DataTypes.STRING(30),
+      allowNull: true,
+    },
+    date_of_birth: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
+    nationality: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
+    national_id: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+    },
     role: {
       type: DataTypes.ENUM(
         'admin',
@@ -67,10 +96,14 @@ const User = sequelize.define(
     hooks: {
       beforeCreate: (user) => {
         if (user.email) user.email = user.email.toLowerCase();
+        if (user.username) user.username = user.username.toLowerCase();
       },
       beforeUpdate: (user) => {
         if (user.changed('email') && user.email) {
           user.email = user.email.toLowerCase();
+        }
+        if (user.changed('username') && user.username) {
+          user.username = user.username.toLowerCase();
         }
       },
     },
