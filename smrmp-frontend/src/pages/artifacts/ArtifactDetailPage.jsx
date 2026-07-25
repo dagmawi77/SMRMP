@@ -36,6 +36,8 @@ export default function ArtifactDetailPage() {
       <PageHeader
         title={artifact?.name || 'Artifact Details'}
         description="Full artifact profile and digital identity"
+        backPath="/artifacts"
+        backLabel="Back to Catalog"
         action={hasRole('admin') && artifact && (
           <Button variant="danger" onClick={() => setShowDeleteModal(true)}>
             Delete
@@ -44,26 +46,28 @@ export default function ArtifactDetailPage() {
       />
 
       {isLoading && <Spinner className="py-24" />}
-      {isError && (
+      {!isLoading && (isError || !artifact) && (
         <EmptyState
           title="Artifact not found"
           description="This artifact may have been removed or you don't have access."
           action={<Button onClick={() => navigate('/artifacts')}>Back to Catalog</Button>}
         />
       )}
-      {artifact && <ArtifactDetail artifact={artifact} />}
+      {!isLoading && artifact && <ArtifactDetail artifact={artifact} />}
 
-      <Modal open={showDeleteModal} onClose={() => setShowDeleteModal(false)} title="Confirm Delete">
-        <p className="text-sm text-gray-600">
-          Remove <strong>{artifact?.name}</strong> from the active catalog? This is a soft delete.
-        </p>
-        <div className="mt-6 flex justify-end gap-3">
-          <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>Cancel</Button>
-          <Button variant="danger" loading={deleteMutation.isPending} onClick={handleDelete}>
-            Delete Artifact
-          </Button>
-        </div>
-      </Modal>
+      {artifact && (
+        <Modal open={showDeleteModal} onClose={() => setShowDeleteModal(false)} title="Confirm Delete">
+          <p className="text-sm text-gray-600">
+            Remove <strong>{artifact.name}</strong> from the active catalog? This is a soft delete.
+          </p>
+          <div className="mt-6 flex justify-end gap-3">
+            <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>Cancel</Button>
+            <Button variant="danger" loading={deleteMutation.isPending} onClick={handleDelete}>
+              Delete Artifact
+            </Button>
+          </div>
+        </Modal>
+      )}
     </PrivateLayout>
   );
 }
