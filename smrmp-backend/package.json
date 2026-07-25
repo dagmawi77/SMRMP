@@ -14,7 +14,8 @@
     "db:migrate:undo": "npx sequelize-cli db:migrate:undo:all",
     "db:seed": "npx sequelize-cli db:seed:all",
     "db:seed:undo": "npx sequelize-cli db:seed:undo:all",
-    "db:reset": "npm run db:migrate:undo && npm run db:migrate && npm run db:seed"
+    "db:reset": "npm run db:migrate:undo && npm run db:migrate && npm run db:seed",
+    "auth:sync": "node scripts/sync-supabase-auth-users.js"
   },
   "keywords": [
     "smrmp",
@@ -23,6 +24,7 @@
   ],
   "license": "ISC",
   "dependencies": {
+    "@supabase/supabase-js": "^2.110.8",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.5.1",
     "cors": "^2.8.5",
