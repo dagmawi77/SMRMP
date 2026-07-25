@@ -11,6 +11,7 @@ const ConservationLog = require('./ConservationLog');
 const Ticket = require('./Ticket');
 const TicketType = require('./TicketType');
 const AuditLog = require('./AuditLog');
+const VisitorFeedback = require('./VisitorFeedback');
 
 // ─── RBAC ASSOCIATIONS ───────────────────────────────────────────
 Role.belongsToMany(Permission, {
@@ -114,4 +115,5 @@ module.exports = {
   Ticket,
   TicketType,
   AuditLog,
+  VisitorFeedback,
 };

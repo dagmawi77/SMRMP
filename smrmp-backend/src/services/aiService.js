@@ -1,6 +1,6 @@
 const OpenAI = require('openai');
 const { Op } = require('sequelize');
-const { Artifact, Exhibition, Ticket } = require('../models');
+const { Artifact, Exhibition, Ticket, TicketType } = require('../models');
 const { aggregateReportData } = require('./reportService');
 const { startOfMonth } = require('../utils/dateHelpers');
 
@@ -245,6 +245,82 @@ using the provided data context. Rules:
   }
 };
 
+/**
+ * Visitor-facing museum guide Q&A (Telegram / public web).
+ * Uses public exhibition + artifact context; never exposes staff/conservation internals.
+ */
+const answerVisitorQuestion = async (question, language = 'en') => {
+  const [exhibitions, sampleArtifacts, ticketTypes] = await Promise.all([
+    Exhibition.findAll({
+      where: { status: { [Op.in]: ['active', 'planning'] } },
+      attributes: ['name', 'description', 'theme', 'gallery', 'start_date', 'end_date', 'status'],
+      limit: 8,
+      order: [['start_date', 'DESC']],
+    }),
+    Artifact.findAll({
+      attributes: ['name', 'category', 'historical_period', 'origin', 'location'],
+      limit: 12,
+      order: [['created_at', 'DESC']],
+    }),
+    TicketType.findAll({
+      where: { is_active: true },
+      attributes: ['label', 'price_etb', 'description'],
+      order: [['price_etb', 'ASC']],
+    }),
+  ]);
+
+  const contextData = {
+    museum: 'Adwa Victory Memorial Museum, Addis Ababa, Ethiopia',
+    exhibitions: exhibitions.map((e) => e.toJSON()),
+    featured_artifacts: sampleArtifacts.map((a) => a.toJSON()),
+    ticket_types: ticketTypes.map((t) => ({
+      label: t.label,
+      price_etb: Number(t.price_etb),
+      description: t.description,
+    })),
+  };
+
+  const langRule =
+    language === 'am'
+      ? 'Prefer answering in Amharic (አማርኛ). If mixed, Amharic first then a short English line.'
+      : 'Answer in clear simple English. You may add a short Amharic greeting if natural.';
+
+  const systemPrompt = `You are a friendly visitor guide for the Adwa Victory Memorial Museum.
+Help guests with hours, tickets, exhibitions, galleries, and general history of Adwa / Ethiopian heritage.
+Rules:
+- ${langRule}
+- Keep answers short (2-5 sentences) for mobile chat
+- Use only the provided museum context for facts about current exhibitions and tickets
+- For deep historical claims beyond context, say you can guide them to the gallery plaques / curator
+- Never discuss staff salaries, conservation treatments, passwords, or internal ops
+- Be warm, respectful, and suitable for families and school groups`;
+
+  try {
+    const completion = await getOpenAI().chat.completions.create({
+      model: AI_MODEL,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        {
+          role: 'user',
+          content: `Museum context:\n${JSON.stringify(contextData, null, 2)}\n\nVisitor question: ${question}`,
+        },
+      ],
+      max_tokens: 400,
+      temperature: 0.4,
+    });
+
+    return {
+      success: true,
+      answer: completion.choices[0].message.content,
+      data_sources: ['exhibitions', 'artifacts', 'ticket_types'],
+      timestamp: new Date().toISOString(),
+      tokens_used: completion.usage.total_tokens,
+    };
+  } catch (error) {
+    throw new Error(`Visitor Q&A failed: ${error.message}`);
+  }
+};
+
 const generateReport = async (reportType) => {
   const reportData = await aggregateReportData(reportType);
 
@@ -320,5 +396,6 @@ module.exports = {
   generateArtifactDescription,
   interpretSearchQuery,
   answerMuseumQuestion,
+  answerVisitorQuestion,
   generateReport,
 };

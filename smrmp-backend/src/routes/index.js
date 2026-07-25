@@ -8,6 +8,7 @@ const aiRoutes = require('./aiRoutes');
 const userRoutes = require('./userRoutes');
 const roleRoutes = require('./roleRoutes');
 const notificationRoutes = require('./notificationRoutes');
+const visitorRoutes = require('./visitorRoutes');
 
 const router = require('express').Router();
 
@@ -21,5 +22,6 @@ router.use('/ai', aiRoutes);
 router.use('/users', userRoutes);
 router.use('/roles', roleRoutes);
 router.use('/notifications', notificationRoutes);
+router.use('/visitor', visitorRoutes);
 
 module.exports = router;
