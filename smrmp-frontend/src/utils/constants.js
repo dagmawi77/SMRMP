@@ -64,5 +64,6 @@ export const PAYMENT_METHODS = [
 export const NAV_ITEMS = [
   { label: 'Dashboard', path: '/dashboard', roles: ['admin', 'curator', 'conservation', 'maintenance'] },
   { label: 'Artifacts', path: '/artifacts', roles: ['admin', 'curator', 'conservation', 'researcher'] },
-  { label: 'Tickets', path: '/tickets', roles: ['curator'] },
+  { label: 'Exhibitions', path: '/exhibitions', roles: ['curator'] },
+  { label: 'Tickets', path: '/tickets', roles: ['admin', 'curator', 'visitor'] },
 ];

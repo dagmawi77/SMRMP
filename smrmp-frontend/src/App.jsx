@@ -15,6 +15,7 @@ import TicketVerificationPage from './pages/tickets/TicketVerificationPage';
 import TicketManagementPage from './pages/tickets/TicketManagementPage';
 import TicketDetailPage from './pages/tickets/TicketDetailPage';
 import VisitorRegistrationPage from './pages/visitor/VisitorRegistrationPage';
+import ExhibitionDashboardPage from './pages/exhibitions/ExhibitionDashboardPage';
 
 export default function App() {
   useSessionRestore();
@@ -62,6 +63,14 @@ export default function App() {
             element={(
               <PrivateRoute roles={['admin', 'curator', 'conservation', 'researcher']}>
                 <ArtifactsPage />
+              </PrivateRoute>
+            )}
+          />
+          <Route
+            path="/exhibitions/*"
+            element={(
+              <PrivateRoute roles={['curator']}>
+                <ExhibitionDashboardPage />
               </PrivateRoute>
             )}
           />

@@ -28,12 +28,15 @@ export default function Button({
   loading = false,
   disabled,
   type = 'button',
+  as: Component = 'button',
   ...props
 }) {
+  const isNativeButton = Component === 'button';
+
   return (
-    <button
-      type={type}
-      disabled={disabled || loading}
+    <Component
+      type={isNativeButton ? type : undefined}
+      disabled={isNativeButton ? disabled || loading : undefined}
       className={`inline-flex items-center justify-center font-medium transition-all duration-200 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${variants[variant] || variants.primary} ${sizes[size] || sizes.md} ${className}`}
       {...props}
     >
@@ -41,6 +44,6 @@ export default function Button({
         <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
       )}
       {children}
-    </button>
+    </Component>
   );
 }
