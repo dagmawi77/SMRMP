@@ -57,14 +57,14 @@ const generateArtifactDescription = async (artifactData) => {
   const systemPrompt = `You are a museum documentation assistant
 for the Adwa Victory Memorial Museum in Ethiopia. Generate
 accurate, culturally respectful, and professionally written
-artifact descriptions.
+artifact descriptions in both English and Amharic (አማርኛ).
 
 You must:
 - Write in formal museum catalog style
+- Provide both English (full_description) and authentic Amharic (amharic_description) narratives
 - Be historically accurate and culturally sensitive
 - Never fabricate historical facts not in the provided data
-- Use phrases like "believed to be", "circa", "attributed to"
-  when uncertain
+- Use phrases like "believed to be", "circa", "attributed to" (in English) and "እንደሚገመተው", "በኪነ-ጥበቡ እንደሚያሳየው" (in Amharic) when uncertain
 - Flag insufficient data fields explicitly
 
 Always output valid JSON only. No explanation outside JSON.`;
@@ -81,7 +81,8 @@ Staff Notes: ${staff_notes || 'None provided'}
 Output this exact JSON structure:
 {
   "short_description": "1 sentence, max 25 words",
-  "full_description": "2 paragraphs, professional catalog style",
+  "full_description": "2 paragraphs, professional catalog style in English",
+  "amharic_description": "2 paragraphs, professional catalog style in proper Amharic script (አማርኛ)",
   "keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"],
   "suggested_category": "most appropriate category",
   "confidence_level": "high | medium | low",

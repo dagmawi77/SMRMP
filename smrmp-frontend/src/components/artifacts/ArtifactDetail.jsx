@@ -11,7 +11,24 @@ import DuplicateDetectorModal from './DuplicateDetectorModal';
 import { formatDate } from '../../utils/formatters';
 import { useUpdateArtifact } from '../../hooks/useArtifacts';
 import getApiErrorMessage from '../../utils/apiError';
-import { CalendarIcon, SparklesIcon, TagIcon, CheckCircleIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
+import { CalendarIcon, SparklesIcon, TagIcon, CheckCircleIcon, DocumentDuplicateIcon, VideoCameraIcon } from '@heroicons/react/24/outline';
+
+function getEmbedVideoUrl(url) {
+  if (!url) return null;
+  const trimmed = url.trim();
+  const ytMatch = trimmed.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]+)/);
+  if (ytMatch) {
+    return { type: 'iframe', src: `https://www.youtube.com/embed/${ytMatch[1]}` };
+  }
+  const vimeoMatch = trimmed.match(/vimeo\.com\/(?:video\/)?([0-9]+)/);
+  if (vimeoMatch) {
+    return { type: 'iframe', src: `https://player.vimeo.com/video/${vimeoMatch[1]}` };
+  }
+  if (trimmed.match(/\.(mp4|webm|ogg)($|\?)/i)) {
+    return { type: 'video', src: trimmed };
+  }
+  return { type: 'iframe', src: trimmed };
+}
 import toast from 'react-hot-toast';
 
 export default function ArtifactDetail({ artifact, qrDataUrl }) {
@@ -53,10 +70,53 @@ export default function ArtifactDetail({ artifact, qrDataUrl }) {
     );
   };
 
+  const videoEmbed = getEmbedVideoUrl(artifact?.video_url);
+
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       <div className="space-y-6">
         <ImageGallery images={artifact.images} />
+
+        {videoEmbed && (
+          <Card hover>
+            <div className="flex items-center justify-between gap-2 mb-3 border-b border-[#E2D6C5] pb-2">
+              <h3 className="font-display text-base font-bold text-[#2B1B12] flex items-center gap-2">
+                <VideoCameraIcon className="h-5 w-5 text-smrmp-gold" />
+                <span>Video & Archival Footage</span>
+              </h3>
+              <a
+                href={artifact.video_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[11px] font-bold text-smrmp-green hover:underline flex items-center gap-1"
+              >
+                <span>External Link</span>
+                <span>↗</span>
+              </a>
+            </div>
+            <div className="overflow-hidden rounded-xl bg-black border border-[#E2D6C5] aspect-video">
+              {videoEmbed.type === 'video' ? (
+                <video
+                  src={videoEmbed.src}
+                  controls
+                  className="w-full h-full object-contain"
+                  poster={artifact.images?.[0]?.file_url}
+                >
+                  Your browser does not support video playback.
+                </video>
+              ) : (
+                <iframe
+                  src={videoEmbed.src}
+                  title={`${artifact.name} Video`}
+                  className="w-full h-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              )}
+            </div>
+          </Card>
+        )}
+
         {(activeQrDataUrl || artifact.qr_code) && (
           <QRDisplay
             qrDataUrl={activeQrDataUrl}
@@ -66,6 +126,7 @@ export default function ArtifactDetail({ artifact, qrDataUrl }) {
         <AudioNarrationPlayer
           artifactName={artifact.name}
           description={artifact.description}
+          amharicDescription={artifact.amharic_description}
           origin={artifact.origin}
           period={artifact.historical_period}
         />
@@ -115,6 +176,7 @@ export default function ArtifactDetail({ artifact, qrDataUrl }) {
               ['Gallery Location', artifact.location],
               ['Loan Status', artifact.is_on_loan ? 'On Loan to External Institution' : 'On Site'],
               ['QR Code', artifact.qr_code],
+              ['Video Link', artifact.video_url],
               ['Date Added', formatDate(artifact.created_at)],
             ].map(([label, value]) => value && (
               <div key={label} className="rounded-xl bg-[#FFFDF9] p-3 border border-[#E2D6C5]">
@@ -128,7 +190,7 @@ export default function ArtifactDetail({ artifact, qrDataUrl }) {
         {artifact.description && (
           <Card hover>
             <div className="flex flex-wrap items-center justify-between gap-2 mb-3 border-b border-[#E2D6C5] pb-2">
-              <h3 className="font-display text-base font-bold text-[#2B1B12]">Curator Description</h3>
+              <h3 className="font-display text-base font-bold text-[#2B1B12]">English Catalog Narrative</h3>
               {descSource === 'ai_approved' ? (
                 <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-full border border-emerald-300">
                   <CheckCircleIcon className="h-3.5 w-3.5 text-emerald-600" /> Curator Approved
@@ -150,6 +212,37 @@ export default function ArtifactDetail({ artifact, qrDataUrl }) {
               )}
             </div>
             <p className="text-xs leading-relaxed text-[#2B1B12] whitespace-pre-wrap">{artifact.description}</p>
+          </Card>
+        )}
+
+        {artifact.amharic_description && (
+          <Card hover>
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-3 border-b border-[#E2D6C5] pb-2">
+              <h3 className="font-display text-base font-bold text-[#2B1B12] flex items-center gap-1.5">
+                <span>የአማርኛ መግለጫ (Amharic Catalog Narrative)</span>
+              </h3>
+              <span className="text-[11px] font-bold text-[#7C4A2D] bg-[#FAF0D8] px-2.5 py-1 rounded-full border border-smrmp-gold/50">
+                አማርኛ
+              </span>
+            </div>
+            <p className="text-xs leading-relaxed text-[#2B1B12] whitespace-pre-wrap">{artifact.amharic_description}</p>
+          </Card>
+        )}
+
+        {artifact.staff_notes && (
+          <Card hover>
+            <div className="flex items-center justify-between gap-2 mb-2 border-b border-[#E2D6C5] pb-2">
+              <h3 className="font-display text-base font-bold text-[#2B1B12] flex items-center gap-1.5">
+                <SparklesIcon className="h-4 w-4 text-smrmp-gold" />
+                Curator Source Notes (Read by AI)
+              </h3>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#7C4A2D] bg-[#FAF0D8] px-2 py-0.5 rounded border border-smrmp-gold/30">
+                AI Prompt Reference
+              </span>
+            </div>
+            <p className="text-xs leading-relaxed text-[#5C4233] whitespace-pre-wrap bg-[#FAF6F0] p-3 rounded-xl border border-[#E2D6C5]">
+              {artifact.staff_notes}
+            </p>
           </Card>
         )}
 
