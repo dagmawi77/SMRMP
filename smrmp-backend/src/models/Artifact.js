@@ -1,16 +1,105 @@
 ﻿const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
-// TODO: define Artifact model fields and associations
-const Artifact = sequelize.define('Artifact', {
-  id: {
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-    primaryKey: true,
+const Artifact = sequelize.define(
+  'Artifact',
+  {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
+    name: {
+      type: DataTypes.STRING(500),
+      allowNull: false,
+      validate: {
+        notEmpty: true,
+      },
+    },
+    category: {
+      type: DataTypes.ENUM(
+        'weapon',
+        'textile',
+        'document',
+        'ceramic',
+        'jewelry',
+        'ceremonial',
+        'photograph',
+        'coin',
+        'other'
+      ),
+      allowNull: false,
+    },
+    historical_period: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    origin: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    materials: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    ai_description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    description_source: {
+      type: DataTypes.ENUM('manual', 'ai_approved', 'ai_draft'),
+      defaultValue: 'manual',
+    },
+    location: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    condition_status: {
+      type: DataTypes.ENUM('excellent', 'good', 'fair', 'poor', 'critical'),
+      defaultValue: 'good',
+    },
+    qr_code: {
+      type: DataTypes.STRING(100),
+      unique: true,
+      allowNull: false,
+    },
+    keywords: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      defaultValue: [],
+    },
+    is_on_loan: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    created_by: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: 'users',
+        key: 'id',
+      },
+    },
+    last_edited_by: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: 'users',
+        key: 'id',
+      },
+    },
   },
-}, {
-  tableName: 'artifacts',
-  timestamps: true,
-});
+  {
+    tableName: 'artifacts',
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    paranoid: true,
+    deletedAt: 'deleted_at',
+  }
+);
 
 module.exports = Artifact;
