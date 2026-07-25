@@ -16,6 +16,7 @@ import TicketManagementPage from './pages/tickets/TicketManagementPage';
 import TicketDetailPage from './pages/tickets/TicketDetailPage';
 import VisitorRegistrationPage from './pages/visitor/VisitorRegistrationPage';
 import ExhibitionDashboardPage from './pages/exhibitions/ExhibitionDashboardPage';
+import UsersPage from './pages/users/UsersPage';
 
 export default function App() {
   useSessionRestore();
@@ -95,6 +96,14 @@ export default function App() {
             element={(
               <PrivateRoute roles={['admin', 'curator']}>
                 <EditArtifactPage />
+              </PrivateRoute>
+            )}
+          />
+          <Route
+            path="/users"
+            element={(
+              <PrivateRoute roles={['admin']}>
+                <UsersPage />
               </PrivateRoute>
             )}
           />

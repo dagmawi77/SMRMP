@@ -8,6 +8,7 @@ import {
   ChevronRightIcon,
   Squares2X2Icon,
   TicketIcon,
+  UserGroupIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { NAV_ITEMS } from '../../utils/constants';
@@ -19,6 +20,7 @@ const navIconMap = {
   '/artifacts': ArchiveBoxIcon,
   '/exhibitions': BuildingLibraryIcon,
   '/tickets': TicketIcon,
+  '/users': UserGroupIcon,
 };
 
 const PORTAL_TITLE_MAP = {
