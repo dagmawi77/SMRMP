@@ -1,14 +1,47 @@
-﻿import Button from '../ui/Button';
+﻿import { useState, useEffect } from 'react';
+import QRCode from 'qrcode';
+import Button from '../ui/Button';
 
 export default function QRDisplay({ qrDataUrl, qrCode, publicUrl }) {
-  if (!qrDataUrl && !qrCode) return null;
+  const [generatedUrl, setGeneratedUrl] = useState(null);
 
   const url = publicUrl || (qrCode ? `${window.location.origin}/artifact/${qrCode}` : null);
 
+  useEffect(() => {
+    if (qrDataUrl) {
+      setGeneratedUrl(null);
+      return;
+    }
+    if (!url) return;
+
+    let isMounted = true;
+    QRCode.toDataURL(url, {
+      errorCorrectionLevel: 'M',
+      type: 'image/png',
+      width: 300,
+      margin: 2,
+      color: { dark: '#1a1a1a', light: '#ffffff' },
+    })
+      .then((dataUrl) => {
+        if (isMounted) setGeneratedUrl(dataUrl);
+      })
+      .catch((err) => {
+        console.error('Failed to generate QR code', err);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [qrDataUrl, url]);
+
+  if (!qrDataUrl && !qrCode) return null;
+
+  const activeDataUrl = qrDataUrl || generatedUrl;
+
   const handleDownload = () => {
-    if (!qrDataUrl) return;
+    if (!activeDataUrl) return;
     const link = document.createElement('a');
-    link.href = qrDataUrl;
+    link.href = activeDataUrl;
     link.download = `artifact-${qrCode || 'qr'}.png`;
     link.click();
   };
@@ -21,9 +54,9 @@ export default function QRDisplay({ qrDataUrl, qrCode, publicUrl }) {
   return (
     <div className="rounded-2xl border border-[#E2D6C5] bg-[#FAF6F0] p-6 text-center shadow-2xs">
       <h3 className="mb-4 font-display text-sm font-bold text-[#2B1B12]">Artifact QR Code</h3>
-      {qrDataUrl ? (
+      {activeDataUrl ? (
         <div className="mx-auto flex h-52 w-52 items-center justify-center rounded-2xl bg-[#FFFDF9] p-3 border border-[#E2D6C5] shadow-xs">
-          <img src={qrDataUrl} alt={`QR code for ${qrCode}`} className="h-44 w-44" />
+          <img src={activeDataUrl} alt={`QR code for ${qrCode}`} className="h-44 w-44" />
         </div>
       ) : (
         <div className="mx-auto flex h-48 w-48 items-center justify-center bg-[#EFE5D8] rounded-2xl text-6xl">
@@ -39,7 +72,7 @@ export default function QRDisplay({ qrDataUrl, qrCode, publicUrl }) {
         <p className="mt-2 break-all text-xs text-[#6E5445]">{url}</p>
       )}
       <div className="mt-4 flex justify-center gap-2">
-        {qrDataUrl && (
+        {activeDataUrl && (
           <Button type="button" variant="primary" size="sm" onClick={handleDownload}>
             Download QR
           </Button>

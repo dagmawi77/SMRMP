@@ -11,6 +11,7 @@ import { useArtifact, useDeleteArtifact } from '../../hooks/useArtifacts';
 import useAuthStore from '../../store/authStore';
 import getApiErrorMessage from '../../utils/apiError';
 import { useState } from 'react';
+import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 export default function ArtifactDetailPage() {
   const { id } = useParams();
@@ -39,11 +40,24 @@ export default function ArtifactDetailPage() {
         description="Full artifact profile and digital identity"
         backPath="/artifacts"
         backLabel="Back to Catalog"
-        action={hasRole('admin') && artifact && (
-          <Button variant="danger" onClick={() => setShowDeleteModal(true)}>
-            Delete
-          </Button>
-        )}
+        action={
+          artifact && (
+            <div className="flex flex-wrap items-center gap-2">
+              {hasRole('admin', 'curator') && (
+                <Button variant="secondary" onClick={() => navigate(`/artifacts/${id}/edit`)}>
+                  <PencilSquareIcon className="h-4 w-4" />
+                  <span>Edit Artifact</span>
+                </Button>
+              )}
+              {hasRole('admin') && (
+                <Button variant="danger" onClick={() => setShowDeleteModal(true)}>
+                  <TrashIcon className="h-4 w-4" />
+                  <span>Delete</span>
+                </Button>
+              )}
+            </div>
+          )
+        }
       />
 
       {isLoading && <Spinner className="py-24" />}
@@ -54,7 +68,9 @@ export default function ArtifactDetailPage() {
           action={<Button onClick={() => navigate('/artifacts')}>Back to Catalog</Button>}
         />
       )}
-      {!isLoading && artifact && <ArtifactDetail artifact={artifact} />}
+      {!isLoading && artifact && (
+        <ArtifactDetail artifact={artifact} qrDataUrl={artifact.qr_data_url} />
+      )}
 
       {artifact && (
         <Modal open={showDeleteModal} onClose={() => setShowDeleteModal(false)} title="Confirm Delete">
