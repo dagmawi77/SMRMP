@@ -20,6 +20,8 @@ export default function ArtifactDetail({ artifact, qrDataUrl }) {
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const updateMutation = useUpdateArtifact();
 
+  const activeQrDataUrl = qrDataUrl || artifact?.qr_data_url;
+
   useEffect(() => {
     if (artifact?.description_source) {
       setDescSource(artifact.description_source);
@@ -55,9 +57,9 @@ export default function ArtifactDetail({ artifact, qrDataUrl }) {
     <div className="grid gap-6 lg:grid-cols-2">
       <div className="space-y-6">
         <ImageGallery images={artifact.images} />
-        {(qrDataUrl || artifact.qr_code) && (
+        {(activeQrDataUrl || artifact.qr_code) && (
           <QRDisplay
-            qrDataUrl={qrDataUrl}
+            qrDataUrl={activeQrDataUrl}
             qrCode={artifact.qr_code}
           />
         )}
