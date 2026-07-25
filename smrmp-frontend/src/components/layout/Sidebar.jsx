@@ -126,7 +126,7 @@ export default function Sidebar() {
                 title={isCollapsed && !isMobileOpen ? item.label : undefined}
                 className={`group relative flex items-center gap-3.5 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all duration-200 ${
                   isActive
-                    ? 'bg-[#E4EEDC] text-[#243205] border-l-4 border-[#374B07]'
+                    ? 'bg-[#E4EEDC] text-[#243205]'
                     : 'text-[#5C4233] hover:bg-[#FAF0E4] hover:text-[#2B1B12]'
                 } ${isCollapsed && !isMobileOpen ? 'justify-center px-2' : ''}`}
               >
