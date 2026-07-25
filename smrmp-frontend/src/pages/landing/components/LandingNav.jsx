@@ -34,6 +34,7 @@ export default function LandingNav() {
               Visitor register
             </Link>
           </div>
+        </div>
 
         <div className="flex items-center gap-3">
           <Link
