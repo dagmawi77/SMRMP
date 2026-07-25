@@ -26,9 +26,10 @@ const sequelize = new Sequelize(
     dialectOptions,
     pool: {
       max: 10,
-      min: 0,
+      // Keep one warm connection so the first login after idle isn't a cold SSL open.
+      min: 1,
       acquire: 30000,
-      idle: 10000,
+      idle: 30000,
     },
   }
 );

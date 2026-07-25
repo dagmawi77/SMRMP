@@ -159,21 +159,26 @@ const login = async (req, res) => {
     const email = req.body.email.toLowerCase();
     const { password } = req.body;
 
-    const { data, error } = await getSupabaseAuth().auth.signInWithPassword({
-      email,
-      password,
-    });
+    // Overlap Auth RTT with the profile lookup (email match covers the common case).
+    const [{ data, error }, userByEmail] = await Promise.all([
+      getSupabaseAuth().auth.signInWithPassword({ email, password }),
+      User.findOne({ where: { is_active: true, email } }),
+    ]);
 
     if (error || !data?.session?.access_token || !data?.user) {
       return sendError(res, 401, 'Invalid email or password.');
     }
 
-    const user = await User.findOne({
-      where: {
-        is_active: true,
-        [Op.or]: [{ id: data.user.id }, { email }],
-      },
-    });
+    let user = userByEmail && userByEmail.id === data.user.id ? userByEmail : null;
+
+    if (!user) {
+      user = await User.findOne({
+        where: {
+          is_active: true,
+          [Op.or]: [{ id: data.user.id }, { email }],
+        },
+      });
+    }
 
     if (!user) {
       return sendError(
@@ -183,15 +188,22 @@ const login = async (req, res) => {
       );
     }
 
-    await user.update({ last_login: new Date() });
-
-    await writeAuditLog({
-      userId: user.id,
-      action: 'LOGIN',
-      tableName: 'users',
-      recordId: user.id,
-      ipAddress: req.ip,
-    });
+    // Don't block the login response on bookkeeping writes.
+    const ipAddress = req.ip;
+    Promise.resolve()
+      .then(() => user.update({ last_login: new Date() }))
+      .then(() =>
+        writeAuditLog({
+          userId: user.id,
+          action: 'LOGIN',
+          tableName: 'users',
+          recordId: user.id,
+          ipAddress,
+        }),
+      )
+      .catch((sideEffectError) => {
+        console.error('[AUTH] Post-login side effects failed:', sideEffectError.message);
+      });
 
     return sendSuccess(res, 200, 'Login successful', {
       token: data.session.access_token,
