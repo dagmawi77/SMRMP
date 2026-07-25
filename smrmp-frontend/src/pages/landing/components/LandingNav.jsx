@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Bars3Icon, XMarkIcon, QrCodeIcon } from '@heroicons/react/24/outline';
 
 const navItems = [
+  { label: 'Exhibitions', href: '/#exhibitions' },
   { label: 'The shift', href: '/#shift' },
   { label: 'Capabilities', href: '/#capabilities' },
   { label: 'Roadmap', href: '/#roadmap' },

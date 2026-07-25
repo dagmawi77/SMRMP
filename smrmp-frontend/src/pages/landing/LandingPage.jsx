@@ -4,6 +4,7 @@ import LandingNav from './components/LandingNav';
 import AudienceCard from './components/AudienceCard';
 import CapabilityModule, { AnalyticsStrip } from './components/CapabilityModule';
 import HeroSection from './components/HeroSection';
+import ExhibitionsSection from './components/ExhibitionsSection';
 import RoadmapSection from './components/RoadmapSection';
 import ShiftSection from './components/ShiftSection';
 import TrustSection from './components/TrustSection';
@@ -47,6 +48,7 @@ export default function LandingPage() {
       <LandingNav />
       <main>
         <HeroSection />
+        <ExhibitionsSection />
         <ShiftSection />
         <section id="capabilities" className="bg-smrmp-brown" aria-labelledby="capabilities-title">
           <div className="sr-only" id="capabilities-title">SMRMP platform capabilities</div>

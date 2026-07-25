@@ -12,6 +12,10 @@ const { requirePermission } = require('../middleware/permissionGuard');
 
 const router = express.Router();
 
+// Public routes for visitors & landing page
+router.get('/public', getAllExhibitions);
+router.get('/public/:id', getExhibitionById);
+
 router.use(protect);
 router.get('/', requirePermission('exhibitions.read'), getAllExhibitions);
 router.post('/', requirePermission('exhibitions.create'), createValidation, createExhibition);
