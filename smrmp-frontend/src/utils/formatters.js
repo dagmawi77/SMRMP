@@ -1,6 +1,12 @@
 ﻿export function formatDate(value) {
   if (!value) return '';
-  return new Date(value).toLocaleDateString();
+  try {
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return String(value);
+    return d.toLocaleDateString();
+  } catch {
+    return String(value);
+  }
 }
 
 export function formatCurrency(amount, currency = 'ETB') {
