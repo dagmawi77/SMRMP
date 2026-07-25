@@ -20,7 +20,7 @@ import {
   buildRegistrationRules,
   GENDER_OPTIONS,
   NATIONALITY_OPTIONS,
-  mockRegisterVisitor,
+  registerVisitor,
 } from '../../utils/registrationValidation';
 
 export default function RegistrationForm({ onSuccess }) {
@@ -119,11 +119,15 @@ export default function RegistrationForm({ onSuccess }) {
     setIsSubmitting(true);
 
     try {
-      await mockRegisterVisitor(data);
+      await registerVisitor(data);
       toast.success(t.success.title);
       onSuccess(`${data.firstName} ${data.lastName}`.trim());
     } catch (error) {
-      let alert = { variant: 'error', title: 'Error', message: t.errors.server };
+      let alert = {
+        variant: 'error',
+        title: 'Error',
+        message: error.message || t.errors.server,
+      };
       switch (error.code) {
         case 'DUPLICATE_EMAIL':
           alert = { variant: 'error', title: t.errors.duplicateEmail, message: t.errors.duplicateEmail };
@@ -133,6 +137,9 @@ export default function RegistrationForm({ onSuccess }) {
           break;
         case 'NETWORK':
           alert = { variant: 'error', title: t.errors.network, message: t.errors.network };
+          break;
+        case 'SERVER':
+          alert = { variant: 'error', title: t.errors.server, message: t.errors.server };
           break;
         default:
           break;

@@ -81,4 +81,72 @@ describe('Auth API (Supabase Auth)', () => {
 
     expect(res.status).toBe(401);
   });
+
+  test('POST /api/auth/register creates a visitor account', async () => {
+    const res = await request(app).post('/api/auth/register').send({
+      firstName: 'Abebe',
+      lastName: 'Kebede',
+      gender: 'male',
+      dateOfBirth: '1995-06-15',
+      nationality: 'ethiopian',
+      nationalId: 'ET1234567',
+      username: 'abebe.k',
+      email: 'abebe.visitor@example.com',
+      mobilePhone: '+251911000111',
+      password: 'Visitor@2026!',
+      confirmPassword: 'Visitor@2026!',
+    });
+
+    expect(res.status).toBe(201);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.user.role).toBe('visitor');
+    expect(res.body.data.user.email).toBe('abebe.visitor@example.com');
+    expect(res.body.data.user.username).toBe('abebe.k');
+
+    const login = await request(app).post('/api/auth/login').send({
+      email: 'abebe.visitor@example.com',
+      password: 'Visitor@2026!',
+    });
+    expect(login.status).toBe(200);
+    expect(login.body.data.user.role).toBe('visitor');
+  });
+
+  test('POST /api/auth/register rejects duplicate email', async () => {
+    const payload = {
+      firstName: 'Sara',
+      lastName: 'Tesfaye',
+      gender: 'female',
+      dateOfBirth: '1998-01-20',
+      nationality: 'ethiopian',
+      nationalId: 'ET7654321',
+      username: 'sara.t',
+      email: TEST_EMAIL,
+      mobilePhone: '+251922000222',
+      password: 'Visitor@2026!',
+      confirmPassword: 'Visitor@2026!',
+    };
+
+    const res = await request(app).post('/api/auth/register').send(payload);
+    expect(res.status).toBe(409);
+    expect(res.body.errors?.code).toBe('DUPLICATE_EMAIL');
+  });
+
+  test('POST /api/auth/register rejects weak passwords', async () => {
+    const res = await request(app).post('/api/auth/register').send({
+      firstName: 'Weak',
+      lastName: 'Pass',
+      gender: 'other',
+      dateOfBirth: '2000-01-01',
+      nationality: 'other',
+      nationalId: 'ID99999',
+      username: 'weak.user',
+      email: 'weak@example.com',
+      mobilePhone: '+251933000333',
+      password: 'password',
+      confirmPassword: 'password',
+    });
+
+    expect(res.status).toBe(400);
+    expect(res.body.success).toBe(false);
+  });
 });
