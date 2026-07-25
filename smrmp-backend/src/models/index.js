@@ -6,6 +6,7 @@ const ArtifactImage = require('./ArtifactImage');
 const Exhibition = require('./Exhibition');
 const ConservationLog = require('./ConservationLog');
 const Ticket = require('./Ticket');
+const TicketType = require('./TicketType');
 const AuditLog = require('./AuditLog');
 
 // ─── USER ASSOCIATIONS ───────────────────────────────────────────
@@ -84,5 +85,6 @@ module.exports = {
   Exhibition,
   ConservationLog,
   Ticket,
+  TicketType,
   AuditLog,
 };
