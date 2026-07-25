@@ -18,6 +18,24 @@ export function useExhibitions(params = {}) {
   });
 }
 
+export function usePublicExhibitions(params = {}) {
+  return useQuery({
+    queryKey: ['publicExhibitions', params],
+    queryFn: () => exhibitionApi.getPublic(params),
+    select: (res) => {
+      const data = res?.data?.data;
+      if (data && typeof data === 'object' && Array.isArray(data.exhibitions)) {
+        return data;
+      }
+      return {
+        exhibitions: Array.isArray(data) ? data : [],
+        pagination: { total: Array.isArray(data) ? data.length : 0, page: 1, limit: 50, totalPages: 1 },
+      };
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
 export function useExhibition(id) {
   return useQuery({
     queryKey: ['exhibition', id],
