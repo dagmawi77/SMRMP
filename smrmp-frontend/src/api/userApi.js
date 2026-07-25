@@ -242,15 +242,22 @@ export const userApi = {
   },
 
   // PATCH /users/:id/status
-  toggleUserStatus: async (id) => {
+  toggleUserStatus: async (id, isActive) => {
     try {
-      return await api.patch(`/users/${id}/status`);
+      return await api.patch(`/users/${id}/status`, { is_active: isActive });
     } catch (error) {
       if (isBackendError(error)) {
         const users = getStoredMockUsers();
         const index = users.findIndex((u) => u.id === id);
         if (index !== -1) {
-          const newStatus = users[index].status === 'active' ? 'inactive' : 'active';
+          const newStatus =
+            isActive === undefined
+              ? users[index].status === 'active'
+                ? 'inactive'
+                : 'active'
+              : isActive
+                ? 'active'
+                : 'inactive';
           users[index] = {
             ...users[index],
             status: newStatus,

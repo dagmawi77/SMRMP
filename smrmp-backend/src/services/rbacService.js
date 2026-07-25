@@ -30,6 +30,7 @@ const toPublicUser = (user, permissionCodes) => {
     id: user.id,
     name: user.name,
     email: user.email,
+    phone: user.phone || null,
     avatar: user.avatar || null,
     role: slug,
     role_id: user.role_id || user.rbacRole?.id || null,
@@ -37,6 +38,9 @@ const toPublicUser = (user, permissionCodes) => {
     permissions: codes,
     must_change_password: Boolean(user.must_change_password),
     is_active: user.is_active,
+    status: user.is_active === false ? 'inactive' : 'active',
+    created_at: user.created_at || null,
+    last_login: user.last_login || null,
   };
 };
 

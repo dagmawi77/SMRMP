@@ -67,8 +67,10 @@ export default function UsersPage() {
 
   const handleToggleStatus = async (user) => {
     try {
-      await toggleStatusMutation.mutateAsync(user.id);
-      const nextStatus = user.status === 'active' ? 'inactive' : 'active';
+      const currentlyActive = user.status ? user.status === 'active' : user.is_active !== false;
+      const nextActive = !currentlyActive;
+      await toggleStatusMutation.mutateAsync({ id: user.id, is_active: nextActive });
+      const nextStatus = nextActive ? 'active' : 'inactive';
       toast.success(`Account for "${user.name}" set to ${nextStatus}`);
     } catch (err) {
       toast.error(getApiErrorMessage(err, 'Failed to update user status'));

@@ -24,13 +24,26 @@ const STAFF_SLUGS = new Set([
 const createUserValidation = [
   body('name').trim().notEmpty().isLength({ min: 2, max: 255 }),
   body('email').isEmail().normalizeEmail(),
-  body('role_id').isUUID().withMessage('role_id must be a valid UUID'),
+  body('role_id')
+    .optional({ values: 'falsy' })
+    .isUUID()
+    .withMessage('role_id must be a valid UUID'),
+  body('role')
+    .optional({ values: 'falsy' })
+    .isString()
+    .withMessage('role must be a role slug'),
+  body()
+    .custom((payload) => Boolean(payload.role_id || payload.role))
+    .withMessage('Either role_id (UUID) or role (slug) is required'),
   body('password')
-    .notEmpty()
+    .optional({ values: 'falsy' })
     .matches(STRONG_PASSWORD_RE)
     .withMessage(
       'password must be at least 8 characters and include upper, lower, number, and special character'
     ),
+  body('phone').optional({ values: 'falsy' }).trim().isLength({ max: 50 }),
+  body('status').optional({ values: 'falsy' }).isIn(['active', 'inactive']),
+  body('is_active').optional().isBoolean(),
   validateRequest,
 ];
 
@@ -47,6 +60,20 @@ const statusValidation = [
   body('is_active').isBoolean(),
   validateRequest,
 ];
+
+const resolveTargetRole = async ({ roleId, roleSlug }) => {
+  if (roleId) {
+    return Role.findOne({ where: { id: roleId, is_active: true } });
+  }
+  return Role.findOne({
+    where: { slug: String(roleSlug).trim().toLowerCase(), is_active: true },
+  });
+};
+
+const getInviteRedirectUrl = () => {
+  const base = (process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/+$/, '');
+  return `${base}/set-password`;
+};
 
 const listUsers = async (req, res) => {
   try {
@@ -90,7 +117,8 @@ const createStaffUser = async (req, res) => {
   try {
     const name = String(req.body.name).trim();
     const email = String(req.body.email).toLowerCase().trim();
-    const { password, role_id: roleId } = req.body;
+    const { password, role_id: roleId, role: roleSlug } = req.body;
+    const phone = req.body.phone ? String(req.body.phone).trim() : null;
 
     const existing = await User.findOne({ where: { email } });
     if (existing) {
@@ -99,7 +127,7 @@ const createStaffUser = async (req, res) => {
       });
     }
 
-    const role = await Role.findOne({ where: { id: roleId, is_active: true } });
+    const role = await resolveTargetRole({ roleId, roleSlug });
     if (!role) {
       return sendError(res, 400, 'Invalid or inactive role');
     }
@@ -110,18 +138,30 @@ const createStaffUser = async (req, res) => {
         'Use public registration for visitor accounts. Staff create requires a staff role.'
       );
     }
-    if (role.is_system && !STAFF_SLUGS.has(role.slug) && role.slug !== 'visitor') {
-      // custom roles allowed; system visitor blocked above
-    }
 
+    const isActive =
+      req.body.is_active !== undefined
+        ? Boolean(req.body.is_active)
+        : req.body.status !== 'inactive';
+
+    // No password supplied means this is an invitation: Supabase emails a magic
+    // link and the recipient sets their own password on /set-password.
+    const invited = !password;
+    const userMetadata = { name, role: role.slug };
     const adminClient = getSupabaseAdmin();
-    const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: { name, role: role.slug },
-      app_metadata: { role: role.slug },
-    });
+
+    const { data: authData, error: authError } = invited
+      ? await adminClient.auth.admin.inviteUserByEmail(email, {
+          data: userMetadata,
+          redirectTo: getInviteRedirectUrl(),
+        })
+      : await adminClient.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true,
+          user_metadata: userMetadata,
+          app_metadata: { role: role.slug },
+        });
 
     if (authError || !authData?.user?.id) {
       const message = authError?.message || 'Unable to create authentication account.';
@@ -135,32 +175,46 @@ const createStaffUser = async (req, res) => {
 
     authUserId = authData.user.id;
 
+    if (invited) {
+      // inviteUserByEmail cannot set app_metadata, so mirror the role claim after.
+      const { error: metaError } = await adminClient.auth.admin.updateUserById(authUserId, {
+        app_metadata: { role: role.slug },
+      });
+      if (metaError) {
+        console.warn('[USERS] Could not set app_metadata role:', metaError.message);
+      }
+    }
+
     const user = await User.create({
       id: authUserId,
       name,
       email,
+      phone,
       password: null,
       role: STAFF_SLUGS.has(role.slug) ? role.slug : 'curator',
       role_id: role.id,
-      must_change_password: true,
-      is_active: true,
+      // Invitees pick their own password from the emailed link, so there is
+      // nothing for them to rotate on first login.
+      must_change_password: !invited,
+      is_active: isActive,
     });
 
     const full = await User.findByPk(user.id, { include: [ROLE_INCLUDE] });
 
     await writeAuditLog({
       userId: req.user.id,
-      action: 'CREATE_STAFF_USER',
+      action: invited ? 'INVITE_STAFF_USER' : 'CREATE_STAFF_USER',
       tableName: 'users',
       recordId: user.id,
-      newValues: { email, role: role.slug, role_id: role.id },
+      newValues: { email, role: role.slug, role_id: role.id, invited },
       ipAddress: req.ip,
     });
 
-    return sendSuccess(res, 201, 'Staff account created', {
+    return sendSuccess(res, 201, invited ? 'Invitation sent' : 'Staff account created', {
       user: toPublicUser(full, getPermissionCodes(full)),
-      temporary_password: password,
-      must_change_password: true,
+      invited,
+      temporary_password: invited ? null : password,
+      must_change_password: !invited,
     });
   } catch (error) {
     if (authUserId) {
