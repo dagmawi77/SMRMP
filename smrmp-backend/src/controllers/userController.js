@@ -120,10 +120,6 @@ const createUserValidation = [
     .notEmpty()
     .isIn(['admin', 'curator', 'conservation', 'maintenance', 'researcher'])
     .withMessage('Role must be a valid staff role (visitor excluded)'),
-  body('password')
-    .notEmpty()
-    .isLength({ min: 6 })
-    .withMessage('Password must be at least 6 characters'),
   body('phone').optional({ checkFalsy: true }).trim(),
   body('department').optional().trim(),
   body('status').optional().isIn(['active', 'inactive']),
@@ -131,14 +127,15 @@ const createUserValidation = [
 ];
 
 /**
- * Create a new staff user
+ * Create a new staff user via Supabase Auth Invitation
  * POST /api/users
  */
 const createUser = async (req, res) => {
   let authUserId = null;
+  let invitationSent = false;
 
   try {
-    const { name, email, phone, role, password, status } = req.body;
+    const { name, email, phone, role, status } = req.body;
     const cleanEmail = email.toLowerCase().trim();
 
     if (role === 'visitor') {
@@ -151,20 +148,36 @@ const createUser = async (req, res) => {
     }
 
     const isActive = status !== 'inactive';
+    const redirectUrl = process.env.FRONTEND_URL
+      ? `${process.env.FRONTEND_URL}/set-password`
+      : 'http://localhost:3000/set-password';
 
-    // Attempt Supabase Auth provisioning if credentials are present
+    // Attempt Supabase Auth email invitation
     try {
       const admin = getSupabaseAdmin();
-      const { data: authData, error: authError } = await admin.auth.admin.createUser({
-        email: cleanEmail,
-        password,
-        email_confirm: true,
-        user_metadata: { name, role },
-        app_metadata: { role },
+
+      const { data: inviteData, error: inviteError } = await admin.auth.admin.inviteUserByEmail(cleanEmail, {
+        redirectTo: redirectUrl,
+        data: { name, role },
       });
 
-      if (!authError && authData?.user?.id) {
-        authUserId = authData.user.id;
+      if (!inviteError && inviteData?.user?.id) {
+        authUserId = inviteData.user.id;
+        invitationSent = true;
+      } else {
+        console.warn('[USER] Supabase inviteUserByEmail fallback to createUser:', inviteError?.message);
+        // Fallback to createUser if invite is not enabled or fails
+        const { data: authData, error: authError } = await admin.auth.admin.createUser({
+          email: cleanEmail,
+          password: 'TempPass@2026!',
+          email_confirm: true,
+          user_metadata: { name, role },
+          app_metadata: { role },
+        });
+
+        if (!authError && authData?.user?.id) {
+          authUserId = authData.user.id;
+        }
       }
     } catch (supabaseErr) {
       console.warn('[USER] Supabase Admin provisioning skipped/failed:', supabaseErr.message);
@@ -181,19 +194,24 @@ const createUser = async (req, res) => {
 
     await writeAuditLog({
       userId: req.user?.id || newUser.id,
-      action: 'CREATE_USER',
+      action: 'INVITE_USER',
       tableName: 'users',
       recordId: newUser.id,
-      newValues: { name: newUser.name, email: newUser.email, role: newUser.role },
+      newValues: { name: newUser.name, email: newUser.email, role: newUser.role, invitationSent },
       ipAddress: req.ip,
     });
 
     const plain = newUser.toJSON();
-    return sendSuccess(res, 201, 'Staff user created successfully', {
+    const successMsg = invitationSent
+      ? `Staff user created and invitation email sent to ${cleanEmail}`
+      : 'Staff user created successfully';
+
+    return sendSuccess(res, 201, successMsg, {
       user: {
         ...plain,
         status: plain.is_active ? 'active' : 'inactive',
       },
+      invitationSent,
     });
   } catch (error) {
     if (authUserId) {
