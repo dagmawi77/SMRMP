@@ -67,6 +67,11 @@ const Ticket = sequelize.define(
       type: DataTypes.DATE,
       allowNull: true,
     },
+    purchased_by_user_id: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: { model: 'users', key: 'id' },
+    },
   },
   {
     tableName: 'tickets',

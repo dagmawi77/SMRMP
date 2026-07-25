@@ -13,8 +13,8 @@ import { supabase } from '../../lib/supabase';
 import { authApi } from '../../api/authApi';
 import useAuthStore from '../../store/authStore';
 import getApiErrorMessage from '../../utils/apiError';
-import LandingNav from '../landing/components/LandingNav';
-import LandingFooter from '../landing/components/LandingFooter';
+import { getHomePath } from '../../utils/constants';
+import PublicAuthShell from '../../components/layout/PublicAuthShell';
 import toast from 'react-hot-toast';
 
 export default function SetPasswordPage() {
@@ -108,12 +108,14 @@ export default function SetPasswordPage() {
         console.warn('[AUTH] Backend sync for update-password notice:', backendErr.message);
       }
 
-      // 3. Re-hydrate profile via /auth/me
+      // 3. Re-hydrate profile via /auth/me and redirect by role
+      let redirectPath = getHomePath(useAuthStore.getState().user?.role);
       try {
         const meRes = await authApi.getMe();
         const userData = meRes.data?.data?.user;
         if (userData && data?.session) {
           setAuth(userData, data.session.access_token);
+          redirectPath = getHomePath(userData.role);
         }
       } catch (meErr) {
         console.warn('[AUTH] Profile rehydration:', meErr.message);
@@ -123,7 +125,7 @@ export default function SetPasswordPage() {
       toast.success('Password updated successfully!');
 
       setTimeout(() => {
-        navigate('/dashboard', { replace: true });
+        navigate(redirectPath, { replace: true });
       }, 2000);
     } catch (err) {
       const msg = getApiErrorMessage(err, 'Failed to update password');
@@ -135,17 +137,7 @@ export default function SetPasswordPage() {
   };
 
   return (
-    <div className="site-shell min-h-screen overflow-x-clip bg-smrmp-brown text-smrmp-parchment">
-      <div className="border-b border-white/5 bg-black/40 px-6 py-2 text-[10px] font-medium uppercase tracking-[0.2em] text-smrmp-parchment/60">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
-          <span>SMRMP / Security Portal</span>
-          <span className="hidden text-right sm:inline">Adwa Victory Memorial Museum</span>
-        </div>
-      </div>
-
-      <LandingNav />
-
-      <main>
+    <PublicAuthShell>
         <section
           aria-labelledby="set-password-title"
           className="relative flex min-h-[calc(100vh-130px)] items-start justify-center overflow-hidden px-6 pt-6 pb-12 sm:pt-10 sm:pb-16"
@@ -202,7 +194,7 @@ export default function SetPasswordPage() {
                   <h3 className="font-bold text-lg text-white">Password Updated!</h3>
                   <p className="text-xs text-emerald-200/80 leading-relaxed">{successMessage}</p>
                   <p className="text-[11px] font-mono text-smrmp-gold pt-2">
-                    Redirecting to Dashboard...
+                    Redirecting you now...
                   </p>
                 </div>
               ) : (
@@ -334,9 +326,6 @@ export default function SetPasswordPage() {
             </div>
           </div>
         </section>
-      </main>
-
-      <LandingFooter />
-    </div>
+    </PublicAuthShell>
   );
 }

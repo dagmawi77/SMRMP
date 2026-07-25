@@ -302,6 +302,8 @@ export default function TelebirrPaygatePage() {
   const [phone, setPhone] = useState(checkout?.phone || '');
   const [reference, setReference] = useState('');
 
+  const returnPath = checkout?.returnPath || '/tickets';
+
   useEffect(() => {
     if (!checkout) {
       navigate('/tickets', { replace: true });
@@ -318,7 +320,7 @@ export default function TelebirrPaygatePage() {
 
   const handleCancel = () => {
     sessionStorage.removeItem(TELEBIRR_SESSION_KEY);
-    navigate('/tickets', {
+    navigate(returnPath, {
       replace: true,
       state: {
         telebirrCancelled: true,
@@ -360,7 +362,7 @@ export default function TelebirrPaygatePage() {
     };
     sessionStorage.setItem(TELEBIRR_RESULT_KEY, JSON.stringify(result));
     sessionStorage.removeItem(TELEBIRR_SESSION_KEY);
-    navigate('/tickets', { replace: true, state: { telebirrPaid: true } });
+    navigate(returnPath, { replace: true, state: { telebirrPaid: true } });
   };
 
   return (

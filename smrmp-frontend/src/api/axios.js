@@ -25,7 +25,10 @@ const isPublicPath = () => {
     pathname.startsWith('/login') ||
     pathname.startsWith('/artifact/') ||
     pathname.startsWith('/tickets') ||
-    pathname.startsWith('/register')
+    pathname.startsWith('/register') ||
+    pathname.startsWith('/feedback') ||
+    pathname.startsWith('/book-group-visit') ||
+    pathname.startsWith('/membership/')
   );
 };
 

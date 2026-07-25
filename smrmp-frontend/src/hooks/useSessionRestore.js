@@ -6,6 +6,9 @@ import useAuthStore from '../store/authStore';
 /**
  * Restores the Supabase Auth session on boot, revalidates the staff profile
  * via /auth/me, and keeps the axios Bearer token in sync when Auth refreshes.
+ *
+ * Always re-fetches /auth/me when the session token changes so Zustand never
+ * keeps a stale role/permission snapshot after RBAC migrations.
  */
 export default function useSessionRestore() {
   useEffect(() => {
@@ -34,9 +37,12 @@ export default function useSessionRestore() {
       } catch (error) {
         if (cancelled) return;
         const status = error.response?.status;
-        if (status === 401 || status === 403) {
+        // Stale persisted permissions must not survive a failed profile refresh.
+        if (status === 401 || status === 403 || !error.response) {
           clearAuth();
-          await supabase.auth.signOut();
+          if (status === 401 || status === 403) {
+            await supabase.auth.signOut();
+          }
         }
       }
     };
@@ -72,13 +78,8 @@ export default function useSessionRestore() {
         return;
       }
 
-      if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') {
-        setToken(session.access_token);
-        // Login already hydrates via /auth/login; only fetch profile when missing.
-        const { user, isAuthenticated } = useAuthStore.getState();
-        if (event === 'SIGNED_IN' && !user && !isAuthenticated) {
-          await hydrateFromSession(session);
-        }
+      if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+        await hydrateFromSession(session);
       }
     });
 

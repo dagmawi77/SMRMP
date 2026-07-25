@@ -21,12 +21,16 @@ app.use(
 );
 
 // Rate limiting (disabled in test)
+// Auth limiter is stricter in production; development allows more retries while testing roles.
 if (process.env.NODE_ENV !== 'test') {
+  const isDev = process.env.NODE_ENV === 'development';
   app.use(
     '/api/auth',
     rateLimit({
       windowMs: 15 * 60 * 1000,
-      max: 10,
+      max: isDev ? 100 : 10,
+      standardHeaders: true,
+      legacyHeaders: false,
       message: 'Too many login attempts. Try again in 15 minutes.',
     })
   );
@@ -35,7 +39,9 @@ if (process.env.NODE_ENV !== 'test') {
     '/api/',
     rateLimit({
       windowMs: 1 * 60 * 1000,
-      max: 200,
+      max: isDev ? 1000 : 200,
+      standardHeaders: true,
+      legacyHeaders: false,
     })
   );
 }

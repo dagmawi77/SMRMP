@@ -3,14 +3,18 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   ArchiveBoxIcon,
   BuildingLibraryIcon,
+  CalendarDaysIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   Cog6ToothIcon,
+  IdentificationIcon,
   ShieldCheckIcon,
   ClipboardDocumentCheckIcon,
   Squares2X2Icon,
+  StarIcon,
   TicketIcon,
+  UserGroupIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { NAV_ITEMS, ROLE_REDIRECTS } from '../../utils/constants';
@@ -28,6 +32,10 @@ const navIconMap = {
   '/admin': ShieldCheckIcon,
   '/admin/users': ShieldCheckIcon,
   '/settings': Cog6ToothIcon,
+  '/visitors': UserGroupIcon,
+  '/memberships': IdentificationIcon,
+  '/group-bookings': CalendarDaysIcon,
+  '/feedback/dashboard': StarIcon,
 };
 
 const PORTAL_TITLE_MAP = {
@@ -49,10 +57,16 @@ export default function Sidebar() {
   const location = useLocation();
   const { user, hasRole, canAny } = useAuthStore();
   const { isMobileOpen, isCollapsed, closeMobile, toggleCollapsed } = useUiStore();
+  const isVisitorsSection = (pathname) =>
+    ['/visitors', '/memberships', '/group-bookings', '/feedback/dashboard'].some(
+      (p) => pathname === p || pathname.startsWith(`${p}/`)
+    );
+
   const [openMenus, setOpenMenus] = useState(() => {
     const initial = {};
     if (location.pathname.startsWith('/exhibitions')) initial['/exhibitions'] = true;
     if (location.pathname.startsWith('/admin')) initial['/admin/users'] = true;
+    if (isVisitorsSection(location.pathname)) initial['/visitors'] = true;
     return initial;
   });
 
@@ -63,6 +77,9 @@ export default function Sidebar() {
     if (location.pathname.startsWith('/admin')) {
       setOpenMenus((prev) => ({ ...prev, '/admin/users': true }));
     }
+    if (isVisitorsSection(location.pathname)) {
+      setOpenMenus((prev) => ({ ...prev, '/visitors': true }));
+    }
   }, [location.pathname]);
 
   const toggleMenu = (path) => {
@@ -71,20 +88,37 @@ export default function Sidebar() {
 
   const portalTitle = getPortalTitle(user?.role);
 
-  const visibleItems = NAV_ITEMS.filter((item) => {
+  const isNavVisible = (item) => {
     if (item.excludeRoles?.length && item.excludeRoles.some((role) => hasRole(role))) {
+      return false;
+    }
+    if (item.roles?.length && !item.roles.some((role) => hasRole(role))) {
       return false;
     }
     if (item.permissions?.length) {
       return canAny(...item.permissions);
     }
-    if (item.roles?.length) {
-      return item.roles.some((role) => hasRole(role));
-    }
     return true;
-  });
+  };
 
-  const isPathActive = (path) => location.pathname === path || (path !== '/dashboard' && location.pathname.startsWith(`${path}/`));
+  const visibleItems = NAV_ITEMS.filter(isNavVisible);
+
+  const isPathActive = (path, siblings = []) => {
+    if (location.pathname === path) return true;
+    if (path === '/dashboard') return false;
+    // Prefer more-specific sibling (e.g. /visitors/analytics over /visitors)
+    const siblingOwnsPath = siblings.some(
+      (sibling) =>
+        sibling.path !== path
+        && (sibling.path === location.pathname
+          || (sibling.path.length > path.length
+            && sibling.path.startsWith(`${path}/`)
+            && (location.pathname === sibling.path
+              || location.pathname.startsWith(`${sibling.path}/`)))),
+    );
+    if (siblingOwnsPath) return false;
+    return location.pathname.startsWith(`${path}/`);
+  };
 
   const homePath = ROLE_REDIRECTS[user?.role] || '/dashboard';
 
@@ -139,7 +173,8 @@ export default function Sidebar() {
           {visibleItems.map((item) => {
             const Icon = navIconMap[item.path] || Squares2X2Icon;
             const active = isPathActive(item.path);
-            const hasChildren = item.children?.length;
+            const visibleChildren = item.children?.filter(isNavVisible);
+            const hasChildren = visibleChildren?.length > 0;
 
             if (!hasChildren) {
               return (
@@ -158,19 +193,19 @@ export default function Sidebar() {
               );
             }
 
-            const childActive = item.children.some((child) => isPathActive(child.path));
+            const childActive = visibleChildren.some((child) => isPathActive(child.path, visibleChildren));
+            const sectionActive = childActive || active;
             const isMenuOpen = Boolean(openMenus[item.path]);
-
             return (
               <div key={item.path}>
-                <div className={`group flex items-center rounded-xl text-sm font-semibold transition-all duration-200 ${active ? 'bg-[#E4EEDC] text-[#243205]' : 'text-[#5C4233] hover:bg-[#FAF0E4] hover:text-[#2B1B12]'}`}>
+                <div className={`group flex items-center rounded-xl text-sm font-semibold transition-all duration-200 ${sectionActive ? 'bg-[#E4EEDC] text-[#243205]' : 'text-[#5C4233] hover:bg-[#FAF0E4] hover:text-[#2B1B12]'}`}>
                   <Link
                     to={item.path}
                     onClick={closeMobile}
                     title={isCollapsed && !isMobileOpen ? item.label : undefined}
                     className={`flex min-w-0 flex-1 items-center gap-3.5 px-3.5 py-2.5 ${isCollapsed && !isMobileOpen ? 'justify-center px-2' : ''}`}
                   >
-                    <Icon className={`h-5 w-5 shrink-0 transition-transform duration-200 group-hover:scale-110 ${active ? 'text-[#374B07]' : 'text-[#7C4A2D] group-hover:text-[#2B1B12]'}`} />
+                    <Icon className={`h-5 w-5 shrink-0 transition-transform duration-200 group-hover:scale-110 ${sectionActive ? 'text-[#374B07]' : 'text-[#7C4A2D] group-hover:text-[#2B1B12]'}`} />
                     {(!isCollapsed || isMobileOpen) && <span className="truncate">{item.label}</span>}
                   </Link>
                   {(!isCollapsed || isMobileOpen) && (
@@ -188,8 +223,8 @@ export default function Sidebar() {
 
                 {(!isCollapsed || isMobileOpen) && isMenuOpen && (
                   <div className="ml-5 mt-1 space-y-0.5 border-l border-[#D8C8B8] pl-3">
-                    {item.children.map((child) => {
-                      const childIsActive = isPathActive(child.path);
+                    {visibleChildren.map((child) => {
+                      const childIsActive = isPathActive(child.path, visibleChildren);
                       return (
                         <Link
                           key={child.path}

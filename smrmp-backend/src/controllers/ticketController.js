@@ -236,6 +236,7 @@ const purchaseTicket = async (req, res) => {
       payment_status: 'completed',
       payment_reference: payment.reference_number,
       status: 'valid',
+      purchased_by_user_id: req.user?.id || null,
     });
 
     // Section 4 purchase success shape (+ qr_data_url for digital ticket UI)

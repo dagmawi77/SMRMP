@@ -6,7 +6,7 @@ import { ROLE_REDIRECTS } from '../../utils/constants';
 /**
  * @param {object} props
  * @param {import('react').ReactNode} props.children
- * @param {string[]} [props.roles] legacy role allow-list
+ * @param {string[]} [props.roles] required role allow-list (any match)
  * @param {string[]} [props.excludeRoles] roles denied even when they hold the required permissions
  * @param {string|string[]} [props.permissions] required permission(s) — all must match unless anyPermission
  * @param {boolean} [props.anyPermission] if true, any listed permission is enough
@@ -35,19 +35,30 @@ export default function PrivateRoute({
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (user?.must_change_password && location.pathname !== '/change-password') {
-    return <Navigate to="/change-password" replace />;
+  if (user?.must_change_password) {
+    const passwordPath = user?.role === 'visitor' ? '/portal/change-password' : '/change-password';
+    if (location.pathname !== passwordPath && location.pathname !== '/change-password') {
+      return <Navigate to={passwordPath} replace />;
+    }
   }
 
-  const redirectHome = () => {
+  const deny = () => {
     const roleHome = ROLE_REDIRECTS[user?.role] || '/';
     return (
-      <Navigate to={roleHome === location.pathname ? '/' : roleHome} replace />
+      <Navigate
+        to={roleHome === location.pathname ? '/' : roleHome}
+        replace
+      />
     );
   };
 
+  // Role gate (AND with permissions when both are set)
+  if (roles?.length && !hasRole(...roles)) {
+    return deny();
+  }
+
   if (excludeRoles?.length && hasRole(...excludeRoles)) {
-    return redirectHome();
+    return deny();
   }
 
   const requiredPerms = permissions
@@ -60,11 +71,7 @@ export default function PrivateRoute({
     const allowed = anyPermission
       ? canAny(...requiredPerms)
       : requiredPerms.every((p) => can(p));
-    if (!allowed) {
-      return redirectHome();
-    }
-  } else if (roles?.length && !hasRole(...roles)) {
-    return redirectHome();
+    if (!allowed) return deny();
   }
 
   return children;

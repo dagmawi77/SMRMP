@@ -3,18 +3,24 @@ import { formatCurrency, formatDate } from '../../utils/formatters';
 import { CheckBadgeIcon } from '@heroicons/react/24/outline';
 import Logo from '../ui/Logo';
 
-export default function DigitalTicket({ ticket, paymentInfo }) {
+export default function DigitalTicket({ ticket, paymentInfo, showSandboxBanner = true }) {
   if (!ticket) return null;
 
-  const qrUrl = ticket.qr_ticket_code
-    ? `${window.location.origin}/tickets/verify/${ticket.qr_ticket_code}`
-    : null;
+  // QR encodes the ticket code for gate scanning. Viewing this component
+  // must never auto-call /tickets/verify (that marks the pass used).
+  const qrPayload = ticket.qr_ticket_code || '';
+
+  const showDemo =
+    showSandboxBanner
+    && (paymentInfo?.sandbox || paymentInfo?.sandbox_label || import.meta.env.VITE_PAYMENT_SANDBOX === 'true');
 
   return (
     <div className="mx-auto max-w-md">
-      <Alert variant="warning" title="DEMO MODE — Sandbox Simulation" className="mb-4">
-        {paymentInfo?.sandbox_label || 'Sandbox mode — digital ticket issued for demonstration'}
-      </Alert>
+      {showDemo ? (
+        <Alert variant="warning" title="Sandbox payment" className="mb-4">
+          {paymentInfo?.sandbox_label || 'Sandbox mode — digital ticket issued for demonstration'}
+        </Alert>
+      ) : null}
 
       <div className="overflow-hidden rounded-3xl border border-smrmp-gold/40 bg-[#FAF6F0] shadow-xl transition-all text-[#2B1B12]">
         <div className="bg-gradient-to-r from-[#1C120B] via-[#241710] to-[#120D08] px-6 py-5 text-center text-smrmp-parchment border-b border-smrmp-gold/30">
@@ -29,14 +35,14 @@ export default function DigitalTicket({ ticket, paymentInfo }) {
 
         <div className="p-6 text-center">
           <div className="mx-auto mb-4 flex h-44 w-44 items-center justify-center rounded-2xl bg-[#FFFDF9] p-2 border border-[#E2D6C5] shadow-2xs">
-            {ticket.qr_ticket_code ? (
+            {qrPayload ? (
               <img
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(qrUrl)}`}
-                alt="Ticket QR code"
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(qrPayload)}`}
+                alt={`Ticket QR code ${qrPayload}`}
                 className="h-40 w-40 rounded-xl"
               />
             ) : (
-              <span className="text-5xl">🎫</span>
+              <span className="text-5xl" aria-hidden="true">🎫</span>
             )}
           </div>
 

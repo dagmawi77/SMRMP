@@ -1,7 +1,7 @@
 /**
  * RBAC helpers — load role permissions and shape public user payloads.
  */
-const { Role, Permission } = require('../models');
+const { User, Role, Permission } = require('../models');
 
 const ROLE_INCLUDE = {
   model: Role,
@@ -23,6 +23,29 @@ const getPermissionCodes = (user) => {
   return perms.map((p) => p.code).filter(Boolean);
 };
 
+/**
+ * Repair accounts that still have legacy users.role but a null role_id.
+ * Without role_id, permission checks always fail (empty permission set).
+ */
+const ensureRbacRoleLinked = async (user) => {
+  if (!user) return user;
+  if (user.rbacRole?.id || user.role_id) {
+    if (!user.rbacRole && user.role_id) {
+      return User.findByPk(user.id, { include: [ROLE_INCLUDE] });
+    }
+    return user;
+  }
+
+  const legacySlug = typeof user.role === 'string' ? user.role.trim() : '';
+  if (!legacySlug) return user;
+
+  const role = await Role.findOne({ where: { slug: legacySlug, is_active: true } });
+  if (!role) return user;
+
+  await user.update({ role_id: role.id });
+  return User.findByPk(user.id, { include: [ROLE_INCLUDE] });
+};
+
 const toPublicUser = (user, permissionCodes) => {
   const codes = permissionCodes || getPermissionCodes(user);
   const slug = user.rbacRole?.slug || user.role || 'visitor';
@@ -32,6 +55,9 @@ const toPublicUser = (user, permissionCodes) => {
     email: user.email,
     phone: user.phone || null,
     avatar: user.avatar || null,
+    gender: user.gender || null,
+    date_of_birth: user.date_of_birth || null,
+    nationality: user.nationality || null,
     role: slug,
     role_id: user.role_id || user.rbacRole?.id || null,
     role_name: user.rbacRole?.name || slug,
@@ -52,4 +78,5 @@ module.exports = {
   getPermissionCodes,
   toPublicUser,
   findRoleBySlug,
+  ensureRbacRoleLinked,
 };

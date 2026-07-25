@@ -69,6 +69,13 @@ const useAuthStore = create(
     }),
     {
       name: 'smrmp_auth',
+      // Bump when RBAC shape changes so stale role/permission snapshots are dropped.
+      version: 2,
+      migrate: () => ({
+        user: null,
+        token: null,
+        isAuthenticated: false,
+      }),
       partialize: (state) => ({
         user: state.user,
         token: state.token,

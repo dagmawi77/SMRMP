@@ -1,43 +1,51 @@
 /**
- * Public visitor endpoints for the Telegram bot and visitor web surfaces.
- * No auth required — rate-limited at the router level.
+ * Module 8 — Visitor management routes. Staff-only (permission gated).
  */
 const express = require('express');
-const rateLimit = require('express-rate-limit');
 const {
-  getMuseumInfo,
-  getPublicExhibitions,
-  askVisitorGuide,
-  submitFeedback,
-  getTicketByCode,
+  listVisitors,
+  createVisitor,
+  getVisitorById,
+  updateVisitor,
+  deleteVisitor,
+  checkInVisitor,
+  getVisitorVisits,
+  getVisitorMemberships,
+  getVisitorFeedback,
+  getVisitorCommunications,
+  searchVisitors,
+  getVisitorAnalyticsSummary,
+  getVisitorAnalyticsTrends,
+  getVisitorAnalyticsSegments,
+  getVisitorAnalyticsFeedback,
 } = require('../controllers/visitorController');
+const { protect } = require('../middleware/auth');
+const { requirePermission } = require('../middleware/permissionGuard');
 
 const router = express.Router();
 
-const visitorLimit = rateLimit({
-  windowMs: 1 * 60 * 1000,
-  max: 60,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: 'Too many visitor requests. Please wait a moment.',
-});
+router.use(protect);
 
-const askLimit = rateLimit({
-  windowMs: 1 * 60 * 1000,
-  max: 10,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: 'Too many AI questions. Please wait a moment.',
-});
+// Static paths before /:id
+router.get('/search', requirePermission('visitors.read'), searchVisitors);
+router.get('/analytics/summary', requirePermission('visitors.read'), getVisitorAnalyticsSummary);
+router.get('/analytics/trends', requirePermission('visitors.read'), getVisitorAnalyticsTrends);
+router.get('/analytics/segments', requirePermission('visitors.read'), getVisitorAnalyticsSegments);
+router.get('/analytics/feedback', requirePermission('visitors.read'), getVisitorAnalyticsFeedback);
 
-if (process.env.NODE_ENV !== 'test') {
-  router.use(visitorLimit);
-}
+router.get('/', requirePermission('visitors.read'), listVisitors);
+router.post('/', requirePermission('visitors.create'), createVisitor);
 
-router.get('/info', getMuseumInfo);
-router.get('/exhibitions', getPublicExhibitions);
-router.get('/tickets/:code', getTicketByCode);
-router.post('/ask', askLimit, askVisitorGuide);
-router.post('/feedback', submitFeedback);
+router.get('/:id', requirePermission('visitors.read'), getVisitorById);
+router.put('/:id', requirePermission('visitors.update'), updateVisitor);
+router.delete('/:id', requirePermission('visitors.delete'), deleteVisitor);
+
+router.post('/:id/checkin', requirePermission('visitors.checkin'), checkInVisitor);
+// PRD alias
+router.post('/:id/check-in', requirePermission('visitors.checkin'), checkInVisitor);
+router.get('/:id/visits', requirePermission('visitors.read'), getVisitorVisits);
+router.get('/:id/memberships', requirePermission('visitors.read'), getVisitorMemberships);
+router.get('/:id/feedback', requirePermission('visitors.read'), getVisitorFeedback);
+router.get('/:id/communications', requirePermission('visitors.read'), getVisitorCommunications);
 
 module.exports = router;

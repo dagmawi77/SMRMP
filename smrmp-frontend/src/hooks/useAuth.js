@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { authApi } from '../api/authApi';
 import { supabase } from '../lib/supabase';
 import useAuthStore from '../store/authStore';
-import { ROLE_REDIRECTS } from '../utils/constants';
+import { ROLE_REDIRECTS, getHomePath } from '../utils/constants';
 
 const FRONTEND_DEMO_USERS = {
   'maintenance@adwa.museum': {
@@ -132,8 +132,7 @@ export default function useAuth() {
       if (userData.must_change_password) {
         navigate('/change-password', { replace: true });
       } else {
-        const targetPath = ROLE_REDIRECTS[userData.role] || '/dashboard';
-        navigate(targetPath, { replace: true });
+        navigate(ROLE_REDIRECTS[userData.role] || getHomePath(userData.role) || '/dashboard', { replace: true });
       }
 
       if (refreshToken) {

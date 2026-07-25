@@ -27,6 +27,12 @@ export default function LandingNav() {
                 {item.label}
               </a>
             ))}
+            <Link to="/login" className="nav-link" onClick={closeMenu}>
+              Sign in
+            </Link>
+            <Link to="/register" className="nav-link" onClick={closeMenu}>
+              Visitor register
+            </Link>
           </div>
         </div>
 
@@ -35,9 +41,10 @@ export default function LandingNav() {
             to="/tickets/verify"
             className="inline-flex items-center gap-2 border border-smrmp-gold/60 bg-smrmp-gold/10 px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-smrmp-gold shadow-[0_0_15px_rgba(212,160,23,0.15)] transition-all duration-300 hover:bg-smrmp-gold hover:text-black"
             onClick={closeMenu}
+            title="Staff gate verification"
           >
-            <QrCodeIcon className="h-3.5 w-3.5" />
-            <span>Verify Ticket</span>
+            <QrCodeIcon className="h-3.5 w-3.5" aria-hidden="true" />
+            <span>Gate verify</span>
           </Link>
           <Link
             to="/login"
@@ -59,7 +66,7 @@ export default function LandingNav() {
         </div>
       </div>
 
-      {isOpen && (
+      {isOpen ? (
         <div id="mobile-navigation" className="mx-auto mt-4 max-w-7xl border-t border-white/10 pt-4 md:hidden">
           <div className="flex flex-col gap-4 text-xs font-medium uppercase tracking-widest">
             {navItems.map((item) => (
@@ -67,16 +74,26 @@ export default function LandingNav() {
                 {item.label}
               </a>
             ))}
-            <Link to="/tickets/verify" className="nav-link w-fit text-smrmp-gold font-bold flex items-center gap-1.5" onClick={closeMenu}>
-              <QrCodeIcon className="h-4 w-4" />
-              <span>Verify Ticket</span>
+            <Link to="/login" className="nav-link w-fit" onClick={closeMenu}>
+              Sign in
+            </Link>
+            <Link to="/register" className="nav-link w-fit" onClick={closeMenu}>
+              Visitor register
+            </Link>
+            <Link
+              to="/tickets/verify"
+              className="nav-link flex w-fit items-center gap-1.5 text-smrmp-gold"
+              onClick={closeMenu}
+            >
+              <QrCodeIcon className="h-4 w-4" aria-hidden="true" />
+              <span>Gate verify</span>
             </Link>
             <Link to="/login" className="nav-link w-fit text-smrmp-parchment" onClick={closeMenu}>
               Get started
             </Link>
           </div>
         </div>
-      )}
+      ) : null}
     </nav>
   );
 }

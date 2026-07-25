@@ -11,7 +11,13 @@ const ConservationLog = require('./ConservationLog');
 const Ticket = require('./Ticket');
 const TicketType = require('./TicketType');
 const AuditLog = require('./AuditLog');
+const Visitor = require('./Visitor');
+const VisitLog = require('./VisitLog');
+const MembershipTier = require('./MembershipTier');
+const Membership = require('./Membership');
+const GroupBooking = require('./GroupBooking');
 const VisitorFeedback = require('./VisitorFeedback');
+const VisitorCommunication = require('./VisitorCommunication');
 const MaintenanceRequest = require('./MaintenanceRequest');
 
 // ─── RBAC ASSOCIATIONS ───────────────────────────────────────────
@@ -103,6 +109,38 @@ AuditLog.belongsTo(User, {
   as: 'user',
 });
 
+// ─── VISITOR & MEMBER MANAGEMENT ASSOCIATIONS (Module 8) ─────────
+Visitor.hasMany(VisitLog, { as: 'visits', foreignKey: 'visitor_id' });
+Visitor.hasMany(Membership, { as: 'memberships', foreignKey: 'visitor_id' });
+Visitor.hasMany(VisitorFeedback, { as: 'feedback', foreignKey: 'visitor_id' });
+Visitor.hasMany(VisitorCommunication, {
+  as: 'communications',
+  foreignKey: 'visitor_id',
+});
+Visitor.belongsTo(User, { as: 'registeredBy', foreignKey: 'registered_by' });
+Visitor.belongsTo(User, { as: 'userAccount', foreignKey: 'user_account_id' });
+
+Membership.belongsTo(Visitor, { foreignKey: 'visitor_id' });
+Membership.belongsTo(MembershipTier, { as: 'tier', foreignKey: 'tier_id' });
+Membership.belongsTo(User, { as: 'createdBy', foreignKey: 'created_by' });
+
+MembershipTier.hasMany(Membership, { as: 'memberships', foreignKey: 'tier_id' });
+
+VisitLog.belongsTo(Visitor, { foreignKey: 'visitor_id' });
+VisitLog.belongsTo(Ticket, { foreignKey: 'ticket_id' });
+VisitLog.belongsTo(GroupBooking, { foreignKey: 'group_booking_id' });
+VisitLog.belongsTo(User, { as: 'staff', foreignKey: 'staff_id' });
+
+GroupBooking.hasMany(VisitLog, { foreignKey: 'group_booking_id' });
+GroupBooking.belongsTo(User, { as: 'assignedStaff', foreignKey: 'assigned_staff_id' });
+GroupBooking.belongsTo(User, { as: 'createdBy', foreignKey: 'created_by' });
+
+VisitorFeedback.belongsTo(Visitor, { foreignKey: 'visitor_id' });
+VisitorFeedback.belongsTo(VisitLog, { foreignKey: 'visit_log_id' });
+VisitorFeedback.belongsTo(User, { as: 'responder', foreignKey: 'responded_by' });
+
+VisitorCommunication.belongsTo(Visitor, { foreignKey: 'visitor_id' });
+
 module.exports = {
   sequelize,
   User,
@@ -116,6 +154,12 @@ module.exports = {
   Ticket,
   TicketType,
   AuditLog,
+  Visitor,
+  VisitLog,
+  MembershipTier,
+  Membership,
+  GroupBooking,
   VisitorFeedback,
+  VisitorCommunication,
   MaintenanceRequest,
 };
