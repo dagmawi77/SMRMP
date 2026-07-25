@@ -19,6 +19,7 @@ import {
   TrashIcon,
   ArrowUpTrayIcon,
   EyeIcon,
+  PlusIcon,
 } from '@heroicons/react/24/outline';
 import PrivateLayout from '../../components/layout/PrivateLayout';
 import PageHeader from '../../components/layout/PageHeader';
@@ -27,6 +28,7 @@ import Input from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
+import Modal from '../../components/ui/Modal';
 import PasswordStrengthMeter from '../../components/registration/PasswordStrengthMeter';
 import useAuthStore from '../../store/authStore';
 import { authApi } from '../../api/authApi';
@@ -106,6 +108,42 @@ export default function CuratorSettingsPage() {
     defaultStorageVault: user?.curatorSettings?.defaultStorageVault || DEFAULT_CURATOR_PREFERENCES.defaultStorageVault,
     defaultCondition: user?.curatorSettings?.defaultCondition || DEFAULT_CURATOR_PREFERENCES.defaultCondition,
   });
+
+  // Categories Taxonomy State
+  const [categories, setCategories] = useState([
+    { id: 'cat-1', name: 'Permanent Exhibition', desc: 'Core long-term museum displays highlighting major historical milestones.' },
+    { id: 'cat-2', name: 'Temporary Exhibition', desc: 'Rotating seasonal exhibitions featured for limited timeframes.' },
+    { id: 'cat-3', name: 'Traveling Exhibition', desc: 'Mobile artifact showcases shared with regional partner institutions.' },
+    { id: 'cat-4', name: 'Historical Exhibition', desc: 'Detailed chronological narratives of battle tactics, treaties, and diplomacy.' },
+    { id: 'cat-5', name: 'Cultural Exhibition', desc: 'Spotlight on living heritage, traditional craftsmanship, and attire.' },
+    { id: 'cat-6', name: 'Educational Exhibition', desc: 'Interactive learning zones designed for school groups and young visitors.' },
+    { id: 'cat-7', name: 'Special Exhibition', desc: 'VIP exclusive commemorative installations and commemorative events.' },
+  ]);
+  const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryDesc, setNewCategoryDesc] = useState('');
+
+  const handleAddCategory = () => {
+    if (!newCategoryName.trim()) {
+      toast.error('Category name is required');
+      return;
+    }
+    const newCat = {
+      id: `cat-${Date.now()}`,
+      name: newCategoryName.trim(),
+      desc: newCategoryDesc.trim() || 'Custom exhibition category.',
+    };
+    setCategories((prev) => [...prev, newCat]);
+    setNewCategoryName('');
+    setNewCategoryDesc('');
+    setShowAddCategoryModal(false);
+    toast.success(`Category "${newCat.name}" added successfully`);
+  };
+
+  const handleDeleteCategory = (catId, catName) => {
+    setCategories((prev) => prev.filter((c) => c.id !== catId));
+    toast.success(`Category "${catName}" removed`);
+  };
 
   // Notifications State
   const [notifySettings, setNotifySettings] = useState({
@@ -907,7 +945,82 @@ export default function CuratorSettingsPage() {
                 </div>
               </div>
             </Card>
+
+            <Card
+              title="Exhibition Categories & Taxonomy"
+              subtitle="Configure and maintain standard categories used for curating exhibitions and hall planning"
+              action={
+                <Button variant="gold" size="xs" onClick={() => setShowAddCategoryModal(true)}>
+                  <PlusIcon className="h-3.5 w-3.5" />
+                  <span>Add New Category</span>
+                </Button>
+              }
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                {categories.map((cat) => (
+                  <div key={cat.id} className="p-3.5 rounded-xl border border-[#E2D6C5] bg-[#FFFDF9] flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-xs text-[#2B1B12]">{cat.name}</span>
+                        <div className="flex items-center gap-1.5">
+                          <Badge variant="excellent">Active Standard</Badge>
+                          {cat.id.startsWith('cat-') && !['cat-1','cat-2','cat-3'].includes(cat.id) && (
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteCategory(cat.id, cat.name)}
+                              title="Delete category"
+                              className="text-rose-600 hover:text-rose-800 p-1"
+                            >
+                              <TrashIcon className="h-3.5 w-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      <p className="mt-1 text-[11px] text-[#6E5445] leading-relaxed">{cat.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
           </div>
+        )}
+
+        {/* Add Category Modal */}
+        {showAddCategoryModal && (
+          <Modal
+            isOpen={showAddCategoryModal}
+            onClose={() => setShowAddCategoryModal(false)}
+            title="Add New Exhibition Category"
+          >
+            <div className="space-y-4">
+              <Input
+                label="Category Name *"
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                placeholder="e.g. Commemorative Installation"
+              />
+              <div>
+                <label className="mb-1 block text-xs font-semibold uppercase text-[#5C4233]">
+                  Description
+                </label>
+                <textarea
+                  rows={3}
+                  value={newCategoryDesc}
+                  onChange={(e) => setNewCategoryDesc(e.target.value)}
+                  placeholder="Describe the scope of this category..."
+                  className="w-full rounded-xl border border-[#E2D6C5] p-2.5 text-xs outline-none focus:border-smrmp-gold"
+                />
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <Button variant="secondary" size="sm" onClick={() => setShowAddCategoryModal(false)}>
+                  Cancel
+                </Button>
+                <Button variant="gold" size="sm" onClick={handleAddCategory}>
+                  Add Category
+                </Button>
+              </div>
+            </div>
+          </Modal>
         )}
 
         {/* TAB 4: ALERTS & NOTIFICATIONS */}
