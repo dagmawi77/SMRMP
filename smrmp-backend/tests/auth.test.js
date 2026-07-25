@@ -90,7 +90,6 @@ describe('Auth API (Supabase Auth)', () => {
       dateOfBirth: '1995-06-15',
       nationality: 'ethiopian',
       nationalId: 'ET1234567',
-      username: 'abebe.k',
       email: 'abebe.visitor@example.com',
       mobilePhone: '+251911000111',
       password: 'Visitor@2026!',
@@ -101,7 +100,6 @@ describe('Auth API (Supabase Auth)', () => {
     expect(res.body.success).toBe(true);
     expect(res.body.data.user.role).toBe('visitor');
     expect(res.body.data.user.email).toBe('abebe.visitor@example.com');
-    expect(res.body.data.user.username).toBe('abebe.k');
 
     const login = await request(app).post('/api/auth/login').send({
       email: 'abebe.visitor@example.com',
@@ -119,7 +117,6 @@ describe('Auth API (Supabase Auth)', () => {
       dateOfBirth: '1998-01-20',
       nationality: 'ethiopian',
       nationalId: 'ET7654321',
-      username: 'sara.t',
       email: TEST_EMAIL,
       mobilePhone: '+251922000222',
       password: 'Visitor@2026!',
@@ -139,7 +136,6 @@ describe('Auth API (Supabase Auth)', () => {
       dateOfBirth: '2000-01-01',
       nationality: 'other',
       nationalId: 'ID99999',
-      username: 'weak.user',
       email: 'weak@example.com',
       mobilePhone: '+251933000333',
       password: 'password',

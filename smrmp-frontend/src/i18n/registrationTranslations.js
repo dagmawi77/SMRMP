@@ -19,7 +19,6 @@ export const translations = {
     sections: {
       personal: 'Personal Information',
       contact: 'Contact Information',
-      account: 'Account Information',
     },
     fields: {
       firstName: 'First Name',
@@ -31,7 +30,6 @@ export const translations = {
       profilePhoto: 'Profile Photo',
       email: 'Email Address',
       mobilePhone: 'Mobile Phone Number',
-      username: 'Username',
       password: 'Password',
       confirmPassword: 'Confirm Password',
     },
@@ -71,7 +69,6 @@ export const translations = {
       passwordWeak: 'Password does not meet requirements',
       nationalId: 'Enter a valid national ID or passport number',
       duplicateEmail: 'An account with this email already exists',
-      duplicateUsername: 'This username is already taken',
       network: 'Network error. Check your connection and try again.',
       server: 'Something went wrong on our end. Please try again later.',
     },
@@ -95,7 +92,6 @@ export const translations = {
     sections: {
       personal: 'የግል መረጃ',
       contact: 'የመገናኛ መረጃ',
-      account: 'የመለያ መረጃ',
     },
     fields: {
       firstName: 'ስም',
@@ -107,7 +103,6 @@ export const translations = {
       profilePhoto: 'የመገለጫ ፎቶ',
       email: 'ኢሜይል',
       mobilePhone: 'ስልክ ቁጥር',
-      username: 'Username',
       password: 'Password',
       confirmPassword: 'Password ያረጋግጡ',
     },
@@ -147,7 +142,6 @@ export const translations = {
       passwordWeak: 'Weak password',
       nationalId: 'Invalid national ID or passport number',
       duplicateEmail: 'Email exists',
-      duplicateUsername: 'Username taken',
       network: 'Network error',
       server: 'Server error',
     },
@@ -174,7 +168,6 @@ export const translations = {
       progressLabel: 'SMRMP የጎብኚ ምዝገባ',
       footer: 'Smart Museum Resource Management Platform · Adwa Victory Memorial Museum · Pilot Edition',
       error: 'ስህተት',
-      usernamePattern: 'ፊደላት፣ ቁጥሮች፣ ነጥቦች እና hyphen ብቻ',
       languageLabel: 'ቋንቋ',
       themeLight: 'ወደ dark mode ቀይር',
       themeDark: 'ወደ light mode ቀይር',

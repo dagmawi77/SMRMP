@@ -49,11 +49,6 @@ export function buildRegistrationRules(t) {
       required: t.errors.required,
       pattern: { value: PHONE_RE, message: t.errors.phone },
     },
-    username: {
-      required: t.errors.required,
-      minLength: { value: 3, message: t.errors.required },
-      pattern: { value: /^[a-zA-Z0-9._-]+$/, message: 'Letters, numbers, dots, hyphens only' },
-    },
     password: {
       required: t.errors.required,
       validate: (v) => isStrongPassword(v) || t.errors.passwordWeak,
@@ -78,7 +73,6 @@ export async function registerVisitor(data) {
       dateOfBirth: data.dateOfBirth,
       nationality: data.nationality,
       nationalId: data.nationalId.trim(),
-      username: data.username.trim(),
       email: data.email.trim(),
       mobilePhone: data.mobilePhone.trim(),
       password: data.password,
@@ -97,15 +91,14 @@ export async function registerVisitor(data) {
     }
 
     const apiCode = error.response.data?.errors?.code;
-    if (apiCode === 'DUPLICATE_EMAIL' || apiCode === 'DUPLICATE_USERNAME') {
+    if (apiCode === 'DUPLICATE_EMAIL') {
       err.code = apiCode;
       throw err;
     }
 
     const status = error.response.status;
     if (status === 409) {
-      const message = String(error.response.data?.message || '').toLowerCase();
-      err.code = message.includes('username') ? 'DUPLICATE_USERNAME' : 'DUPLICATE_EMAIL';
+      err.code = 'DUPLICATE_EMAIL';
       throw err;
     }
 

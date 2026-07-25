@@ -26,12 +26,6 @@ const registerValidation = [
     .notEmpty()
     .matches(/^[A-Za-z0-9-]{5,20}$/)
     .withMessage('nationalId must be 5–20 alphanumeric characters'),
-  body('username')
-    .trim()
-    .notEmpty()
-    .isLength({ min: 3, max: 50 })
-    .matches(/^[a-zA-Z0-9._-]+$/)
-    .withMessage('username may only contain letters, numbers, dots, underscores, hyphens'),
   body('email').isEmail().normalizeEmail(),
   body('mobilePhone')
     .trim()
@@ -56,7 +50,6 @@ const toPublicUser = (user) => ({
   name: user.name,
   email: user.email,
   role: user.role,
-  username: user.username || null,
 });
 
 /**
@@ -68,7 +61,6 @@ const register = async (req, res) => {
 
   try {
     const email = req.body.email.toLowerCase();
-    const username = req.body.username.trim().toLowerCase();
     const firstName = req.body.firstName.trim();
     const lastName = req.body.lastName.trim();
     const name = `${firstName} ${lastName}`.replace(/\s+/g, ' ').trim();
@@ -81,20 +73,11 @@ const register = async (req, res) => {
       mobilePhone,
     } = req.body;
 
-    const existing = await User.findOne({
-      where: {
-        [Op.or]: [{ email }, { username }],
-      },
-    });
+    const existing = await User.findOne({ where: { email } });
 
     if (existing) {
-      if (existing.email === email) {
-        return sendError(res, 409, 'An account with this email already exists', {
-          code: 'DUPLICATE_EMAIL',
-        });
-      }
-      return sendError(res, 409, 'This username is already taken', {
-        code: 'DUPLICATE_USERNAME',
+      return sendError(res, 409, 'An account with this email already exists', {
+        code: 'DUPLICATE_EMAIL',
       });
     }
 
@@ -106,7 +89,6 @@ const register = async (req, res) => {
       user_metadata: {
         name,
         role: 'visitor',
-        username,
       },
       app_metadata: { role: 'visitor' },
     });
@@ -127,7 +109,6 @@ const register = async (req, res) => {
       id: authUserId,
       name,
       email,
-      username,
       phone: String(mobilePhone).trim(),
       gender,
       date_of_birth: dateOfBirth,
@@ -143,7 +124,7 @@ const register = async (req, res) => {
       action: 'REGISTER',
       tableName: 'users',
       recordId: user.id,
-      newValues: { email: user.email, username: user.username, role: user.role },
+      newValues: { email: user.email, role: user.role },
       ipAddress: req.ip,
     });
 
@@ -160,12 +141,6 @@ const register = async (req, res) => {
     }
 
     if (error.name === 'SequelizeUniqueConstraintError') {
-      const field = error.errors?.[0]?.path;
-      if (field === 'username') {
-        return sendError(res, 409, 'This username is already taken', {
-          code: 'DUPLICATE_USERNAME',
-        });
-      }
       return sendError(res, 409, 'An account with this email already exists', {
         code: 'DUPLICATE_EMAIL',
       });

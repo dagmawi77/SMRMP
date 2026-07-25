@@ -47,16 +47,14 @@ export default function RegistrationForm({ onSuccess }) {
       dateOfBirth: '',
       nationality: '',
       nationalId: '',
-      username: '',
-      password: '',
-      confirmPassword: '',
       email: '',
       mobilePhone: '',
+      password: '',
+      confirmPassword: '',
     },
   });
 
   const password = watch('password');
-  const confirmPassword = watch('confirmPassword');
 
   const handleNextStep = async () => {
     setSubmitError(null);
@@ -72,19 +70,6 @@ export default function RegistrationForm({ onSuccess }) {
       ]);
       if (isStep1Valid) {
         setCurrentStep(2);
-      }
-    } else if (currentStep === 2) {
-      const isStep2Valid = await trigger(['username', 'password', 'confirmPassword']);
-      if (password && confirmPassword && password !== confirmPassword) {
-        setSubmitError({
-          variant: 'error',
-          title: t.errors.passwordMatch,
-          message: t.errors.passwordMatch,
-        });
-        return;
-      }
-      if (isStep2Valid) {
-        setCurrentStep(3);
       }
     }
   };
@@ -132,9 +117,6 @@ export default function RegistrationForm({ onSuccess }) {
         case 'DUPLICATE_EMAIL':
           alert = { variant: 'error', title: t.errors.duplicateEmail, message: t.errors.duplicateEmail };
           break;
-        case 'DUPLICATE_USERNAME':
-          alert = { variant: 'error', title: t.errors.duplicateUsername, message: t.errors.duplicateUsername };
-          break;
         case 'NETWORK':
           alert = { variant: 'error', title: t.errors.network, message: t.errors.network };
           break;
@@ -153,7 +135,7 @@ export default function RegistrationForm({ onSuccess }) {
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
-    if (currentStep === 1 || currentStep === 2) {
+    if (currentStep === 1) {
       handleNextStep();
     } else {
       handleSubmit(onSubmit)(e);
@@ -162,15 +144,14 @@ export default function RegistrationForm({ onSuccess }) {
 
   const stepsInfo = [
     { step: 1, title: t.sections.personal },
-    { step: 2, title: t.sections.account },
-    { step: 3, title: t.sections.contact },
+    { step: 2, title: t.sections.contact },
   ];
 
   return (
     <form noValidate onSubmit={handleFormSubmit} className="space-y-6">
       {/* Stepper Header */}
       <div className="space-y-3">
-        <div className="grid grid-cols-3 gap-2 text-center text-xs font-semibold">
+        <div className="grid grid-cols-2 gap-2 text-center text-xs font-semibold">
           {stepsInfo.map((item) => {
             const isDone = currentStep > item.step;
             const isActive = currentStep === item.step;
@@ -214,7 +195,7 @@ export default function RegistrationForm({ onSuccess }) {
         <div className="relative h-2 overflow-hidden rounded-full border border-white/10 bg-black/40">
           <div
             className="h-full bg-smrmp-gold transition-all duration-300 rounded-full"
-            style={{ width: `${(currentStep / 3) * 100}%` }}
+            style={{ width: `${(currentStep / 2) * 100}%` }}
           />
         </div>
       </div>
@@ -280,17 +261,26 @@ export default function RegistrationForm({ onSuccess }) {
         </FormSection>
       )}
 
-      {/* STEP 2: Account Information */}
+      {/* STEP 2: Contact Information + Password */}
       {currentStep === 2 && (
-        <FormSection number={2} title={t.sections.account} id="section-account">
+        <FormSection number={2} title={t.sections.contact} id="section-contact">
           <div className="grid gap-4 sm:grid-cols-2">
             <Input
               variant="glass"
-              label={`${t.fields.username} *`}
-              autoComplete="username"
-              error={errors.username?.message}
-              className="sm:col-span-2"
-              {...register('username', rules.username)}
+              label={`${t.fields.email} *`}
+              type="email"
+              autoComplete="email"
+              error={errors.email?.message}
+              {...register('email', rules.email)}
+            />
+            <Input
+              variant="glass"
+              label={`${t.fields.mobilePhone} *`}
+              type="tel"
+              autoComplete="tel"
+              placeholder="+251 9XX XXX XXXX"
+              error={errors.mobilePhone?.message}
+              {...register('mobilePhone', rules.mobilePhone)}
             />
             <div>
               <div className="mb-2 flex items-center justify-between">
@@ -363,31 +353,6 @@ export default function RegistrationForm({ onSuccess }) {
         </FormSection>
       )}
 
-      {/* STEP 3: Contact Information */}
-      {currentStep === 3 && (
-        <FormSection number={3} title={t.sections.contact} id="section-contact">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Input
-              variant="glass"
-              label={`${t.fields.email} *`}
-              type="email"
-              autoComplete="email"
-              error={errors.email?.message}
-              {...register('email', rules.email)}
-            />
-            <Input
-              variant="glass"
-              label={`${t.fields.mobilePhone} *`}
-              type="tel"
-              autoComplete="tel"
-              placeholder="+251 9XX XXX XXXX"
-              error={errors.mobilePhone?.message}
-              {...register('mobilePhone', rules.mobilePhone)}
-            />
-          </div>
-        </FormSection>
-      )}
-
       {/* Form Action Controls */}
       <div className="flex flex-col gap-4 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
         {currentStep > 1 ? (
@@ -408,7 +373,7 @@ export default function RegistrationForm({ onSuccess }) {
           </Link>
         )}
 
-        {currentStep < 3 ? (
+        {currentStep < 2 ? (
           <button
             type="button"
             onClick={handleNextStep}
