@@ -14,7 +14,6 @@ import {
   PencilSquareIcon,
   TrashIcon,
   PrinterIcon,
-  BuildingLibraryIcon,
   BanknotesIcon,
   CreditCardIcon,
   ClockIcon,
@@ -28,6 +27,7 @@ import Modal from '../../components/ui/Modal';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import Spinner from '../../components/ui/Spinner';
+import Logo from '../../components/ui/Logo';
 import { ticketApi } from '../../api/ticketApi';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 
@@ -78,7 +78,7 @@ export default function TicketDetailPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tickets-list'] });
       toast.success('Ticket deleted successfully');
-      navigate('/tickets');
+      navigate('/tickets/manage');
     },
     onError: (err) => {
       toast.error(err.response?.data?.message || 'Failed to delete ticket');
@@ -126,7 +126,7 @@ export default function TicketDetailPage() {
           <p className="text-xs text-[#6E5445]">
             {error?.response?.data?.message || 'No ticket matching this ID was found in the database.'}
           </p>
-          <Button variant="primary" onClick={() => navigate('/tickets')}>
+          <Button variant="primary" onClick={() => navigate('/tickets/manage')}>
             <ArrowLeftIcon className="h-4 w-4" />
             <span>Return to Tickets Management</span>
           </Button>
@@ -149,7 +149,7 @@ export default function TicketDetailPage() {
           <div className="flex items-center gap-3">
             <button
               type="button"
-              onClick={() => navigate('/tickets')}
+              onClick={() => navigate('/tickets/manage')}
               className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[#E2D6C5] bg-[#FAF6F0] text-[#7C4A2D] hover:bg-[#FAF0E4] hover:text-[#2B1B12] transition-colors"
               title="Back to Tickets"
             >
@@ -214,8 +214,8 @@ export default function TicketDetailPage() {
           <div className="lg:col-span-5 space-y-4">
             <div className="rounded-3xl border border-smrmp-gold/40 bg-[#FAF6F0] p-6 shadow-xl text-[#2B1B12] text-center relative overflow-hidden">
               <div className="bg-gradient-to-r from-[#1C120B] via-[#241710] to-[#120D08] -mx-6 -mt-6 p-5 text-smrmp-parchment border-b border-smrmp-gold/30 mb-6">
+                <Logo className="mx-auto mb-3 h-14 w-auto" decorative />
                 <div className="flex items-center justify-center gap-2 text-smrmp-gold text-xs uppercase tracking-widest font-bold">
-                  <BuildingLibraryIcon className="h-4 w-4" />
                   <span>Adwa Victory Memorial Museum</span>
                 </div>
                 <h3 className="font-display text-lg font-bold text-white mt-1">

@@ -3,14 +3,26 @@ const { Op } = require('sequelize');
 const { User } = require('../models');
 const { getSupabaseAuth } = require('../config/supabase');
 const { sendError } = require('../utils/apiResponse');
+const {
+  ROLE_INCLUDE,
+  getPermissionCodes,
+  toPublicUser,
+} = require('../services/rbacService');
 
 /** Short-lived cache so burst API calls after login don't re-hit Supabase Auth. */
 const authUserCache = new Map();
 const AUTH_CACHE_TTL_MS = 60_000;
 const AUTH_CACHE_MAX = 500;
 
+const PASSWORD_CHANGE_ALLOWLIST = new Set([
+  'GET /api/auth/me',
+  'POST /api/auth/change-password',
+  'POST /api/auth/logout',
+]);
+
 const cacheAuthUser = (token, authUser, expSeconds) => {
-  const fromExp = typeof expSeconds === 'number' ? expSeconds * 1000 : Date.now() + AUTH_CACHE_TTL_MS;
+  const fromExp =
+    typeof expSeconds === 'number' ? expSeconds * 1000 : Date.now() + AUTH_CACHE_TTL_MS;
   const expiresAt = Math.min(fromExp, Date.now() + AUTH_CACHE_TTL_MS);
 
   if (authUserCache.size >= AUTH_CACHE_MAX) {
@@ -52,7 +64,7 @@ const resolveAuthUser = async (token) => {
         return authUser;
       }
     } catch {
-      // Not a locally verifiable JWT — try Auth API (also covers revoked sessions).
+      // Not a locally verifiable JWT — try Auth API.
     }
   }
 
@@ -66,8 +78,8 @@ const resolveAuthUser = async (token) => {
 };
 
 /**
- * Verifies a Supabase Auth access token, then loads the matching staff profile
- * from public.users (by auth user id, with email fallback during migration).
+ * Verifies a Supabase Auth access token, then loads the matching profile
+ * with RBAC role + permissions attached to req.user.
  */
 const protect = async (req, res, next) => {
   try {
@@ -92,19 +104,43 @@ const protect = async (req, res, next) => {
     const user = await User.findOne({
       where: {
         is_active: true,
-        [Op.or]: [
-          { id: authUser.id },
-          ...(email ? [{ email }] : []),
-        ],
+        [Op.or]: [{ id: authUser.id }, ...(email ? [{ email }] : [])],
       },
+      include: [ROLE_INCLUDE],
     });
 
     if (!user) {
       return sendError(res, 401, 'User not found or deactivated.');
     }
 
-    req.user = user;
+    const permissions = getPermissionCodes(user);
+    const publicUser = toPublicUser(user, permissions);
+
+    req.user = {
+      ...user.get({ plain: true }),
+      ...publicUser,
+      permissions,
+      rbacRole: user.rbacRole,
+    };
     req.authUser = authUser;
+
+    if (user.must_change_password) {
+      const key = `${req.method} ${req.baseUrl}${req.path}`.replace(/\/$/, '') || `${req.method} ${req.originalUrl.split('?')[0]}`;
+      const normalized = `${req.method} ${req.originalUrl.split('?')[0]}`;
+      const allowed =
+        PASSWORD_CHANGE_ALLOWLIST.has(normalized) ||
+        PASSWORD_CHANGE_ALLOWLIST.has(key) ||
+        (req.method === 'GET' && normalized.endsWith('/auth/me')) ||
+        (req.method === 'POST' && normalized.endsWith('/auth/change-password')) ||
+        (req.method === 'POST' && normalized.endsWith('/auth/logout'));
+
+      if (!allowed) {
+        return sendError(res, 403, 'Password change required before continuing.', {
+          code: 'MUST_CHANGE_PASSWORD',
+        });
+      }
+    }
+
     return next();
   } catch (error) {
     return sendError(res, 401, 'Invalid authentication token.');

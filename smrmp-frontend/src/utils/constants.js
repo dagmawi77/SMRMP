@@ -62,9 +62,45 @@ export const PAYMENT_METHODS = [
 ];
 
 export const NAV_ITEMS = [
-  { label: 'Dashboard', path: '/dashboard', roles: ['admin', 'curator', 'conservation'] },
-  { label: 'Artifacts', path: '/artifacts', roles: ['admin', 'curator', 'conservation', 'researcher'] },
-  { label: 'Exhibitions', path: '/exhibitions', roles: ['curator'] },
+  { label: 'Dashboard', path: '/dashboard', permissions: ['dashboard.read'], roles: ['admin', 'curator', 'conservation'] },
+  { label: 'Artifacts', path: '/artifacts', permissions: ['artifacts.read'], roles: ['admin', 'curator', 'conservation', 'researcher'] },
+  { label: 'Exhibitions', path: '/exhibitions', permissions: ['exhibitions.read'], roles: ['curator'] },
   { label: 'Maintenance', path: '/maintenance', roles: ['maintenance'] },
-  { label: 'Tickets', path: '/tickets', roles: ['admin', 'curator', 'visitor'] },
+  { label: 'Tickets', path: '/tickets/manage', permissions: ['tickets.list'] },
+  {
+    label: 'Access control',
+    path: '/admin/users',
+    permissions: ['users.read', 'roles.read'],
+    children: [
+      { label: 'User accounts', path: '/admin/users' },
+      { label: 'Roles & matrix', path: '/admin/roles' },
+      { label: 'Permission catalog', path: '/admin/permissions' },
+    ],
+  },
+  { label: 'Settings', path: '/settings', permissions: [] },
 ];
+
+export const STAFF_ROLE_OPTIONS = [
+  { value: 'admin', label: 'Administrator', description: 'Full system configuration, security & user management' },
+  { value: 'curator', label: 'Curator', description: 'Exhibition management, cataloging & ticketing control' },
+  { value: 'conservation', label: 'Conservation Specialist', description: 'Artifact condition logging, environmental monitoring & restoration' },
+  { value: 'maintenance', label: 'Maintenance Staff', description: 'Facility maintenance, casing security & physical upkeep' },
+  { value: 'researcher', label: 'Researcher', description: 'Archival research, historical notes & documentation access' },
+];
+
+export const DEPARTMENT_OPTIONS = [
+  { value: 'Administration & IT', label: 'Administration & IT' },
+  { value: 'Curatorial & Exhibitions', label: 'Curatorial & Exhibitions' },
+  { value: 'Conservation & Restoration', label: 'Conservation & Restoration' },
+  { value: 'Facilities & Maintenance', label: 'Facilities & Maintenance' },
+  { value: 'Research & Archival', label: 'Research & Archival' },
+];
+
+export const ROLE_BADGE_VARIANTS = {
+  admin: 'gold',
+  curator: 'good',
+  conservation: 'excellent',
+  maintenance: 'poor',
+  researcher: 'purple',
+  visitor: 'default',
+};

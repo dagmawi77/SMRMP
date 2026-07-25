@@ -16,7 +16,7 @@ import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
 export default function ArtifactDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { hasRole } = useAuthStore();
+  const { can } = useAuthStore();
   const { data, isLoading, isError } = useArtifact(id);
   const deleteMutation = useDeleteArtifact();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -40,16 +40,16 @@ export default function ArtifactDetailPage() {
         description="Full artifact profile and digital identity"
         backPath="/artifacts"
         backLabel="Back to Catalog"
-        action={
+action={
           artifact && (
             <div className="flex flex-wrap items-center gap-2">
-              {hasRole('admin', 'curator') && (
+              {can('artifacts.update') && (
                 <Button variant="secondary" onClick={() => navigate(`/artifacts/${id}/edit`)}>
                   <PencilSquareIcon className="h-4 w-4" />
                   <span>Edit Artifact</span>
                 </Button>
               )}
-              {hasRole('admin') && (
+              {can('artifacts.delete') && (
                 <Button variant="danger" onClick={() => setShowDeleteModal(true)}>
                   <TrashIcon className="h-4 w-4" />
                   <span>Delete</span>

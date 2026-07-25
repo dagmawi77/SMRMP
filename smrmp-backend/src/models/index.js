@@ -1,6 +1,9 @@
 const sequelize = require('../config/database');
 
 const User = require('./User');
+const Role = require('./Role');
+const Permission = require('./Permission');
+const RolePermission = require('./RolePermission');
 const Artifact = require('./Artifact');
 const ArtifactImage = require('./ArtifactImage');
 const Exhibition = require('./Exhibition');
@@ -8,6 +11,28 @@ const ConservationLog = require('./ConservationLog');
 const Ticket = require('./Ticket');
 const TicketType = require('./TicketType');
 const AuditLog = require('./AuditLog');
+const VisitorFeedback = require('./VisitorFeedback');
+
+// ─── RBAC ASSOCIATIONS ───────────────────────────────────────────
+Role.belongsToMany(Permission, {
+  through: RolePermission,
+  foreignKey: 'role_id',
+  otherKey: 'permission_id',
+  as: 'permissions',
+});
+
+Permission.belongsToMany(Role, {
+  through: RolePermission,
+  foreignKey: 'permission_id',
+  otherKey: 'role_id',
+  as: 'roles',
+});
+
+RolePermission.belongsTo(Role, { foreignKey: 'role_id' });
+RolePermission.belongsTo(Permission, { foreignKey: 'permission_id' });
+
+User.belongsTo(Role, { foreignKey: 'role_id', as: 'rbacRole' });
+Role.hasMany(User, { foreignKey: 'role_id', as: 'users' });
 
 // ─── USER ASSOCIATIONS ───────────────────────────────────────────
 User.hasMany(Artifact, {
@@ -80,6 +105,9 @@ AuditLog.belongsTo(User, {
 module.exports = {
   sequelize,
   User,
+  Role,
+  Permission,
+  RolePermission,
   Artifact,
   ArtifactImage,
   Exhibition,
@@ -87,4 +115,5 @@ module.exports = {
   Ticket,
   TicketType,
   AuditLog,
+  VisitorFeedback,
 };

@@ -6,14 +6,15 @@ const {
   resetAuthMock,
 } = require('../src/config/supabase');
 const app = require('../src/app');
-const { sequelize, User, TicketType } = require('../src/models');
+const { User, TicketType } = require('../src/models');
+const { resetDbWithRbac } = require('./helpers/db');
 
 describe('Phase 3 — Tickets + Payments (complete)', () => {
   let staffToken;
   let visitorToken;
 
   beforeAll(async () => {
-    await sequelize.sync({ force: true });
+    const roles = await resetDbWithRbac();
     resetAuthMock();
 
     const admin = await User.create({
@@ -21,12 +22,25 @@ describe('Phase 3 — Tickets + Payments (complete)', () => {
       email: 'admin@adwa.museum',
       password: null,
       role: 'admin',
+      role_id: roles.admin.id,
     });
     const visitor = await User.create({
       name: 'Visitor',
       email: 'visitor@test.com',
       password: null,
       role: 'visitor',
+      role_id: roles.visitor.id,
+    });
+
+    registerAuthUser({
+      id: admin.id,
+      email: admin.email,
+      password: 'Demo@2026!',
+    });
+    registerAuthUser({
+      id: visitor.id,
+      email: visitor.email,
+      password: 'Demo@2026!',
     });
 
     registerAuthUser({
@@ -76,7 +90,6 @@ describe('Phase 3 — Tickets + Payments (complete)', () => {
     visitorToken = visitorLogin.body.data.token;
   });
 
-  // BE-TKT-001 list (catalog)
   test('GET /api/tickets/types lists active catalog (public)', async () => {
     const res = await request(app).get('/api/tickets/types');
     expect(res.status).toBe(200);
@@ -90,7 +103,6 @@ describe('Phase 3 — Tickets + Payments (complete)', () => {
     );
   });
 
-  // BE-TKT-001 list (purchased tickets — staff)
   test('GET /api/tickets lists purchases for staff', async () => {
     await request(app).post('/api/tickets/purchase').send({
       ticket_type: 'adult',
@@ -117,7 +129,6 @@ describe('Phase 3 — Tickets + Payments (complete)', () => {
     expect(res.status).toBe(403);
   });
 
-  // BE-TKT-001 purchase + BE-TKT-002 QR + BE-TKT-003 payment sim
   test('POST /api/tickets/purchase returns Section 4 shape + QR image', async () => {
     const res = await request(app)
       .post('/api/tickets/purchase')
@@ -170,7 +181,6 @@ describe('Phase 3 — Tickets + Payments (complete)', () => {
     expect(res.body.message).toBe('Invalid ticket type');
   });
 
-  // BE-TKT-001 verify
   test('GET /api/tickets/verify/:code Valid → Already Used', async () => {
     const purchase = await request(app).post('/api/tickets/purchase').send({
       ticket_type: 'student',

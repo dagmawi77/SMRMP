@@ -7,11 +7,10 @@ const {
   askAssistant,
 } = require('../controllers/aiController');
 const { protect } = require('../middleware/auth');
-const { isCuratorPlus } = require('../middleware/roleGuard');
+const { requirePermission } = require('../middleware/permissionGuard');
 
 const router = express.Router();
 
-// AI-specific rate limit (cost control) — PRD Section 5.2
 const aiRateLimit = rateLimit({
   windowMs: 60 * 1000,
   max: 20,
@@ -26,9 +25,9 @@ if (process.env.NODE_ENV !== 'test') {
   router.use(aiRateLimit);
 }
 
-router.post('/describe-artifact', isCuratorPlus, describeArtifact);
-router.post('/search', isCuratorPlus, smartSearch);
-router.post('/generate-report', isCuratorPlus, generateReport);
-router.post('/ask', isCuratorPlus, askAssistant);
+router.post('/describe-artifact', requirePermission('ai.describe'), describeArtifact);
+router.post('/search', requirePermission('ai.search'), smartSearch);
+router.post('/generate-report', requirePermission('ai.report'), generateReport);
+router.post('/ask', requirePermission('ai.ask'), askAssistant);
 
 module.exports = router;

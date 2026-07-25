@@ -31,7 +31,7 @@ import toast from 'react-hot-toast';
 
 export default function ArtifactsPage() {
   const navigate = useNavigate();
-  const { hasRole } = useAuthStore();
+  const { can } = useAuthStore();
   const [showScanner, setShowScanner] = useState(false);
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [isAiMode, setIsAiMode] = useState(false);
@@ -109,7 +109,7 @@ export default function ArtifactsPage() {
               <DocumentDuplicateIcon className="h-4 w-4" />
               <span>Check Duplicates</span>
             </Button>
-            {hasRole('admin', 'curator') && (
+            {can('artifacts.create') && (
               <Button variant="primary" onClick={() => navigate('/artifacts/new')}>
                 <PlusIcon className="h-4 w-4" />
                 <span>Add Artifact</span>

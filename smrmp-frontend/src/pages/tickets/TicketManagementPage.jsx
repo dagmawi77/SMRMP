@@ -487,7 +487,7 @@ export default function TicketManagementPage() {
                   return (
                     <div
                       key={t.id}
-                      onClick={() => navigate(`/tickets/${t.id}`)}
+                      onClick={() => navigate(`/tickets/manage/${t.id}`)}
                       className="group relative flex flex-col justify-between rounded-2xl border border-[#E2D6C5] bg-[#FFFDF9] p-5 shadow-2xs hover:border-smrmp-gold hover:shadow-md hover:-translate-y-0.5 cursor-pointer transition-all duration-200"
                     >
                       <div>
@@ -552,7 +552,7 @@ export default function TicketManagementPage() {
                             <PencilSquareIcon className="h-4 w-4" />
                           </button>
                           <Link
-                            to={`/tickets/${t.id}`}
+                            to={`/tickets/manage/${t.id}`}
                             className="inline-flex items-center gap-1 rounded-xl bg-[#EFE5D8] px-2.5 py-1 text-xs font-bold text-[#5C4233] border border-[#D8C8B8] hover:bg-[#FAF0E4] hover:text-[#2B1B12] transition-colors"
                           >
                             <EyeIcon className="h-3.5 w-3.5" />
@@ -589,7 +589,7 @@ export default function TicketManagementPage() {
                         return (
                           <tr
                             key={t.id}
-                            onClick={() => navigate(`/tickets/${t.id}`)}
+                            onClick={() => navigate(`/tickets/manage/${t.id}`)}
                             className="hover:bg-[#FAF0E4]/80 cursor-pointer transition-colors"
                           >
                             <td className="px-4 py-3 font-mono font-bold text-[#2B1B12]">
@@ -630,7 +630,7 @@ export default function TicketManagementPage() {
                             <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                               <div className="flex items-center justify-end gap-1.5">
                                 <Link
-                                  to={`/tickets/${t.id}`}
+                                  to={`/tickets/manage/${t.id}`}
                                   title="View Ticket Details Page"
                                   className="rounded-lg p-1 text-[#7C4A2D] hover:bg-[#FAF0E4] hover:text-[#2B1B12]"
                                 >

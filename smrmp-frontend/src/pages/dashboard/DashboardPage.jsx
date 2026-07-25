@@ -8,7 +8,8 @@ import AIAssistant from '../../components/ai/AIAssistant';
 import AIReportModal from '../../components/ai/AIReportModal';
 import { useDashboardStats, useDashboardCharts } from '../../hooks/useDashboard';
 import useAuthStore from '../../store/authStore';
-import { CalendarIcon, BuildingLibraryIcon } from '@heroicons/react/24/outline';
+import Logo from '../../components/ui/Logo';
+import { CalendarIcon } from '@heroicons/react/24/outline';
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
@@ -31,9 +32,7 @@ export default function DashboardPage() {
       <div className="relative mb-5 overflow-hidden rounded-2xl bg-gradient-to-r from-[#1C120B] via-[#241710] to-[#120D08] px-5 py-4 text-smrmp-parchment shadow-md border border-smrmp-gold/30">
         <div className="relative z-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-smrmp-gold/20 text-smrmp-gold ring-1 ring-smrmp-gold/40">
-              <BuildingLibraryIcon className="h-5 w-5" />
-            </div>
+            <Logo className="h-11 w-auto" decorative />
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="font-display text-lg font-bold text-white tracking-tight">

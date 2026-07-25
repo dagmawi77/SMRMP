@@ -75,8 +75,21 @@ const User = sequelize.define(
       allowNull: false,
       defaultValue: 'visitor',
     },
+    role_id: {
+      type: DataTypes.UUID,
+      allowNull: true,
+    },
+    must_change_password: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
     museum_id: {
       type: DataTypes.UUID,
+      allowNull: true,
+    },
+    avatar: {
+      type: DataTypes.TEXT,
       allowNull: true,
     },
     is_active: {

@@ -216,12 +216,14 @@ export default function RegistrationForm({ onSuccess }) {
             <Input
               variant="glass"
               label={`${t.fields.firstName} *`}
+              placeholder="First name"
               error={errors.firstName?.message}
               {...register('firstName', rules.firstName)}
             />
             <Input
               variant="glass"
               label={`${t.fields.lastName} *`}
+              placeholder="Last name"
               error={errors.lastName?.message}
               {...register('lastName', rules.lastName)}
             />
@@ -272,6 +274,7 @@ export default function RegistrationForm({ onSuccess }) {
               label={`${t.fields.email} *`}
               type="email"
               autoComplete="email"
+              placeholder="name@example.com"
               error={errors.email?.message}
               {...register('email', rules.email)}
             />
@@ -302,6 +305,7 @@ export default function RegistrationForm({ onSuccess }) {
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="new-password"
+                placeholder="Create a password"
                 className={`h-12 w-full rounded-xl border px-4 text-sm text-[#121212] bg-white outline-none transition-all placeholder:text-stone-400 [color-scheme:light] ${
                   errors.password
                     ? 'border-rose-400 bg-rose-50/90 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/25'
@@ -331,6 +335,7 @@ export default function RegistrationForm({ onSuccess }) {
                 id="confirmPassword"
                 type={showConfirm ? 'text' : 'password'}
                 autoComplete="new-password"
+                placeholder="Confirm your password"
                 className={`h-12 w-full rounded-xl border px-4 text-sm text-[#121212] bg-white outline-none transition-all placeholder:text-stone-400 [color-scheme:light] ${
                   errors.confirmPassword
                     ? 'border-rose-400 bg-rose-50/90 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/25'

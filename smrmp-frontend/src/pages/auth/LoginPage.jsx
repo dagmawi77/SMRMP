@@ -5,44 +5,53 @@ import {
   ExclamationCircleIcon,
   EyeIcon,
   EyeSlashIcon,
+  CheckCircleIcon,
+  EnvelopeIcon,
 } from '@heroicons/react/24/outline';
 import useAuth from '../../hooks/useAuth';
 import getApiErrorMessage from '../../utils/apiError';
 import LandingFooter from '../landing/components/LandingFooter';
 import LandingNav from '../landing/components/LandingNav';
+import { supabase } from '../../lib/supabase';
+import { authApi } from '../../api/authApi';
+import toast from 'react-hot-toast';
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const [isForgotMode, setIsForgotMode] = useState(false);
+
+  // Login form state
   const [credentials, setCredentials] = useState({ email: '', password: '' });
   const [rememberDevice, setRememberDevice] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
+  // Forgot password form state
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetSuccess, setResetSuccess] = useState(false);
+  const [resetError, setResetError] = useState('');
+  const [isResetting, setIsResetting] = useState(false);
 
-    setCredentials((currentCredentials) => ({
-      ...currentCredentials,
+  const handleLoginChange = (event) => {
+    const { name, value } = event.target;
+    setCredentials((current) => ({
+      ...current,
       [name]: value,
     }));
-
-    if (errorMessage) {
-      setErrorMessage('');
-    }
+    if (errorMessage) setErrorMessage('');
   };
 
-  const handleSubmit = async (event) => {
+  const handleLoginSubmit = async (event) => {
     event.preventDefault();
 
     if (!credentials.email.trim() || !credentials.password) {
-      setErrorMessage('Enter your institutional email and password to continue.');
+      setErrorMessage('Please enter both your email address and password to continue.');
       return;
     }
 
-    // Mirrors the API's own validation so the form answers before a round trip.
     if (credentials.password.length < 6) {
-      setErrorMessage('Passwords are at least 6 characters long.');
+      setErrorMessage('Password must be at least 6 characters.');
       return;
     }
 
@@ -55,7 +64,7 @@ export default function LoginPage() {
       setErrorMessage(
         getApiErrorMessage(
           error,
-          'The email or password entered does not match an active staff account.',
+          'The email or password you entered is incorrect.',
         ),
       );
     } finally {
@@ -82,6 +91,60 @@ export default function LoginPage() {
     }
   };
 
+  const handleResetSubmit = async (event) => {
+    event.preventDefault();
+    setResetError('');
+
+    if (!resetEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(resetEmail.trim())) {
+      setResetError('Please enter a valid email address.');
+      return;
+    }
+
+    setIsResetting(true);
+
+    try {
+      const cleanEmail = resetEmail.trim().toLowerCase();
+      const redirectUrl = `${window.location.origin}/set-password`;
+
+      try {
+        const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
+          redirectTo: redirectUrl,
+        });
+        if (error) console.warn('[AUTH] Supabase resetPassword error:', error.message);
+      } catch (err) {
+        console.warn('[AUTH] Supabase resetPassword exception:', err.message);
+      }
+
+      try {
+        await authApi.forgotPassword(cleanEmail);
+      } catch (err) {
+        console.warn('[AUTH] Backend forgotPassword exception:', err.message);
+      }
+
+      setResetSuccess(true);
+      toast.success('Password reset link sent.');
+    } catch (err) {
+      const msg = getApiErrorMessage(err, 'Failed to request password reset');
+      setResetError(msg);
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
+  const switchToForgot = () => {
+    setIsForgotMode(true);
+    setErrorMessage('');
+    setResetError('');
+    setResetSuccess(false);
+  };
+
+  const switchToLogin = () => {
+    setIsForgotMode(false);
+    setErrorMessage('');
+    setResetError('');
+    setResetSuccess(false);
+  };
+
   return (
     <div className="site-shell min-h-screen overflow-x-clip bg-smrmp-brown text-smrmp-parchment">
       <div className="border-b border-white/5 bg-black/40 px-6 py-2 text-[10px] font-medium uppercase tracking-[0.2em] text-smrmp-parchment/60">
@@ -96,7 +159,7 @@ export default function LoginPage() {
       <main>
         <section
           aria-labelledby="login-title"
-          className="relative flex min-h-[calc(100vh-130px)] items-center justify-center overflow-hidden px-6 py-16 sm:py-24"
+          className="relative flex min-h-[calc(100vh-130px)] items-start justify-center overflow-hidden px-6 pt-6 pb-12 sm:pt-10 sm:pb-16"
         >
           <div
             aria-hidden="true"
@@ -113,185 +176,274 @@ export default function LoginPage() {
           <div aria-hidden="true" className="absolute inset-0 bg-smrmp-green/15 mix-blend-multiply" />
 
           <div className="relative z-10 mx-auto w-full max-w-md">
-            <div className="mb-10 text-center">
-              <div className="mx-auto mb-6 h-px w-16 bg-smrmp-gold opacity-60" aria-hidden="true" />
-              <p className="mb-4 text-xs font-bold uppercase tracking-[0.4em] text-smrmp-gold">
-                Staff access
-              </p>
+            {/* Page Header */}
+            <div className="mb-6 text-center">
               <h1
                 id="login-title"
                 className="font-display text-4xl tracking-tight sm:text-5xl"
               >
-                Enter the <span className="italic">archive</span>
+                {isForgotMode ? (
+                  <>Reset your <span className="italic">password</span></>
+                ) : (
+                  <>Welcome <span className="italic">back</span></>
+                )}
               </h1>
-              <p className="mt-4 text-sm font-light leading-relaxed text-smrmp-parchment/70">
-                Sign in to steward artifact records, review provenance, and keep the museum archive precise.
+              <p className="mt-3 text-sm font-light leading-relaxed text-smrmp-parchment/70">
+                {isForgotMode
+                  ? 'We will send you a link to reset your password and recover your account.'
+                  : 'Sign in to manage museum collections, exhibits, and operations.'}
               </p>
             </div>
 
-            <div className="glass-panel p-8 sm:p-10">
+            {/* Main Card */}
+            <div className="glass-panel rounded-2xl sm:rounded-3xl p-8 sm:p-10">
               <div className="mb-8 flex items-center justify-between gap-4 border-b border-white/10 pb-5">
                 <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-smrmp-gold">
-                  Conservatory access
+                  {isForgotMode ? 'Password Reset' : 'Account Sign In'}
                 </p>
                 <div className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.18em] text-smrmp-parchment/50">
                   <span className="h-1.5 w-1.5 rounded-full bg-smrmp-gold" aria-hidden="true" />
-                  Internal
+                  Secure
                 </div>
               </div>
 
-              {errorMessage && (
-                <div
-                  aria-live="polite"
-                  className="mb-6 flex gap-3 border-l-2 border-smrmp-gold bg-black/30 px-4 py-3 text-sm leading-5 text-smrmp-parchment/90"
-                  role="alert"
-                >
-                  <ExclamationCircleIcon
-                    aria-hidden="true"
-                    className="mt-0.5 h-5 w-5 shrink-0 text-smrmp-gold"
-                  />
-                  <p>
-                    <span className="font-semibold">Please review your details.</span>{' '}
-                    {errorMessage}
-                  </p>
-                </div>
-              )}
-
-              <form className="space-y-5" noValidate onSubmit={handleSubmit}>
+              {/* FORGOT PASSWORD FORM */}
+              {isForgotMode ? (
                 <div>
-                  <label
-                    className="mb-2 block text-[10px] font-bold uppercase tracking-[0.2em] text-smrmp-parchment/80"
-                    htmlFor="email"
-                  >
-                    Institutional email
-                  </label>
-                  <input
-                    aria-describedby="email-help"
-                    aria-invalid={Boolean(errorMessage)}
-                    autoComplete="username"
-                    className="h-12 w-full border border-white/15 bg-black/30 px-4 text-sm text-smrmp-parchment outline-none placeholder:text-smrmp-parchment/35 focus:border-smrmp-gold/50 focus:ring-2 focus:ring-smrmp-gold/25"
-                    id="email"
-                    name="email"
-                    onChange={handleChange}
-                    placeholder="name@institution.org"
-                    type="email"
-                    value={credentials.email}
-                  />
-                  <p className="mt-2 text-xs text-smrmp-parchment/50" id="email-help">
-                    Use your museum-issued address.
-                  </p>
-                </div>
+                  {resetSuccess ? (
+                    <div className="space-y-5 text-center">
+                      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/30">
+                        <CheckCircleIcon className="h-6 w-6 text-emerald-400" />
+                      </div>
+                      <h2 className="text-lg font-medium text-smrmp-parchment">Check your email</h2>
+                      <p className="text-xs leading-relaxed text-smrmp-parchment/70">
+                        We sent a password reset link to <span className="font-semibold text-smrmp-gold">{resetEmail}</span>. Click the link in your email to choose a new password.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={switchToLogin}
+                        className="mt-4 inline-flex h-11 w-full items-center justify-center bg-smrmp-gold px-5 text-xs font-bold uppercase tracking-widest text-black transition-colors duration-300 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-smrmp-gold"
+                      >
+                        Back to Sign In
+                      </button>
+                    </div>
+                  ) : (
+                    <form className="space-y-5" noValidate onSubmit={handleResetSubmit}>
+                      {resetError && (
+                        <div
+                          aria-live="polite"
+                          className="flex gap-3 border-l-2 border-smrmp-gold bg-black/30 px-4 py-3 text-sm leading-5 text-smrmp-parchment/90"
+                          role="alert"
+                        >
+                          <ExclamationCircleIcon
+                            aria-hidden="true"
+                            className="mt-0.5 h-5 w-5 shrink-0 text-smrmp-gold"
+                          />
+                          <p>{resetError}</p>
+                        </div>
+                      )}
 
-                <div>
-                  <div className="mb-2 flex items-center justify-between gap-4">
-                    <label
-                      className="block text-[10px] font-bold uppercase tracking-[0.2em] text-smrmp-parchment/80"
-                      htmlFor="password"
+                      <div>
+                        <label
+                          className="mb-2 block text-[10px] font-bold uppercase tracking-[0.2em] text-smrmp-parchment/80"
+                          htmlFor="reset-email"
+                        >
+                          Email address
+                        </label>
+                        <div className="relative flex items-center">
+                          <input
+                            id="reset-email"
+                            type="email"
+                            autoComplete="email"
+                            value={resetEmail}
+                            onChange={(e) => {
+                              setResetEmail(e.target.value);
+                              if (resetError) setResetError('');
+                            }}
+                            placeholder="name@example.com"
+                            className="h-12 w-full border border-white/15 bg-black/30 px-4 text-sm text-smrmp-parchment outline-none placeholder:text-smrmp-parchment/35 focus:border-smrmp-gold/50 focus:ring-2 focus:ring-smrmp-gold/25"
+                          />
+                        </div>
+                        <p className="mt-2 text-xs text-smrmp-parchment/50">
+                          Enter the email associated with your account.
+                        </p>
+                      </div>
+
+                      <button
+                        className="group flex h-12 w-full items-center justify-center gap-3 bg-smrmp-gold px-5 text-xs font-bold uppercase tracking-widest text-black transition-colors duration-500 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-smrmp-gold disabled:cursor-wait disabled:opacity-70"
+                        disabled={isResetting}
+                        type="submit"
+                      >
+                        <span>{isResetting ? 'Sending link...' : 'Send Reset Link'}</span>
+                        <ArrowRightIcon
+                          aria-hidden="true"
+                          className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
+                        />
+                      </button>
+
+                      <div className="pt-2 text-center text-xs text-smrmp-parchment/70">
+                        <span>Remembered your password? </span>
+                        <button
+                          type="button"
+                          onClick={switchToLogin}
+                          className="font-semibold text-smrmp-gold transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-smrmp-gold"
+                        >
+                          Back to Sign In
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </div>
+              ) : (
+                /* LOGIN FORM */
+                <form className="space-y-5" noValidate onSubmit={handleLoginSubmit}>
+                  {errorMessage && (
+                    <div
+                      aria-live="polite"
+                      className="mb-6 flex gap-3 border-l-2 border-smrmp-gold bg-black/30 px-4 py-3 text-sm leading-5 text-smrmp-parchment/90"
+                      role="alert"
                     >
-                      Password
+                      <ExclamationCircleIcon
+                        aria-hidden="true"
+                        className="mt-0.5 h-5 w-5 shrink-0 text-smrmp-gold"
+                      />
+                      <p>
+                        <span className="font-semibold">Please review your details.</span>{' '}
+                        {errorMessage}
+                      </p>
+                    </div>
+                  )}
+
+                  <div>
+                    <label
+                      className="mb-2 block text-[10px] font-bold uppercase tracking-[0.2em] text-smrmp-parchment/80"
+                      htmlFor="email"
+                    >
+                      Email address
+                    </label>
+                    <input
+                      aria-describedby="email-help"
+                      aria-invalid={Boolean(errorMessage)}
+                      autoComplete="username"
+                      className="h-12 w-full border border-white/15 bg-black/30 px-4 text-sm text-smrmp-parchment outline-none placeholder:text-smrmp-parchment/35 focus:border-smrmp-gold/50 focus:ring-2 focus:ring-smrmp-gold/25"
+                      id="email"
+                      name="email"
+                      onChange={handleLoginChange}
+                      placeholder="name@example.com"
+                      type="email"
+                      value={credentials.email}
+                    />
+                    <p className="mt-2 text-xs text-smrmp-parchment/50" id="email-help">
+                      Enter your registered email address.
+                    </p>
+                  </div>
+
+                  <div>
+                    <div className="mb-2 flex items-center justify-between gap-4">
+                      <label
+                        className="block text-[10px] font-bold uppercase tracking-[0.2em] text-smrmp-parchment/80"
+                        htmlFor="password"
+                      >
+                        Password
+                      </label>
+                      <button
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        className="flex items-center gap-1.5 text-xs font-semibold text-smrmp-gold transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-smrmp-gold"
+                        onClick={() => setShowPassword((current) => !current)}
+                        type="button"
+                      >
+                        {showPassword ? 'Hide' : 'Show'}
+                        {showPassword ? (
+                          <EyeSlashIcon aria-hidden="true" className="h-4 w-4" />
+                        ) : (
+                          <EyeIcon aria-hidden="true" className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                    <input
+                      aria-invalid={Boolean(errorMessage)}
+                      autoComplete="current-password"
+                      className="h-12 w-full border border-white/15 bg-black/30 px-4 text-sm text-smrmp-parchment outline-none placeholder:text-smrmp-parchment/35 focus:border-smrmp-gold/50 focus:ring-2 focus:ring-smrmp-gold/25"
+                      id="password"
+                      name="password"
+                      onChange={handleLoginChange}
+                      placeholder="Enter your password"
+                      type={showPassword ? 'text' : 'password'}
+                      value={credentials.password}
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-3 pt-1 text-sm sm:flex-row sm:items-center sm:justify-between">
+                    <label className="flex cursor-pointer items-center gap-2 text-sm text-smrmp-parchment/70">
+                      <input
+                        checked={rememberDevice}
+                        className="h-4 w-4 accent-smrmp-gold focus-visible:ring-2 focus-visible:ring-smrmp-gold"
+                        onChange={(event) => setRememberDevice(event.target.checked)}
+                        type="checkbox"
+                      />
+                      Remember this device
                     </label>
                     <button
-                      aria-label={showPassword ? 'Hide password' : 'Show password'}
-                      className="flex items-center gap-1.5 text-xs font-semibold text-smrmp-gold transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-smrmp-gold"
-                      onClick={() => setShowPassword((current) => !current)}
                       type="button"
+                      onClick={switchToForgot}
+                      className="text-xs font-semibold text-smrmp-gold transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-smrmp-gold"
                     >
-                      {showPassword ? 'Hide' : 'Show'}
-                      {showPassword ? (
-                        <EyeSlashIcon aria-hidden="true" className="h-4 w-4" />
-                      ) : (
-                        <EyeIcon aria-hidden="true" className="h-4 w-4" />
-                      )}
+                      Forgot password?
                     </button>
                   </div>
-                  <input
-                    aria-invalid={Boolean(errorMessage)}
-                    autoComplete="current-password"
-                    className="h-12 w-full border border-white/15 bg-black/30 px-4 text-sm text-smrmp-parchment outline-none placeholder:text-smrmp-parchment/35 focus:border-smrmp-gold/50 focus:ring-2 focus:ring-smrmp-gold/25"
-                    id="password"
-                    name="password"
-                    onChange={handleChange}
-                    placeholder="Enter your password"
-                    type={showPassword ? 'text' : 'password'}
-                    value={credentials.password}
-                  />
-                </div>
 
-                <div className="flex flex-col gap-3 pt-1 text-sm sm:flex-row sm:items-center sm:justify-between">
-                  <label className="flex cursor-pointer items-center gap-2 text-sm text-smrmp-parchment/70">
-                    <input
-                      checked={rememberDevice}
-                      className="h-4 w-4 accent-smrmp-gold focus-visible:ring-2 focus-visible:ring-smrmp-gold"
-                      onChange={(event) => setRememberDevice(event.target.checked)}
-                      type="checkbox"
-                    />
-                    Remember this device
-                  </label>
-                  <a
-                    className="text-xs font-semibold text-smrmp-gold transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-smrmp-gold"
-                    href="#recovery"
+                  <button
+                    className="group flex h-12 w-full items-center justify-center gap-3 bg-smrmp-gold px-5 text-xs font-bold uppercase tracking-widest text-black transition-colors duration-500 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-smrmp-gold disabled:cursor-wait disabled:opacity-70"
+                    disabled={isSubmitting}
+                    type="submit"
                   >
-                    Recover access
-                  </a>
+                    <span>{isSubmitting ? 'Signing in...' : 'Sign In'}</span>
+                    <ArrowRightIcon
+                      aria-hidden="true"
+                      className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
+                    />
+                  </button>
+
+                  <div className="pt-2 text-center text-xs text-smrmp-parchment/70">
+                    <span>Don&apos;t have an account? </span>
+                    <Link
+                      className="font-semibold text-smrmp-gold transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-smrmp-gold"
+                      to="/register"
+                    >
+                      Create an account
+                    </Link>
+                  </div>
+                </form>
+              )}
+
+              {!isForgotMode && (
+                <div className="mt-6 rounded-lg bg-smrmp-green/20 p-4 text-sm text-smrmp-parchment/80">
+                  <p className="mb-2 font-medium text-smrmp-gold">Demo staff accounts</p>
+                  <p>Maintenance: maintenance@adwa.museum</p>
+                  <p>Curator: curator@adwa.museum</p>
+                  <p>Admin: admin@adwa.museum</p>
+                  <p className="mt-1 font-semibold text-smrmp-gold">Password: Demo@2026!</p>
+                  <button
+                    type="button"
+                    onClick={handleInstitutionalAccount}
+                    className="mt-3 w-full rounded-lg border border-smrmp-gold/50 py-1.5 text-xs font-bold uppercase tracking-wider text-smrmp-gold hover:bg-smrmp-gold hover:text-black transition"
+                  >
+                    Quick Sign In as Maintenance
+                  </button>
                 </div>
-
-                <button
-                  className="group flex h-12 w-full items-center justify-center gap-3 bg-smrmp-gold px-5 text-xs font-bold uppercase tracking-widest text-black transition-colors duration-500 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-smrmp-gold disabled:cursor-wait disabled:opacity-70"
-                  disabled={isSubmitting}
-                  type="submit"
-                >
-                  <span>{isSubmitting ? 'Checking details' : 'Enter conservatory'}</span>
-                  <ArrowRightIcon
-                    aria-hidden="true"
-                    className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
-                  />
-                </button>
-
-                <div className="flex items-center gap-3 py-1">
-                  <span className="h-px flex-1 bg-white/10" />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-smrmp-parchment/40">
-                    or
-                  </span>
-                  <span className="h-px flex-1 bg-white/10" />
-                </div>
-
-                <button
-                  className="flex h-12 w-full items-center justify-center border border-white/25 px-4 text-xs font-bold uppercase tracking-widest text-smrmp-parchment transition-colors duration-500 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-smrmp-gold"
-                  onClick={handleInstitutionalAccount}
-                  type="button"
-                >
-                  Continue with institutional account
-                </button>
-              </form>
-
-              <div className="mt-6 rounded-lg bg-smrmp-green/20 p-4 text-sm text-smrmp-parchment/80">
-                <p className="mb-2 font-medium text-smrmp-gold">Demo staff accounts</p>
-                <p>Maintenance: maintenance@adwa.museum</p>
-                <p>Curator: curator@adwa.museum</p>
-                <p>Admin: admin@adwa.museum</p>
-                <p className="mt-1 font-semibold text-smrmp-gold">Password: Demo@2026!</p>
-              </div>
-
+              )}
               <p className="mt-6 border-t border-white/10 pt-5 text-xs leading-5 text-smrmp-parchment/50">
-                <span className="font-semibold text-smrmp-parchment/70">Protected archive access.</span>{' '}
-                Your session is encrypted and monitored in accordance with conservatory handling policy.
+                <span className="font-semibold text-smrmp-parchment/70">Protected & Secure.</span>{' '}
+                Your connection is encrypted and secured with modern authentication protocols.
               </p>
             </div>
 
             <p className="mt-8 text-center text-xs text-smrmp-parchment/45">
-              Not staff?{' '}
-              <Link
-                className="font-semibold text-smrmp-gold transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-smrmp-gold"
-                to="/register"
-              >
-                Create a visitor account
-              </Link>
-              {' · '}
               <Link
                 className="font-semibold text-smrmp-gold transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-smrmp-gold"
                 to="/"
               >
-                Return to the platform overview
+                Back to home
               </Link>
             </p>
           </div>

@@ -129,8 +129,12 @@ export default function useAuth() {
       setAuth(userData, accessToken);
 
       toast.success(`Welcome back, ${userData.name}!`);
-      const targetPath = ROLE_REDIRECTS[userData.role] || '/dashboard';
-      navigate(targetPath, { replace: true });
+      if (userData.must_change_password) {
+        navigate('/change-password', { replace: true });
+      } else {
+        const targetPath = ROLE_REDIRECTS[userData.role] || '/dashboard';
+        navigate(targetPath, { replace: true });
+      }
 
       if (refreshToken) {
         void supabase.auth

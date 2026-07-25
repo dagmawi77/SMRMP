@@ -6,14 +6,15 @@ const {
   resetAuthMock,
 } = require('../src/config/supabase');
 const app = require('../src/app');
-const { sequelize, User, Artifact } = require('../src/models');
+const { User, Artifact } = require('../src/models');
+const { resetDbWithRbac } = require('./helpers/db');
 
 describe('Artifacts API', () => {
   let curatorToken;
   let adminToken;
 
   beforeAll(async () => {
-    await sequelize.sync({ force: true });
+    const roles = await resetDbWithRbac();
     resetAuthMock();
 
     const curator = await User.create({
@@ -21,12 +22,14 @@ describe('Artifacts API', () => {
       email: 'curator@smrmp.dev',
       password: null,
       role: 'curator',
+      role_id: roles.curator.id,
     });
     const admin = await User.create({
       name: 'Admin',
       email: 'admin@smrmp.dev',
       password: null,
       role: 'admin',
+      role_id: roles.admin.id,
     });
 
     registerAuthUser({

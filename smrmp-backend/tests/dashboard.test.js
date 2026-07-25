@@ -6,14 +6,15 @@ const {
   resetAuthMock,
 } = require('../src/config/supabase');
 const app = require('../src/app');
-const { sequelize, User, Artifact, Exhibition, Ticket } = require('../src/models');
+const { User, Artifact, Exhibition, Ticket } = require('../src/models');
+const { resetDbWithRbac } = require('./helpers/db');
 
 describe('Dashboard API — Phase 2', () => {
   let curatorToken;
   let visitorToken;
 
   beforeAll(async () => {
-    await sequelize.sync({ force: true });
+    const roles = await resetDbWithRbac();
     resetAuthMock();
 
     const curator = await User.create({
@@ -21,12 +22,14 @@ describe('Dashboard API — Phase 2', () => {
       email: 'curator@smrmp.dev',
       password: null,
       role: 'curator',
+      role_id: roles.curator.id,
     });
     const visitor = await User.create({
       name: 'Visitor',
       email: 'visitor@test.com',
       password: null,
       role: 'visitor',
+      role_id: roles.visitor.id,
     });
 
     registerAuthUser({

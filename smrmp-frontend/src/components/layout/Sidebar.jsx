@@ -6,6 +6,8 @@ import {
   ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  Cog6ToothIcon,
+  ShieldCheckIcon,
   Squares2X2Icon,
   TicketIcon,
   WrenchScrewdriverIcon,
@@ -14,6 +16,7 @@ import {
 import { NAV_ITEMS, ROLE_REDIRECTS } from '../../utils/constants';
 import useAuthStore from '../../store/authStore';
 import useUiStore from '../../store/uiStore';
+import { LogoMark } from '../ui/Logo';
 
 const navIconMap = {
   '/dashboard': Squares2X2Icon,
@@ -21,6 +24,10 @@ const navIconMap = {
   '/exhibitions': BuildingLibraryIcon,
   '/maintenance': WrenchScrewdriverIcon,
   '/tickets': TicketIcon,
+  '/tickets/manage': TicketIcon,
+  '/admin': ShieldCheckIcon,
+  '/admin/users': ShieldCheckIcon,
+  '/settings': Cog6ToothIcon,
 };
 
 const PORTAL_TITLE_MAP = {
@@ -40,22 +47,39 @@ const getPortalTitle = (role) => {
 
 export default function Sidebar() {
   const location = useLocation();
-  const { user, hasRole } = useAuthStore();
+  const { user, hasRole, canAny } = useAuthStore();
   const { isMobileOpen, isCollapsed, closeMobile, toggleCollapsed } = useUiStore();
-  const [openMenus, setOpenMenus] = useState({
-    '/exhibitions': location.pathname.startsWith('/exhibitions'),
+  const [openMenus, setOpenMenus] = useState(() => {
+    const initial = {};
+    if (location.pathname.startsWith('/exhibitions')) initial['/exhibitions'] = true;
+    if (location.pathname.startsWith('/admin')) initial['/admin/users'] = true;
+    return initial;
   });
 
   useEffect(() => {
     if (location.pathname.startsWith('/exhibitions')) {
       setOpenMenus((prev) => ({ ...prev, '/exhibitions': true }));
     }
+    if (location.pathname.startsWith('/admin')) {
+      setOpenMenus((prev) => ({ ...prev, '/admin/users': true }));
+    }
   }, [location.pathname]);
 
+  const toggleMenu = (path) => {
+    setOpenMenus((prev) => ({ ...prev, [path]: !prev[path] }));
+  };
+
   const portalTitle = getPortalTitle(user?.role);
-  const visibleItems = NAV_ITEMS.filter(
-    (item) => !item.roles || item.roles.some((role) => hasRole(role)),
-  );
+
+  const visibleItems = NAV_ITEMS.filter((item) => {
+    if (item.permissions?.length) {
+      return canAny(...item.permissions);
+    }
+    if (item.roles?.length) {
+      return item.roles.some((role) => hasRole(role));
+    }
+    return true;
+  });
 
   const isPathActive = (path) => location.pathname === path || (path !== '/dashboard' && location.pathname.startsWith(`${path}/`));
 
@@ -81,13 +105,13 @@ export default function Sidebar() {
       >
         <div className="relative flex items-center justify-between border-b border-[#E2D6C5] bg-[#FAF6F0] px-5 py-5">
           <Link to={homePath} onClick={closeMobile} className="group flex min-w-0 items-center gap-3">
-            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[#D4A017]/40 bg-[#FAF0D8] text-lg transition-transform group-hover:scale-105">
-              <span aria-hidden="true">🏛️</span>
+            <div className="relative shrink-0 transition-transform group-hover:scale-105">
+              <LogoMark className="h-10 w-10" imgClassName="h-6 w-auto" decorative />
               <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#374B07] ring-2 ring-[#FAF6F0]" />
             </div>
             {(!isCollapsed || isMobileOpen) && (
               <div className="min-w-0 truncate">
-                <p className="truncate font-display text-base font-bold tracking-tight text-[#2B1B12] transition-colors group-hover:text-[#7C4A2D]">SMRMP</p>
+                <p className="truncate font-display text-xs font-bold tracking-tight text-[#2B1B12] transition-colors group-hover:text-[#7C4A2D]" title="Adwa Victory Memorial">Adwa Victory Memorial</p>
                 <p className="truncate text-[10px] font-bold uppercase tracking-wider text-[#6E5445]">{portalTitle}</p>
               </div>
             )}
@@ -109,7 +133,6 @@ export default function Sidebar() {
         </div>
 
         <nav aria-label="Primary navigation" className="flex-1 space-y-1.5 overflow-y-auto px-3 py-6">
-          <p className={`px-3.5 pb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[#8B7668] ${isCollapsed && !isMobileOpen ? 'sr-only' : ''}`}>Museum operations</p>
           {visibleItems.map((item) => {
             const Icon = navIconMap[item.path] || Squares2X2Icon;
             const active = isPathActive(item.path);
@@ -133,7 +156,7 @@ export default function Sidebar() {
             }
 
             const childActive = item.children.some((child) => isPathActive(child.path));
-            const isMenuOpen = !!openMenus[item.path];
+            const isMenuOpen = Boolean(openMenus[item.path]);
 
             return (
               <div key={item.path}>
@@ -152,7 +175,7 @@ export default function Sidebar() {
                       type="button"
                       aria-label={`${isMenuOpen ? 'Collapse' : 'Expand'} ${item.label} menu`}
                       aria-expanded={isMenuOpen}
-                      onClick={() => setOpenMenus((prev) => ({ ...prev, [item.path]: !prev[item.path] }))}
+                      onClick={() => toggleMenu(item.path)}
                       className="mr-2 rounded-lg p-1.5 text-[#7C4A2D] transition hover:bg-[#FAF0E4] focus:outline-none focus:ring-2 focus:ring-smrmp-gold/60"
                     >
                       <ChevronDownIcon className={`h-4 w-4 transition-transform ${isMenuOpen ? 'rotate-180' : ''}`} />

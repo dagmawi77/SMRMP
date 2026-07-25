@@ -1,6 +1,5 @@
 ﻿/**
- * BE-TKT-004 — Ticket routes
- * Section 4: types, purchase, verify, staff CRUD
+ * Ticket routes — public types/purchase; staff list/verify via permissions
  */
 const express = require('express');
 const {
@@ -17,26 +16,23 @@ const {
   purchaseValidation,
 } = require('../controllers/ticketController');
 const { protect } = require('../middleware/auth');
-const { isStaff } = require('../middleware/roleGuard');
+const { requirePermission } = require('../middleware/permissionGuard');
 
 const router = express.Router();
 
-// Public
 router.get('/types', getTicketTypes);
+router.post('/types', protect, requirePermission('tickets.list'), createTicketType);
+router.put('/types/:id', protect, requirePermission('tickets.list'), updateTicketType);
+router.delete('/types/:id', protect, requirePermission('tickets.list'), deleteTicketType);
+
 router.post('/purchase', purchaseValidation, purchaseTicket);
 
-// Staff / Curator / Admin routes
-router.get('/verify/:code', protect, isStaff, verifyTicket);
-router.get('/', protect, isStaff, listTickets);
-router.get('/:id', protect, isStaff, getTicketById);
-router.post('/', protect, isStaff, purchaseValidation, purchaseTicket);
-router.patch('/:id', protect, isStaff, updateTicket);
-router.put('/:id', protect, isStaff, updateTicket);
-router.delete('/:id', protect, isStaff, deleteTicket);
-
-// Ticket Types CRUD (Staff)
-router.post('/types', protect, isStaff, createTicketType);
-router.put('/types/:id', protect, isStaff, updateTicketType);
-router.delete('/types/:id', protect, isStaff, deleteTicketType);
+router.get('/verify/:code', protect, requirePermission('tickets.verify'), verifyTicket);
+router.get('/', protect, requirePermission('tickets.list'), listTickets);
+router.get('/:id', protect, requirePermission('tickets.list'), getTicketById);
+router.post('/', protect, requirePermission('tickets.purchase'), purchaseValidation, purchaseTicket);
+router.patch('/:id', protect, requirePermission('tickets.list'), updateTicket);
+router.put('/:id', protect, requirePermission('tickets.list'), updateTicket);
+router.delete('/:id', protect, requirePermission('tickets.list'), deleteTicket);
 
 module.exports = router;

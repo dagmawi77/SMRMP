@@ -4,10 +4,19 @@ const {
   login,
   logout,
   getMe,
+  updateProfile,
+  uploadAvatar,
+  changePassword,
+  forgotPassword,
+  updatePassword,
   registerValidation,
   loginValidation,
+  changePasswordValidation,
+  forgotPasswordValidation,
+  updatePasswordValidation,
 } = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
+const { uploadHandler } = require('../middleware/uploadHandler');
 
 const router = express.Router();
 
@@ -15,5 +24,10 @@ router.post('/register', registerValidation, register);
 router.post('/login', loginValidation, login);
 router.post('/logout', protect, logout);
 router.get('/me', protect, getMe);
+router.patch('/profile', protect, updateProfile);
+router.post('/avatar', protect, uploadHandler.single('avatar'), uploadAvatar);
+router.post('/change-password', protect, changePasswordValidation, changePassword);
+router.post('/forgot-password', forgotPasswordValidation, forgotPassword);
+router.post('/update-password', protect, updatePasswordValidation, updatePassword);
 
 module.exports = router;

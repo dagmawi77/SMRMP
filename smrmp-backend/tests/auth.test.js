@@ -6,21 +6,25 @@ const {
   resetAuthMock,
 } = require('../src/config/supabase');
 const app = require('../src/app');
-const { sequelize, User } = require('../src/models');
+const { User } = require('../src/models');
+const { resetDbWithRbac } = require('./helpers/db');
 
 const TEST_USER_ID = '11111111-1111-1111-1111-111111111111';
 const TEST_EMAIL = 'admin@smrmp.dev';
 const TEST_PASSWORD = 'Demo@2026!';
 
 describe('Auth API (Supabase Auth)', () => {
+  let roles;
+
   beforeAll(async () => {
-    await sequelize.sync({ force: true });
+    roles = await resetDbWithRbac();
     await User.create({
       id: TEST_USER_ID,
       name: 'Test Admin',
       email: TEST_EMAIL,
       password: null,
       role: 'admin',
+      role_id: roles.admin.id,
     });
   });
 
@@ -43,6 +47,8 @@ describe('Auth API (Supabase Auth)', () => {
     expect(res.body.success).toBe(true);
     expect(res.body.data.token).toBe(`tok-${TEST_USER_ID}`);
     expect(res.body.data.user.role).toBe('admin');
+    expect(Array.isArray(res.body.data.user.permissions)).toBe(true);
+    expect(res.body.data.user.permissions).toContain('users.create');
   });
 
   test('POST /api/auth/login rejects invalid credentials', async () => {
@@ -60,7 +66,7 @@ describe('Auth API (Supabase Auth)', () => {
     expect(res.status).toBe(401);
   });
 
-  test('GET /api/auth/me returns user with Supabase token', async () => {
+  test('GET /api/auth/me returns user with permissions', async () => {
     const login = await request(app).post('/api/auth/login').send({
       email: TEST_EMAIL,
       password: TEST_PASSWORD,
@@ -72,6 +78,7 @@ describe('Auth API (Supabase Auth)', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.data.user.email).toBe(TEST_EMAIL);
+    expect(res.body.data.user.permissions.length).toBeGreaterThan(0);
   });
 
   test('GET /api/auth/me rejects invalid Supabase token', async () => {
@@ -107,6 +114,7 @@ describe('Auth API (Supabase Auth)', () => {
     });
     expect(login.status).toBe(200);
     expect(login.body.data.user.role).toBe('visitor');
+    expect(login.body.data.user.permissions).toEqual([]);
   });
 
   test('POST /api/auth/register rejects duplicate email', async () => {

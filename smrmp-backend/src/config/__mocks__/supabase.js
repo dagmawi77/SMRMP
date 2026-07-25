@@ -55,6 +55,21 @@ const getSupabaseAuth = () => ({
 const getSupabaseAdmin = () => ({
   auth: {
     admin: {
+      inviteUserByEmail: async (email, options) => {
+        const normalizedEmail = String(email).toLowerCase();
+        if (sessions.has(normalizedEmail)) {
+          return {
+            data: { user: null },
+            error: { message: 'User already registered' },
+          };
+        }
+        const userId = randomUUID();
+        registerAuthUser({ id: userId, email: normalizedEmail, password: 'DefaultInvitePassword!' });
+        return {
+          data: { user: { id: userId, email: normalizedEmail, user_metadata: options?.data } },
+          error: null,
+        };
+      },
       createUser: async ({ email, password, id }) => {
         const normalizedEmail = String(email).toLowerCase();
         if (sessions.has(normalizedEmail)) {
@@ -78,6 +93,15 @@ const getSupabaseAdmin = () => ({
           }
         }
         return { data: {}, error: null };
+      },
+      updateUserById: async (userId, updates) => {
+        for (const entry of sessions.values()) {
+          if (entry.user.id === userId) {
+            if (updates.password) entry.password = updates.password;
+            return { data: { user: entry.user }, error: null };
+          }
+        }
+        return { data: { user: null }, error: { message: 'User not found' } };
       },
     },
   },
