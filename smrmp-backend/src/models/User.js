@@ -88,6 +88,10 @@ const User = sequelize.define(
       type: DataTypes.UUID,
       allowNull: true,
     },
+    avatar: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
     is_active: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,

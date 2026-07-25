@@ -5,6 +5,7 @@ const { getSupabaseAuth, getSupabaseAdmin } = require('../config/supabase');
 const { sendSuccess, sendError } = require('../utils/apiResponse');
 const { writeAuditLog } = require('../middleware/auditLogger');
 const validateRequest = require('../middleware/validateRequest');
+const { uploadBuffer } = require('../services/imageService');
 const {
   ROLE_INCLUDE,
   toPublicUser,
@@ -274,6 +275,93 @@ const getMe = async (req, res) => {
   });
 };
 
+const updateProfile = async (req, res) => {
+  try {
+    const user = req.user;
+    const allowedFields = ['name', 'phone', 'gender', 'date_of_birth', 'nationality', 'national_id', 'username', 'avatar'];
+    const updates = {};
+
+    allowedFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field] === '' ? null : req.body[field];
+      }
+    });
+
+    if (Object.keys(updates).length === 0) {
+      return sendError(res, 400, 'No valid fields provided for update');
+    }
+
+    const before = { ...user.get({ plain: true }) };
+    await user.update(updates);
+    await user.reload({ include: [ROLE_INCLUDE] });
+
+    await writeAuditLog({
+      userId: user.id,
+      action: 'UPDATE_PROFILE',
+      tableName: 'users',
+      recordId: user.id,
+      oldValues: before,
+      newValues: updates,
+      ipAddress: req.ip,
+    });
+
+    return sendSuccess(res, 200, 'Profile updated successfully', {
+      user: {
+        ...toPublicUser(user, req.user.permissions),
+        created_at: user.created_at,
+      },
+    });
+  } catch (error) {
+    return sendError(res, 500, 'Failed to update profile', error.message);
+  }
+};
+
+const uploadAvatar = async (req, res) => {
+  try {
+    const user = req.user;
+    let avatarUrl = null;
+
+    if (req.file) {
+      try {
+        const uploadRes = await uploadBuffer(req.file.buffer, req.file.mimetype);
+        avatarUrl = uploadRes.secure_url;
+      } catch (uploadErr) {
+        console.warn('[AVATAR] Cloudinary upload warning, fallback to data URL:', uploadErr.message);
+        const base64 = req.file.buffer.toString('base64');
+        avatarUrl = `data:${req.file.mimetype};base64,${base64}`;
+      }
+    } else if (req.body.avatar) {
+      avatarUrl = req.body.avatar;
+    } else {
+      return sendError(res, 400, 'Please provide an image file or avatar URL');
+    }
+
+    const before = user.avatar;
+    await user.update({ avatar: avatarUrl });
+    await user.reload({ include: [ROLE_INCLUDE] });
+
+    await writeAuditLog({
+      userId: user.id,
+      action: 'UPLOAD_AVATAR',
+      tableName: 'users',
+      recordId: user.id,
+      oldValues: { avatar: before },
+      newValues: { avatar: avatarUrl },
+      ipAddress: req.ip,
+    });
+
+    return sendSuccess(res, 200, 'Profile picture updated successfully', {
+      avatar: user.avatar,
+      user: {
+        ...toPublicUser(user, req.user.permissions),
+        created_at: user.created_at,
+      },
+    });
+  } catch (error) {
+    return sendError(res, 500, 'Failed to upload avatar', error.message);
+  }
+};
+
 const changePassword = async (req, res) => {
   try {
     const email = req.user.email;
@@ -401,6 +489,8 @@ module.exports = {
   login,
   logout,
   getMe,
+  updateProfile,
+  uploadAvatar,
   changePassword,
   forgotPassword,
   updatePassword,
