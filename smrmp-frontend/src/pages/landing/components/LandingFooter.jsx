@@ -22,14 +22,17 @@ export default function LandingFooter() {
         <div className="mb-20 grid gap-16 md:mb-24 md:grid-cols-2 md:gap-24">
           <div>
             <div className="mb-10 flex items-center gap-4">
-              <span className="font-display text-4xl font-bold tracking-tighter text-smrmp-gold">SMRMP.</span>
+              <img
+                src="/adwa-logo.svg"
+                alt="Adwa Victory Memorial Museum"
+                className="h-14 w-auto"
+              />
             </div>
             <p className="mb-12 max-w-xl font-display text-2xl italic leading-relaxed text-smrmp-parchment/60 md:text-3xl">
               Built for museums, archives, galleries, and the heritage institutions that protect our collective memory.
             </p>
             <div className="flex flex-wrap gap-x-8 gap-y-3 text-[10px] font-bold uppercase tracking-[0.3em] text-smrmp-gold">
-              <a href="#roadmap" className="transition-colors hover:text-white">Proposal 2026</a>
-              <a href="#shift" className="transition-colors hover:text-white">Adwa Pilot</a>
+              <a href="#exhibitions" className="transition-colors hover:text-white">Exhibitions</a>
               <a href="#trust-title" className="transition-colors hover:text-white">Data Ethics</a>
             </div>
           </div>

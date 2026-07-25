@@ -2,13 +2,10 @@ import { useEffect } from 'react';
 import LandingFooter from './components/LandingFooter';
 import LandingNav from './components/LandingNav';
 import AudienceCard from './components/AudienceCard';
-import CapabilityModule, { AnalyticsStrip } from './components/CapabilityModule';
 import HeroSection from './components/HeroSection';
 import ExhibitionsSection from './components/ExhibitionsSection';
-import RoadmapSection from './components/RoadmapSection';
-import ShiftSection from './components/ShiftSection';
 import TrustSection from './components/TrustSection';
-import { audienceCards, capabilityModules } from './landingData';
+import { audienceCards } from './landingData';
 
 export default function LandingPage() {
   useEffect(() => {
@@ -49,19 +46,7 @@ export default function LandingPage() {
       <main>
         <HeroSection />
         <ExhibitionsSection />
-        <ShiftSection />
-        <section id="capabilities" className="bg-smrmp-brown" aria-labelledby="capabilities-title">
-          <div className="sr-only" id="capabilities-title">SMRMP platform capabilities</div>
-          {capabilityModules.map((capability, index) => (
-            <div key={capability.title}>
-              <CapabilityModule capability={capability} />
-              {index < capabilityModules.length - 1 && <div className="hairline-gold max-w-6xl mx-auto" aria-hidden="true" />}
-            </div>
-          ))}
-          <AnalyticsStrip />
-        </section>
         <TrustSection />
-        <RoadmapSection />
         <section className="bg-smrmp-deep-green px-6 py-12 sm:py-16" aria-labelledby="audience-title">
           <h2 id="audience-title" className="sr-only">Explore SMRMP by audience</h2>
           <div className="mx-auto grid max-w-6xl gap-4 sm:grid-cols-3">
