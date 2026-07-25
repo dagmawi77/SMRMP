@@ -76,17 +76,13 @@ const ADMIN_PROTECTED_PERMISSIONS = [
   'roles.assign_permissions',
 ];
 
-/** Modules owned by Curator (Visitor Relations) or Visitor Portal — not Admin day-to-day ops */
+/** Visitor self-service portal only — admin keeps full staff ops including Visitor Relations */
 const ADMIN_EXCLUDED_PERMISSION_PREFIXES = [
   'portal.',
-  'visitors.',
-  'members.',
-  'bookings.',
-  'feedback.',
 ];
 
 const ROLE_PERMISSION_MAP = {
-  // Admin: system administration only (no Visitor Portal, no Visitor Relations ops)
+  // Admin: full staff access (sidebar + ops). Excludes visitor self-service portal.*
   admin: PERMISSIONS.filter(
     (p) => !ADMIN_EXCLUDED_PERMISSION_PREFIXES.some((prefix) => p.code.startsWith(prefix)),
   ).map((p) => p.code),

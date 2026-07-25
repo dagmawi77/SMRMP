@@ -68,21 +68,20 @@ export const PAYMENT_METHODS = [
 export const NAV_ITEMS = [
   { label: 'Dashboard', path: '/dashboard', permissions: ['dashboard.read'], roles: ['admin', 'curator', 'conservation'] },
   { label: 'Artifacts', path: '/artifacts', permissions: ['artifacts.read'], roles: ['admin', 'curator', 'conservation', 'researcher'] },
-  { label: 'Exhibitions', path: '/exhibitions', permissions: ['exhibitions.read'], roles: ['curator'] },
-  { label: 'Maintenance', path: '/maintenance', roles: ['maintenance'] },
+  { label: 'Exhibitions', path: '/exhibitions', permissions: ['exhibitions.read'], roles: ['admin', 'curator'] },
+  { label: 'Maintenance', path: '/maintenance', roles: ['admin', 'maintenance'] },
   { label: 'Tickets', path: '/tickets/manage', permissions: ['tickets.list'] },
   {
-    // Curator Portal only — not shown in Admin sidebar
     label: 'Visitor Relations',
     path: '/visitors',
-    roles: ['curator'],
+    roles: ['admin', 'curator'],
     permissions: ['visitors.read', 'members.read', 'bookings.read', 'feedback.read'],
     children: [
-      { label: 'Visitors', path: '/visitors', roles: ['curator'], permissions: ['visitors.read'] },
-      { label: 'Analytics', path: '/visitors/analytics', roles: ['curator'], permissions: ['visitors.read'] },
-      { label: 'Memberships', path: '/memberships', roles: ['curator'], permissions: ['members.read'] },
-      { label: 'Group Bookings', path: '/group-bookings', roles: ['curator'], permissions: ['bookings.read'] },
-      { label: 'Feedback', path: '/feedback/dashboard', roles: ['curator'], permissions: ['feedback.read'] },
+      { label: 'Visitors', path: '/visitors', roles: ['admin', 'curator'], permissions: ['visitors.read'] },
+      { label: 'Analytics', path: '/visitors/analytics', roles: ['admin', 'curator'], permissions: ['visitors.read'] },
+      { label: 'Memberships', path: '/memberships', roles: ['admin', 'curator'], permissions: ['members.read'] },
+      { label: 'Group Bookings', path: '/group-bookings', roles: ['admin', 'curator'], permissions: ['bookings.read'] },
+      { label: 'Feedback', path: '/feedback/dashboard', roles: ['admin', 'curator'], permissions: ['feedback.read'] },
     ],
   },
   {
@@ -99,7 +98,7 @@ export const NAV_ITEMS = [
 ];
 
 export const STAFF_ROLE_OPTIONS = [
-  { value: 'admin', label: 'Administrator', description: 'Full system configuration, security & user management' },
+  { value: 'admin', label: 'Administrator', description: 'Full staff access: system, catalog, visitors, tickets & settings' },
   { value: 'curator', label: 'Curator', description: 'Exhibitions, cataloging, ticketing & Visitor Relations monitoring' },
   { value: 'conservation', label: 'Conservation Specialist', description: 'Artifact condition logging, environmental monitoring & restoration' },
   { value: 'maintenance', label: 'Maintenance Staff', description: 'Facility maintenance, casing security & physical upkeep' },

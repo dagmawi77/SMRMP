@@ -151,7 +151,7 @@ export default function App() {
           <Route
             path="/maintenance/*"
             element={(
-              <PrivateRoute roles={['maintenance']}>
+              <PrivateRoute roles={['admin', 'maintenance']}>
                 <MaintenanceDashboardPage />
               </PrivateRoute>
             )}
@@ -228,11 +228,11 @@ export default function App() {
           <Route path="/admin/settings" element={<Navigate to="/settings" replace />} />
           <Route path="/users" element={<Navigate to="/admin/users" replace />} />
 
-          {/* Visitor Relations — Curator Portal only */}
+          {/* Visitor Relations — Admin + Curator */}
           <Route
             path="/visitors/analytics"
             element={(
-              <PrivateRoute roles={['curator']} permissions="visitors.read">
+              <PrivateRoute roles={['admin', 'curator']} permissions="visitors.read">
                 <VisitorAnalyticsPage />
               </PrivateRoute>
             )}
@@ -240,7 +240,7 @@ export default function App() {
           <Route
             path="/visitors/:id"
             element={(
-              <PrivateRoute roles={['curator']} permissions="visitors.read">
+              <PrivateRoute roles={['admin', 'curator']} permissions="visitors.read">
                 <VisitorDetailPage />
               </PrivateRoute>
             )}
@@ -248,7 +248,7 @@ export default function App() {
           <Route
             path="/visitors"
             element={(
-              <PrivateRoute roles={['curator']} permissions="visitors.read">
+              <PrivateRoute roles={['admin', 'curator']} permissions="visitors.read">
                 <VisitorsPage />
               </PrivateRoute>
             )}
@@ -256,7 +256,7 @@ export default function App() {
           <Route
             path="/memberships/issue"
             element={(
-              <PrivateRoute roles={['curator']} permissions="members.create">
+              <PrivateRoute roles={['admin', 'curator']} permissions="members.create">
                 <IssueMembershipPage />
               </PrivateRoute>
             )}
@@ -264,7 +264,7 @@ export default function App() {
           <Route
             path="/memberships/verify/:code"
             element={(
-              <PrivateRoute roles={['curator']} permissions="members.verify">
+              <PrivateRoute roles={['admin', 'curator']} permissions="members.verify">
                 <MembershipVerifyPage />
               </PrivateRoute>
             )}
@@ -272,7 +272,7 @@ export default function App() {
           <Route
             path="/memberships/verify"
             element={(
-              <PrivateRoute roles={['curator']} permissions="members.verify">
+              <PrivateRoute roles={['admin', 'curator']} permissions="members.verify">
                 <MembershipVerifyPage />
               </PrivateRoute>
             )}
@@ -280,7 +280,7 @@ export default function App() {
           <Route
             path="/memberships"
             element={(
-              <PrivateRoute roles={['curator']} permissions="members.read">
+              <PrivateRoute roles={['admin', 'curator']} permissions="members.read">
                 <MembershipsPage />
               </PrivateRoute>
             )}
@@ -288,7 +288,7 @@ export default function App() {
           <Route
             path="/group-bookings/:id"
             element={(
-              <PrivateRoute roles={['curator']} permissions="bookings.read">
+              <PrivateRoute roles={['admin', 'curator']} permissions="bookings.read">
                 <BookingDetailPage />
               </PrivateRoute>
             )}
@@ -296,7 +296,7 @@ export default function App() {
           <Route
             path="/group-bookings"
             element={(
-              <PrivateRoute roles={['curator']} permissions="bookings.read">
+              <PrivateRoute roles={['admin', 'curator']} permissions="bookings.read">
                 <GroupBookingsPage />
               </PrivateRoute>
             )}
@@ -304,7 +304,7 @@ export default function App() {
           <Route
             path="/feedback/dashboard"
             element={(
-              <PrivateRoute roles={['curator']} permissions="feedback.read">
+              <PrivateRoute roles={['admin', 'curator']} permissions="feedback.read">
                 <FeedbackDashboardPage />
               </PrivateRoute>
             )}
