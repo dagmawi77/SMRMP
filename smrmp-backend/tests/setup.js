@@ -8,9 +8,12 @@ process.env.DB_PORT = process.env.DB_PORT || '5432';
 process.env.DB_NAME = process.env.DB_NAME_TEST || 'smrmp_db_test';
 process.env.DB_USER = process.env.DB_USER || 'smrmp_user';
 process.env.DB_PASSWORD = process.env.DB_PASSWORD || 'your_password';
-process.env.JWT_SECRET =
-  process.env.JWT_SECRET || 'test_jwt_secret_key_with_32_chars_min';
-process.env.JWT_EXPIRES_IN = '1h';
+process.env.SUPABASE_URL =
+  process.env.SUPABASE_URL || 'https://example.supabase.co';
+process.env.SUPABASE_ANON_KEY =
+  process.env.SUPABASE_ANON_KEY || 'test-anon-key';
+process.env.SUPABASE_SERVICE_ROLE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY || 'test-service-role-key';
 process.env.CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || 'test';
 process.env.CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY || 'test';
 process.env.CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET || 'test';
@@ -21,4 +24,3 @@ process.env.TELEBIRR_APP_KEY = 'sandbox';
 process.env.TELEBIRR_SHORT_CODE = 'sandbox';
 process.env.TELEBIRR_PUBLIC_KEY = 'sandbox';
 process.env.TELEBIRR_BASE_URL = 'https://sandbox.telebirr.com';
-process.env.JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
