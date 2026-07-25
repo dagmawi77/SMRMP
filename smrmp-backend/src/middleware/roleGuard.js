@@ -20,6 +20,7 @@ const isAdmin = allowRoles('admin');
 const isCuratorPlus = allowRoles('admin', 'curator');
 const isStaff = allowRoles('admin', 'curator', 'conservation', 'maintenance');
 const isConservationPlus = allowRoles('admin', 'curator', 'conservation');
+const isCatalogReader = allowRoles('admin', 'curator', 'conservation', 'researcher');
 
 module.exports = {
   allowRoles,
@@ -27,4 +28,5 @@ module.exports = {
   isCuratorPlus,
   isStaff,
   isConservationPlus,
+  isCatalogReader,
 };
