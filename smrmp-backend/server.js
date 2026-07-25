@@ -1,9 +1,8 @@
-require('dotenv').config();
+require('dotenv').config({ override: true });
 
 const { validateEnv } = require('./src/config/environment');
 const app = require('./src/app');
 const { sequelize } = require('./src/models');
-
 const start = async () => {
   try {
     validateEnv();

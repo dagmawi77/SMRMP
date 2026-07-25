@@ -1,7 +1,6 @@
-﻿import { useState } from 'react';
+﻿import { useCallback, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { useDropzone } from 'react-dropzone';
 import Input from '../ui/Input';
 import Select from '../ui/Select';
 import Button from '../ui/Button';
@@ -10,9 +9,13 @@ import AIDescriptionBtn from '../ai/AIDescriptionBtn';
 import { ARTIFACT_CATEGORIES, CONDITION_STATUSES } from '../../utils/constants';
 import { CloudArrowUpIcon, SparklesIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
+const IMAGE_ACCEPT = 'image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp';
+
 export default function ArtifactForm({ onSubmit, loading, initialData, onCancel }) {
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
   const [files, setFiles] = useState([]);
+  const [isDragActive, setIsDragActive] = useState(false);
   const [aiDraft, setAiDraft] = useState(null);
 
   const {
@@ -37,11 +40,18 @@ export default function ArtifactForm({ onSubmit, loading, initialData, onCancel 
 
   const formValues = watch();
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    accept: { 'image/*': ['.jpg', '.jpeg', '.png', '.webp'] },
-    maxFiles: 5,
-    onDrop: (accepted) => setFiles((prev) => [...prev, ...accepted].slice(0, 5)),
-  });
+  const addImageFiles = useCallback((incoming) => {
+    const images = Array.from(incoming || []).filter((file) =>
+      String(file.type || '').startsWith('image/')
+    );
+    if (!images.length) return;
+    setFiles((prev) => [...prev, ...images].slice(0, 5));
+  }, []);
+
+  const onFileInputChange = (e) => {
+    addImageFiles(e.target.files);
+    e.target.value = '';
+  };
 
   const handleAIDescription = (result) => {
     setAiDraft(result);
@@ -169,14 +179,50 @@ export default function ArtifactForm({ onSubmit, loading, initialData, onCancel 
           Upload Artifact Images (max 5)
         </label>
         <div
-          {...getRootProps()}
+          role="button"
+          tabIndex={0}
+          onClick={() => fileInputRef.current?.click()}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              fileInputRef.current?.click();
+            }
+          }}
+          onDragEnter={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsDragActive(true);
+          }}
+          onDragOver={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsDragActive(true);
+          }}
+          onDragLeave={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsDragActive(false);
+          }}
+          onDrop={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsDragActive(false);
+            addImageFiles(e.dataTransfer.files);
+          }}
           className={`cursor-pointer rounded-2xl border-2 border-dashed p-8 text-center transition-all ${
             isDragActive
               ? 'border-smrmp-green bg-[#E4EEDC]/50'
               : 'border-[#E2D6C5] bg-[#FAF6F0] hover:border-smrmp-gold hover:bg-[#FAF0E4]'
           }`}
         >
-          <input {...getInputProps()} />
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept={IMAGE_ACCEPT}
+            multiple
+            className="hidden"
+            onChange={onFileInputChange}
+          />
           <CloudArrowUpIcon className="mx-auto h-8 w-8 text-[#7C4A2D] mb-2" />
           <p className="text-xs font-semibold text-[#2B1B12]">
             {isDragActive
@@ -189,7 +235,7 @@ export default function ArtifactForm({ onSubmit, loading, initialData, onCancel 
         {files.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-3">
             {files.map((file, i) => (
-              <div key={file.name} className="relative group">
+              <div key={`${file.name}-${i}`} className="relative group">
                 <img
                   src={URL.createObjectURL(file)}
                   alt={file.name}
