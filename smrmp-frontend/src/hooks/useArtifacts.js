@@ -24,8 +24,13 @@ export function useArtifact(id) {
     queryFn: () => artifactApi.getById(id),
     select: (res) => {
       const data = res?.data?.data;
-      if (data && typeof data === 'object' && data.artifact) {
-        return data.artifact;
+      if (data && typeof data === 'object') {
+        if (data.artifact) {
+          return {
+            ...data.artifact,
+            qr_data_url: data.qr_data_url || data.artifact.qr_data_url,
+          };
+        }
       }
       return data;
     },
@@ -39,8 +44,13 @@ export function useArtifactByQR(code) {
     queryFn: () => artifactApi.getByQR(code),
     select: (res) => {
       const data = res?.data?.data;
-      if (data && typeof data === 'object' && data.artifact) {
-        return data.artifact;
+      if (data && typeof data === 'object') {
+        if (data.artifact) {
+          return {
+            ...data.artifact,
+            qr_data_url: data.qr_data_url || data.artifact.qr_data_url,
+          };
+        }
       }
       return data;
     },
