@@ -38,6 +38,8 @@ const PERMISSIONS = [
   { code: 'tickets.verify', module: 'tickets', description: 'Verify tickets at gate' },
   { code: 'tickets.purchase', module: 'tickets', description: 'Purchase tickets (staff override)' },
   { code: 'dashboard.read', module: 'dashboard', description: 'View dashboard stats' },
+  { code: 'maintenance.read', module: 'maintenance', description: 'View maintenance requests and dashboard' },
+  { code: 'maintenance.update', module: 'maintenance', description: 'Update and close maintenance requests' },
   { code: 'ai.describe', module: 'ai', description: 'AI artifact description' },
   { code: 'ai.search', module: 'ai', description: 'AI smart search' },
   { code: 'ai.report', module: 'ai', description: 'AI report generation' },
@@ -82,7 +84,7 @@ const ROLE_PERMISSION_MAP = {
     'tickets.verify',
     'dashboard.read',
   ],
-  maintenance: ['tickets.list', 'tickets.verify', 'dashboard.read'],
+  maintenance: ['tickets.list', 'tickets.verify', 'dashboard.read', 'maintenance.read', 'maintenance.update'],
   researcher: ['artifacts.read'],
   visitor: [],
 };
