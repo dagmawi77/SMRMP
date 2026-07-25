@@ -113,7 +113,17 @@ const getArtifactById = async (req, res) => {
 
     if (!artifact) return sendError(res, 404, 'Artifact not found');
 
-    return sendSuccess(res, 200, 'Artifact retrieved', { artifact });
+    let qrDataUrl = null;
+    if (artifact.qr_code) {
+      try {
+        const qrRes = await generateArtifactQR(artifact.qr_code);
+        qrDataUrl = qrRes.qrDataUrl;
+      } catch (_e) {
+        // Fallback if QR generation fails
+      }
+    }
+
+    return sendSuccess(res, 200, 'Artifact retrieved', { artifact, qr_data_url: qrDataUrl });
   } catch (error) {
     return sendError(res, 500, 'Failed to retrieve artifact', error.message);
   }
@@ -137,7 +147,17 @@ const getArtifactByQR = async (req, res) => {
       );
     }
 
-    return sendSuccess(res, 200, 'Artifact retrieved', { artifact });
+    let qrDataUrl = null;
+    if (artifact.qr_code) {
+      try {
+        const qrRes = await generateArtifactQR(artifact.qr_code);
+        qrDataUrl = qrRes.qrDataUrl;
+      } catch (_e) {
+        // Fallback if QR generation fails
+      }
+    }
+
+    return sendSuccess(res, 200, 'Artifact retrieved', { artifact, qr_data_url: qrDataUrl });
   } catch (error) {
     return sendError(res, 500, 'QR lookup failed', error.message);
   }
@@ -222,6 +242,19 @@ const updateArtifact = async (req, res) => {
     delete updates.created_by;
 
     await artifact.update(updates);
+
+    if (req.files && req.files.length > 0) {
+      const uploaded = await uploadArtifactImages(req.files);
+      const existingImagesCount = await ArtifactImage.count({ where: { artifact_id: artifact.id } });
+      await ArtifactImage.bulkCreate(
+        uploaded.map((img, index) => ({
+          artifact_id: artifact.id,
+          file_path: img.file_path,
+          file_url: img.file_url,
+          is_primary: existingImagesCount === 0 && index === 0,
+        }))
+      );
+    }
 
     await writeAuditLog({
       userId: req.user.id,

@@ -26,7 +26,7 @@ router.post(
   createArtifact
 );
 router.get('/:id', isCatalogReader, getArtifactById);
-router.put('/:id', isCuratorPlus, updateArtifact);
+router.put('/:id', isCuratorPlus, uploadHandler.array('images', 5), updateArtifact);
 router.delete('/:id', isAdmin, deleteArtifact);
 
 module.exports = router;
