@@ -22,6 +22,8 @@ import ExhibitionDashboardPage from './pages/exhibitions/ExhibitionDashboardPage
 import UsersPage from './pages/users/UsersPage';
 import AdminRolesPage from './pages/admin/AdminRolesPage';
 import AdminPermissionsPage from './pages/admin/AdminPermissionsPage';
+import AdminSettingsPage from './pages/admin/AdminSettingsPage';
+import SettingsPage from './pages/settings/SettingsPage';
 
 export default function App() {
   useSessionRestore();
@@ -46,6 +48,15 @@ export default function App() {
             element={(
               <PrivateRoute>
                 <ChangePasswordPage />
+              </PrivateRoute>
+            )}
+          />
+
+          <Route
+            path="/settings"
+            element={(
+              <PrivateRoute>
+                <SettingsPage />
               </PrivateRoute>
             )}
           />
@@ -136,6 +147,14 @@ export default function App() {
             element={(
               <PrivateRoute permissions="roles.read">
                 <AdminPermissionsPage />
+              </PrivateRoute>
+            )}
+          />
+          <Route
+            path="/admin/settings"
+            element={(
+              <PrivateRoute permissions="users.read">
+                <AdminSettingsPage />
               </PrivateRoute>
             )}
           />

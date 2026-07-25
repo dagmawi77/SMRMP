@@ -30,6 +30,7 @@ const toPublicUser = (user, permissionCodes) => {
     id: user.id,
     name: user.name,
     email: user.email,
+    avatar: user.avatar || null,
     role: slug,
     role_id: user.role_id || user.rbacRole?.id || null,
     role_name: user.rbacRole?.name || slug,
