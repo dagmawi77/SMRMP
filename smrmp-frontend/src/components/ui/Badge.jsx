@@ -27,6 +27,10 @@
     container: 'bg-[#F3E8FA] text-[#5B21B6] border-[#D8B4FE]',
     dot: 'bg-[#5B21B6]',
   },
+  on_loan: {
+    container: 'bg-[#FEF3C7] text-[#92400E] border-[#FCD34D]',
+    dot: 'bg-[#D97706]',
+  },
   default: {
     container: 'bg-[#EFE7DA] text-[#5C4233] border-[#D8C8B8]',
     dot: 'bg-[#7C4A2D]',

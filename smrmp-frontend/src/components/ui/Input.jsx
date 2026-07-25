@@ -1,19 +1,25 @@
-﻿export default function Input({
-  label,
-  error,
-  hint,
-  id,
-  className = '',
-  icon: Icon,
-  ...props
-}) {
+﻿import { forwardRef } from 'react';
+
+const Input = forwardRef(function Input(
+  {
+    label,
+    error,
+    hint,
+    id,
+    className = '',
+    icon: Icon,
+    required = false,
+    ...props
+  },
+  ref
+) {
   const inputId = id || props.name;
 
   return (
     <div className={className}>
       {label && (
         <label htmlFor={inputId} className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-[#5C4233]">
-          {label}
+          {label} {required && <span className="text-rose-500">*</span>}
         </label>
       )}
       <div className="relative flex items-center">
@@ -23,6 +29,7 @@
           </div>
         )}
         <input
+          ref={ref}
           id={inputId}
           className={`w-full rounded-xl border ${
             Icon ? 'pl-10' : 'px-4'
@@ -38,4 +45,6 @@
       {hint && !error && <p className="mt-1 text-xs text-[#6E5445]">{hint}</p>}
     </div>
   );
-}
+});
+
+export default Input;
