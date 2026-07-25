@@ -1,4 +1,10 @@
+jest.mock('../src/config/supabase');
+
 const request = require('supertest');
+const {
+  registerAuthUser,
+  resetAuthMock,
+} = require('../src/config/supabase');
 const app = require('../src/app');
 const { sequelize, User, Artifact, Exhibition, Ticket } = require('../src/models');
 
@@ -8,18 +14,30 @@ describe('Dashboard API — Phase 2', () => {
 
   beforeAll(async () => {
     await sequelize.sync({ force: true });
+    resetAuthMock();
 
-    await User.create({
+    const curator = await User.create({
       name: 'Curator',
-      email: 'curator@adwa.museum',
-      password: 'Demo@2026!',
+      email: 'curator@smrmp.dev',
+      password: null,
       role: 'curator',
     });
-    await User.create({
+    const visitor = await User.create({
       name: 'Visitor',
       email: 'visitor@test.com',
-      password: 'Demo@2026!',
+      password: null,
       role: 'visitor',
+    });
+
+    registerAuthUser({
+      id: curator.id,
+      email: curator.email,
+      password: 'Demo@2026!',
+    });
+    registerAuthUser({
+      id: visitor.id,
+      email: visitor.email,
+      password: 'Demo@2026!',
     });
 
     await Artifact.bulkCreate([
@@ -61,7 +79,7 @@ describe('Dashboard API — Phase 2', () => {
     });
 
     const curatorLogin = await request(app).post('/api/auth/login').send({
-      email: 'curator@adwa.museum',
+      email: 'curator@smrmp.dev',
       password: 'Demo@2026!',
     });
     const visitorLogin = await request(app).post('/api/auth/login').send({

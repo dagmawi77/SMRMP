@@ -1,4 +1,10 @@
-﻿const request = require('supertest');
+﻿jest.mock('../src/config/supabase');
+
+const request = require('supertest');
+const {
+  registerAuthUser,
+  resetAuthMock,
+} = require('../src/config/supabase');
 
 jest.mock('../src/services/aiService', () => ({
   generateArtifactDescription: jest.fn(async () => ({
@@ -50,12 +56,20 @@ describe('AI API — Phase 2', () => {
 
   beforeAll(async () => {
     await sequelize.sync({ force: true });
-    await User.create({
+    resetAuthMock();
+
+    const curator = await User.create({
       name: 'Curator',
-      email: 'curator@adwa.museum',
-      password: 'Demo@2026!',
+      email: 'curator@smrmp.dev',
+      password: null,
       role: 'curator',
     });
+    registerAuthUser({
+      id: curator.id,
+      email: curator.email,
+      password: 'Demo@2026!',
+    });
+
     await Artifact.create({
       name: 'Spear',
       category: 'weapon',
@@ -65,7 +79,7 @@ describe('AI API — Phase 2', () => {
     });
 
     const login = await request(app).post('/api/auth/login').send({
-      email: 'curator@adwa.museum',
+      email: 'curator@smrmp.dev',
       password: 'Demo@2026!',
     });
     token = login.body.data.token;

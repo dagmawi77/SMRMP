@@ -1,4 +1,10 @@
-﻿const request = require('supertest');
+﻿jest.mock('../src/config/supabase');
+
+const request = require('supertest');
+const {
+  registerAuthUser,
+  resetAuthMock,
+} = require('../src/config/supabase');
 const app = require('../src/app');
 const { sequelize, User, Artifact } = require('../src/models');
 
@@ -8,26 +14,38 @@ describe('Artifacts API', () => {
 
   beforeAll(async () => {
     await sequelize.sync({ force: true });
+    resetAuthMock();
 
-    await User.create({
+    const curator = await User.create({
       name: 'Curator',
-      email: 'curator@adwa.museum',
-      password: 'Demo@2026!',
+      email: 'curator@smrmp.dev',
+      password: null,
       role: 'curator',
     });
-    await User.create({
+    const admin = await User.create({
       name: 'Admin',
-      email: 'admin@adwa.museum',
-      password: 'Demo@2026!',
+      email: 'admin@smrmp.dev',
+      password: null,
       role: 'admin',
     });
 
+    registerAuthUser({
+      id: curator.id,
+      email: curator.email,
+      password: 'Demo@2026!',
+    });
+    registerAuthUser({
+      id: admin.id,
+      email: admin.email,
+      password: 'Demo@2026!',
+    });
+
     const curatorLogin = await request(app).post('/api/auth/login').send({
-      email: 'curator@adwa.museum',
+      email: 'curator@smrmp.dev',
       password: 'Demo@2026!',
     });
     const adminLogin = await request(app).post('/api/auth/login').send({
-      email: 'admin@adwa.museum',
+      email: 'admin@smrmp.dev',
       password: 'Demo@2026!',
     });
 
@@ -63,11 +81,16 @@ describe('Artifacts API', () => {
   });
 
   test('visitor role cannot list artifacts', async () => {
-    await User.create({
+    const visitor = await User.create({
       name: 'Visitor',
       email: 'visitor@test.com',
-      password: 'Demo@2026!',
+      password: null,
       role: 'visitor',
+    });
+    registerAuthUser({
+      id: visitor.id,
+      email: visitor.email,
+      password: 'Demo@2026!',
     });
     const login = await request(app).post('/api/auth/login').send({
       email: 'visitor@test.com',
