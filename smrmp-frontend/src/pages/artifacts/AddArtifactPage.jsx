@@ -30,6 +30,8 @@ export default function AddArtifactPage() {
         <PageHeader
           title="Artifact Created"
           description="QR code generated — ready for physical labeling"
+          backPath="/artifacts"
+          backLabel="Back to Catalog"
         />
         <div className="mx-auto max-w-lg">
           <QRDisplay
@@ -62,6 +64,8 @@ export default function AddArtifactPage() {
       <PageHeader
         title="Add New Artifact"
         description="Register a new artifact in the digital catalog"
+        backPath="/artifacts"
+        backLabel="Back to Catalog"
       />
       <div className="mx-auto max-w-4xl rounded-2xl border border-[#E2D6C5] bg-[#FAF6F0] p-6 sm:p-8 shadow-xs">
         <ArtifactForm
