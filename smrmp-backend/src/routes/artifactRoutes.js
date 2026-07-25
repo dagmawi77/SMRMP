@@ -9,7 +9,7 @@ const {
   createValidation,
 } = require('../controllers/artifactController');
 const { protect } = require('../middleware/auth');
-const { isCuratorPlus, isAdmin, isCatalogReader } = require('../middleware/roleGuard');
+const { requirePermission } = require('../middleware/permissionGuard');
 const { uploadHandler } = require('../middleware/uploadHandler');
 
 const router = express.Router();
@@ -17,16 +17,16 @@ const router = express.Router();
 router.get('/qr/:code', getArtifactByQR);
 
 router.use(protect);
-router.get('/', isCatalogReader, getAllArtifacts);
+router.get('/', requirePermission('artifacts.read'), getAllArtifacts);
 router.post(
   '/',
-  isCuratorPlus,
+  requirePermission('artifacts.create'),
   uploadHandler.array('images', 5),
   createValidation,
   createArtifact
 );
-router.get('/:id', isCatalogReader, getArtifactById);
-router.put('/:id', isCuratorPlus, updateArtifact);
-router.delete('/:id', isAdmin, deleteArtifact);
+router.get('/:id', requirePermission('artifacts.read'), getArtifactById);
+router.put('/:id', requirePermission('artifacts.update'), updateArtifact);
+router.delete('/:id', requirePermission('artifacts.delete'), deleteArtifact);
 
 module.exports = router;

@@ -4,13 +4,19 @@ import PrivateRoute from './components/layout/PrivateRoute';
 import useSessionRestore from './hooks/useSessionRestore';
 import LandingPage from './pages/landing/LandingPage';
 import LoginPage from './pages/auth/LoginPage';
+import ChangePasswordPage from './pages/auth/ChangePasswordPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import ArtifactsPage from './pages/artifacts/ArtifactsPage';
 import AddArtifactPage from './pages/artifacts/AddArtifactPage';
 import ArtifactDetailPage from './pages/artifacts/ArtifactDetailPage';
 import PublicArtifactPage from './pages/visitor/PublicArtifactPage';
 import TicketPurchasePage from './pages/tickets/TicketPurchasePage';
+import TelebirrPaygatePage from './pages/tickets/TelebirrPaygatePage';
 import VisitorRegistrationPage from './pages/visitor/VisitorRegistrationPage';
+import AdminAccessPage from './pages/admin/AdminAccessPage';
+import AdminUsersPage from './pages/admin/AdminUsersPage';
+import AdminRolesPage from './pages/admin/AdminRolesPage';
+import AdminPermissionsPage from './pages/admin/AdminPermissionsPage';
 
 export default function App() {
   useSessionRestore();
@@ -19,18 +25,26 @@ export default function App() {
     <ErrorBoundary>
       <BrowserRouter>
         <Routes>
-          {/* Public routes */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/artifact/:code" element={<PublicArtifactPage />} />
           <Route path="/tickets" element={<TicketPurchasePage />} />
+          <Route path="/tickets/telebirr/paygate" element={<TelebirrPaygatePage />} />
           <Route path="/register" element={<VisitorRegistrationPage />} />
 
-          {/* Protected staff routes */}
+          <Route
+            path="/change-password"
+            element={(
+              <PrivateRoute>
+                <ChangePasswordPage />
+              </PrivateRoute>
+            )}
+          />
+
           <Route
             path="/dashboard"
             element={(
-              <PrivateRoute roles={['admin', 'curator', 'conservation', 'maintenance']}>
+              <PrivateRoute permissions="dashboard.read">
                 <DashboardPage />
               </PrivateRoute>
             )}
@@ -38,7 +52,7 @@ export default function App() {
           <Route
             path="/artifacts"
             element={(
-              <PrivateRoute roles={['admin', 'curator', 'conservation', 'researcher']}>
+              <PrivateRoute permissions="artifacts.read">
                 <ArtifactsPage />
               </PrivateRoute>
             )}
@@ -46,7 +60,7 @@ export default function App() {
           <Route
             path="/artifacts/new"
             element={(
-              <PrivateRoute roles={['admin', 'curator']}>
+              <PrivateRoute permissions="artifacts.create">
                 <AddArtifactPage />
               </PrivateRoute>
             )}
@@ -54,15 +68,45 @@ export default function App() {
           <Route
             path="/artifacts/:id"
             element={(
-              <PrivateRoute roles={['admin', 'curator', 'conservation', 'researcher']}>
+              <PrivateRoute permissions="artifacts.read">
                 <ArtifactDetailPage />
               </PrivateRoute>
             )}
           />
+          <Route
+            path="/admin"
+            element={(
+              <PrivateRoute permissions={['users.read', 'roles.read']} anyPermission>
+                <AdminAccessPage />
+              </PrivateRoute>
+            )}
+          />
+          <Route
+            path="/admin/users"
+            element={(
+              <PrivateRoute permissions="users.read">
+                <AdminUsersPage />
+              </PrivateRoute>
+            )}
+          />
+          <Route
+            path="/admin/roles"
+            element={(
+              <PrivateRoute permissions="roles.read">
+                <AdminRolesPage />
+              </PrivateRoute>
+            )}
+          />
+          <Route
+            path="/admin/permissions"
+            element={(
+              <PrivateRoute permissions="roles.read">
+                <AdminPermissionsPage />
+              </PrivateRoute>
+            )}
+          />
 
-          {/* Legacy redirect */}
           <Route path="/public/artifacts/:id" element={<Navigate to="/artifacts" replace />} />
-
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

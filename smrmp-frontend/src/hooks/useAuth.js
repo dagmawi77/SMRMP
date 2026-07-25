@@ -39,7 +39,11 @@ export default function useAuth() {
       setAuth(userData, accessToken);
 
       toast.success(`Welcome back, ${userData.name}!`);
-      navigate(ROLE_REDIRECTS[userData.role] || '/dashboard', { replace: true });
+      if (userData.must_change_password) {
+        navigate('/change-password', { replace: true });
+      } else {
+        navigate(ROLE_REDIRECTS[userData.role] || '/dashboard', { replace: true });
+      }
 
       // Persist Supabase session in the background — don't delay the redirect.
       if (refreshToken) {

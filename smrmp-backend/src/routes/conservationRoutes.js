@@ -8,15 +8,15 @@ const {
   createValidation,
 } = require('../controllers/conservationController');
 const { protect } = require('../middleware/auth');
-const { isConservationPlus, isAdmin } = require('../middleware/roleGuard');
+const { requirePermission } = require('../middleware/permissionGuard');
 
 const router = express.Router();
 
 router.use(protect);
-router.get('/', isConservationPlus, getAllLogs);
-router.post('/', isConservationPlus, createValidation, createLog);
-router.get('/:id', isConservationPlus, getLogById);
-router.put('/:id', isConservationPlus, updateLog);
-router.delete('/:id', isAdmin, deleteLog);
+router.get('/', requirePermission('conservation.read'), getAllLogs);
+router.post('/', requirePermission('conservation.create'), createValidation, createLog);
+router.get('/:id', requirePermission('conservation.read'), getLogById);
+router.put('/:id', requirePermission('conservation.update'), updateLog);
+router.delete('/:id', requirePermission('conservation.delete'), deleteLog);
 
 module.exports = router;

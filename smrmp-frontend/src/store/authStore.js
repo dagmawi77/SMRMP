@@ -7,8 +7,6 @@ const useAuthStore = create(
       user: null,
       token: null,
       isAuthenticated: false,
-      // Not persisted, so every page load re-verifies the stored token against
-      // /auth/me before protected routes are allowed to render.
       isRestoringSession: true,
 
       setAuth: (user, token) =>
@@ -25,7 +23,6 @@ const useAuthStore = create(
         })),
 
       clearAuth: () => {
-        // Older builds mirrored the session into standalone keys.
         localStorage.removeItem('smrmp_token');
         localStorage.removeItem('smrmp_user');
         set({ user: null, token: null, isAuthenticated: false });
@@ -37,6 +34,27 @@ const useAuthStore = create(
         const { user } = get();
         return user ? roles.includes(user.role) : false;
       },
+
+      can: (permission) => {
+        const { user } = get();
+        if (!user) return false;
+        const perms = user.permissions || [];
+        return perms.includes(permission);
+      },
+
+      canAny: (...permissions) => {
+        const { user } = get();
+        if (!user) return false;
+        const perms = user.permissions || [];
+        return permissions.some((p) => perms.includes(p));
+      },
+
+      canAll: (...permissions) => {
+        const { user } = get();
+        if (!user) return false;
+        const perms = user.permissions || [];
+        return permissions.every((p) => perms.includes(p));
+      },
     }),
     {
       name: 'smrmp_auth',
@@ -45,8 +63,8 @@ const useAuthStore = create(
         token: state.token,
         isAuthenticated: state.isAuthenticated,
       }),
-    },
-  ),
+    }
+  )
 );
 
 export default useAuthStore;

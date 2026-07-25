@@ -33,6 +33,13 @@ module.exports = {
     const curatorId = uuidv4();
     const conservationId = uuidv4();
 
+    const [roleRows] = await queryInterface.sequelize.query(
+      `SELECT id, slug FROM roles`
+    );
+    const roleIdBySlug = Object.fromEntries(
+      (roleRows || []).map((r) => [r.slug, r.id])
+    );
+
     await queryInterface.bulkInsert('users', [
       {
         id: adminId,
@@ -40,6 +47,8 @@ module.exports = {
         email: 'admin@adwa.museum',
         password: passwordHash,
         role: 'admin',
+        role_id: roleIdBySlug.admin || null,
+        must_change_password: false,
         museum_id: null,
         is_active: true,
         last_login: null,
@@ -52,6 +61,8 @@ module.exports = {
         email: 'curator@adwa.museum',
         password: passwordHash,
         role: 'curator',
+        role_id: roleIdBySlug.curator || null,
+        must_change_password: false,
         museum_id: null,
         is_active: true,
         last_login: null,
@@ -64,6 +75,8 @@ module.exports = {
         email: 'conservation@adwa.museum',
         password: passwordHash,
         role: 'conservation',
+        role_id: roleIdBySlug.conservation || null,
+        must_change_password: false,
         museum_id: null,
         is_active: true,
         last_login: null,

@@ -15,7 +15,7 @@ import { useState } from 'react';
 export default function ArtifactDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { hasRole } = useAuthStore();
+  const { can } = useAuthStore();
   const { data, isLoading, isError } = useArtifact(id);
   const deleteMutation = useDeleteArtifact();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -39,7 +39,7 @@ export default function ArtifactDetailPage() {
         description="Full artifact profile and digital identity"
         backPath="/artifacts"
         backLabel="Back to Catalog"
-        action={hasRole('admin') && artifact && (
+        action={can('artifacts.delete') && artifact && (
           <Button variant="danger" onClick={() => setShowDeleteModal(true)}>
             Delete
           </Button>

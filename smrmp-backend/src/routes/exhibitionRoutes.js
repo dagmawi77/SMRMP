@@ -8,15 +8,15 @@ const {
   createValidation,
 } = require('../controllers/exhibitionController');
 const { protect } = require('../middleware/auth');
-const { isCuratorPlus, isAdmin } = require('../middleware/roleGuard');
+const { requirePermission } = require('../middleware/permissionGuard');
 
 const router = express.Router();
 
 router.use(protect);
-router.get('/', isCuratorPlus, getAllExhibitions);
-router.post('/', isCuratorPlus, createValidation, createExhibition);
-router.get('/:id', isCuratorPlus, getExhibitionById);
-router.put('/:id', isCuratorPlus, updateExhibition);
-router.delete('/:id', isAdmin, deleteExhibition);
+router.get('/', requirePermission('exhibitions.read'), getAllExhibitions);
+router.post('/', requirePermission('exhibitions.create'), createValidation, createExhibition);
+router.get('/:id', requirePermission('exhibitions.read'), getExhibitionById);
+router.put('/:id', requirePermission('exhibitions.update'), updateExhibition);
+router.delete('/:id', requirePermission('exhibitions.delete'), deleteExhibition);
 
 module.exports = router;

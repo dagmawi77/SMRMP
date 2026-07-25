@@ -1,7 +1,5 @@
 ﻿/**
- * BE-TKT-004 — Ticket routes
- * Section 4: types, purchase, verify
- * BE-TKT-001: staff list (GET /)
+ * Ticket routes — public types/purchase; staff list/verify via permissions
  */
 const express = require('express');
 const {
@@ -12,16 +10,14 @@ const {
   purchaseValidation,
 } = require('../controllers/ticketController');
 const { protect } = require('../middleware/auth');
-const { isStaff } = require('../middleware/roleGuard');
+const { requirePermission } = require('../middleware/permissionGuard');
 
 const router = express.Router();
 
-// Public
 router.get('/types', getTicketTypes);
 router.post('/purchase', purchaseValidation, purchaseTicket);
 
-// Staff / Admin
-router.get('/verify/:code', protect, isStaff, verifyTicket);
-router.get('/', protect, isStaff, listTickets);
+router.get('/verify/:code', protect, requirePermission('tickets.verify'), verifyTicket);
+router.get('/', protect, requirePermission('tickets.list'), listTickets);
 
 module.exports = router;

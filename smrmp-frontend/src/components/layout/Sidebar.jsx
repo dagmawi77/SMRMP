@@ -3,6 +3,7 @@ import {
   Squares2X2Icon,
   ArchiveBoxIcon,
   TicketIcon,
+  ShieldCheckIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   XMarkIcon,
@@ -16,6 +17,7 @@ const navIconMap = {
   '/dashboard': Squares2X2Icon,
   '/artifacts': ArchiveBoxIcon,
   '/tickets': TicketIcon,
+  '/admin': ShieldCheckIcon,
 };
 
 const PORTAL_TITLE_MAP = {
@@ -35,14 +37,20 @@ const getPortalTitle = (role) => {
 
 export default function Sidebar() {
   const location = useLocation();
-  const { user, hasRole } = useAuthStore();
+  const { user, hasRole, canAny } = useAuthStore();
   const { isMobileOpen, isCollapsed, closeMobile, toggleCollapsed } = useUiStore();
 
   const portalTitle = getPortalTitle(user?.role);
 
-  const visibleItems = NAV_ITEMS.filter(
-    (item) => !item.roles || item.roles.some((role) => hasRole(role)),
-  );
+  const visibleItems = NAV_ITEMS.filter((item) => {
+    if (item.permissions?.length) {
+      return canAny(...item.permissions);
+    }
+    if (item.roles?.length) {
+      return item.roles.some((role) => hasRole(role));
+    }
+    return true;
+  });
 
   return (
     <>

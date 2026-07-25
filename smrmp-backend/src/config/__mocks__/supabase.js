@@ -79,6 +79,15 @@ const getSupabaseAdmin = () => ({
         }
         return { data: {}, error: null };
       },
+      updateUserById: async (userId, updates) => {
+        for (const entry of sessions.values()) {
+          if (entry.user.id === userId) {
+            if (updates.password) entry.password = updates.password;
+            return { data: { user: entry.user }, error: null };
+          }
+        }
+        return { data: { user: null }, error: { message: 'User not found' } };
+      },
     },
   },
 });

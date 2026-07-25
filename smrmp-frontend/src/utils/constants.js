@@ -62,7 +62,12 @@ export const PAYMENT_METHODS = [
 ];
 
 export const NAV_ITEMS = [
-  { label: 'Dashboard', path: '/dashboard', roles: ['admin', 'curator', 'conservation', 'maintenance'] },
-  { label: 'Artifacts', path: '/artifacts', roles: ['admin', 'curator', 'conservation', 'researcher'] },
+  { label: 'Dashboard', path: '/dashboard', permissions: ['dashboard.read'] },
+  { label: 'Artifacts', path: '/artifacts', permissions: ['artifacts.read'] },
   { label: 'Tickets', path: '/tickets', roles: ['admin', 'visitor'] },
+  {
+    label: 'Access control',
+    path: '/admin',
+    permissions: ['users.read', 'roles.read'],
+  },
 ];

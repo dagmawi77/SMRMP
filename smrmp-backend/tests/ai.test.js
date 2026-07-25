@@ -49,13 +49,14 @@ jest.mock('../src/services/aiService', () => ({
 }));
 
 const app = require('../src/app');
-const { sequelize, User, Artifact } = require('../src/models');
+const { User, Artifact } = require('../src/models');
+const { resetDbWithRbac } = require('./helpers/db');
 
 describe('AI API — Phase 2', () => {
   let token;
 
   beforeAll(async () => {
-    await sequelize.sync({ force: true });
+    const roles = await resetDbWithRbac();
     resetAuthMock();
 
     const curator = await User.create({
@@ -63,6 +64,7 @@ describe('AI API — Phase 2', () => {
       email: 'curator@smrmp.dev',
       password: null,
       role: 'curator',
+      role_id: roles.curator.id,
     });
     registerAuthUser({
       id: curator.id,
