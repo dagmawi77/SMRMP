@@ -150,14 +150,7 @@ export default function App() {
               </PrivateRoute>
             )}
           />
-          <Route
-            path="/admin/settings"
-            element={(
-              <PrivateRoute permissions="users.read">
-                <AdminSettingsPage />
-              </PrivateRoute>
-            )}
-          />
+          <Route path="/admin/settings" element={<Navigate to="/settings" replace />} />
           <Route path="/users" element={<Navigate to="/admin/users" replace />} />
 
           <Route path="/public/artifacts/:id" element={<Navigate to="/artifacts" replace />} />
