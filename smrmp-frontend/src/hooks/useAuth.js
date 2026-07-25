@@ -23,45 +23,46 @@ export default function useAuth() {
       const email = credentials.email.trim().toLowerCase();
       const { password } = credentials;
 
-      // Supabase Auth owns the credential check + session tokens.
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      // One API hop: backend signs in with Supabase and returns profile + tokens.
+      // Avoids browser → Supabase Auth, then browser → /auth/me → Auth again.
+      const res = await authApi.login({ email, password });
+      const payload = res.data?.data;
+      const accessToken = payload?.token;
+      const refreshToken = payload?.refresh_token;
+      const userData = payload?.user;
 
-      if (error || !data.session?.access_token) {
-        const err = new Error(error?.message || 'Invalid email or password.');
-        err.code = error?.code;
-        err.status = error?.status ?? 401;
-        throw err;
-      }
-
-      const accessToken = data.session.access_token;
-      // Make the token available to axios before /auth/me runs.
-      setToken(accessToken);
-
-      let userData;
-      try {
-        const res = await authApi.getMe();
-        userData = res.data?.data?.user;
-      } catch (profileError) {
-        await supabase.auth.signOut();
-        clearAuth();
-        throw profileError;
-      }
-
-      if (!userData) {
-        await supabase.auth.signOut();
-        clearAuth();
+      if (!accessToken || !userData) {
         throw new Error('Unexpected login response from server');
       }
 
+      // Hydrate app state before setSession so SIGNED_IN skips a duplicate /auth/me.
       setAuth(userData, accessToken);
+
       toast.success(`Welcome back, ${userData.name}!`);
       navigate(ROLE_REDIRECTS[userData.role] || '/dashboard', { replace: true });
+
+      // Persist Supabase session in the background — don't delay the redirect.
+      if (refreshToken) {
+        void supabase.auth
+          .setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          })
+          .then(({ error: sessionError }) => {
+            if (sessionError) {
+              console.warn(
+                '[AUTH] Failed to persist Supabase session:',
+                sessionError.message,
+              );
+            }
+          });
+      } else {
+        setToken(accessToken);
+      }
+
       return userData;
     },
-    [navigate, setAuth, setToken, clearAuth],
+    [navigate, setAuth, setToken],
   );
 
   const logout = useCallback(async () => {

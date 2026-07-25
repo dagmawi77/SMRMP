@@ -70,7 +70,9 @@ export default function useSessionRestore() {
 
       if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') {
         setToken(session.access_token);
-        if (event === 'SIGNED_IN' && !useAuthStore.getState().user) {
+        // Login already hydrates via /auth/login; only fetch profile when missing.
+        const { user, isAuthenticated } = useAuthStore.getState();
+        if (event === 'SIGNED_IN' && !user && !isAuthenticated) {
           await hydrateFromSession(session);
         }
       }
