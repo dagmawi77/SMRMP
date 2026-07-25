@@ -148,7 +148,7 @@ export default function SetPasswordPage() {
       <main>
         <section
           aria-labelledby="set-password-title"
-          className="relative flex min-h-[calc(100vh-130px)] items-center justify-center overflow-hidden px-6 py-16 sm:py-24"
+          className="relative flex min-h-[calc(100vh-130px)] items-start justify-center overflow-hidden px-6 pt-6 pb-12 sm:pt-10 sm:pb-16"
         >
           <div
             aria-hidden="true"
@@ -164,11 +164,7 @@ export default function SetPasswordPage() {
           />
 
           <div className="relative z-10 mx-auto w-full max-w-md">
-            <div className="mb-8 text-center">
-              <div className="mx-auto mb-6 h-px w-16 bg-smrmp-gold opacity-60" aria-hidden="true" />
-              <p className="mb-3 text-xs font-bold uppercase tracking-[0.4em] text-smrmp-gold">
-                Credential Setup
-              </p>
+            <div className="mb-6 text-center">
               <h1
                 id="set-password-title"
                 className="font-display text-3xl tracking-tight sm:text-4xl"
@@ -332,7 +328,7 @@ export default function SetPasswordPage() {
                   to="/login"
                   className="text-xs font-semibold text-smrmp-gold hover:text-white transition-colors"
                 >
-                  Return to Staff Login
+                  Back to Sign In
                 </Link>
               </div>
             </div>
