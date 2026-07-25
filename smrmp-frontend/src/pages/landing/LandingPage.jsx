@@ -1,11 +1,9 @@
 import { useEffect } from 'react';
 import LandingFooter from './components/LandingFooter';
 import LandingNav from './components/LandingNav';
-import AudienceCard from './components/AudienceCard';
 import HeroSection from './components/HeroSection';
 import ExhibitionsSection from './components/ExhibitionsSection';
 import TrustSection from './components/TrustSection';
-import { audienceCards } from './landingData';
 
 export default function LandingPage() {
   useEffect(() => {
@@ -47,12 +45,6 @@ export default function LandingPage() {
         <HeroSection />
         <ExhibitionsSection />
         <TrustSection />
-        <section className="bg-smrmp-deep-green px-6 py-12 sm:py-16" aria-labelledby="audience-title">
-          <h2 id="audience-title" className="sr-only">Explore SMRMP by audience</h2>
-          <div className="mx-auto grid max-w-6xl gap-4 sm:grid-cols-3">
-            {audienceCards.map((audience) => <AudienceCard key={audience.title} audience={audience} />)}
-          </div>
-        </section>
       </main>
       <LandingFooter />
     </div>
