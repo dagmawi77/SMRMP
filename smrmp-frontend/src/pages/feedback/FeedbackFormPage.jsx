@@ -159,6 +159,7 @@ export default function FeedbackFormPage() {
       <div className="max-w-2xl">
         <PortalPageHeader
           showTitle={false}
+          showBack={false}
           title="Leave Feedback"
           description="Help us improve the museum experience for future visitors"
         />

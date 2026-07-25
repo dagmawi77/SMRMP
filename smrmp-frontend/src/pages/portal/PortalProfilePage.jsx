@@ -59,6 +59,7 @@ export default function PortalProfilePage() {
     <>
       <PortalPageHeader
         showTitle={false}
+        showBack={false}
         icon={UserCircleIcon}
         title="My profile"
         description="Keep your contact details up to date."
