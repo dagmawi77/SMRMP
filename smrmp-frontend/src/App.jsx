@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import ErrorBoundary from './components/ui/ErrorBoundary';
 import PrivateRoute from './components/layout/PrivateRoute';
+import useSessionRestore from './hooks/useSessionRestore';
 import LandingPage from './pages/landing/LandingPage';
 import LoginPage from './pages/auth/LoginPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
@@ -11,6 +12,8 @@ import PublicArtifactPage from './pages/visitor/PublicArtifactPage';
 import TicketPurchasePage from './pages/tickets/TicketPurchasePage';
 
 export default function App() {
+  useSessionRestore();
+
   return (
     <ErrorBoundary>
       <BrowserRouter>
