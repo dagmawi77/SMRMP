@@ -233,13 +233,18 @@ const getMyVisits = async (req, res) => {
 
 const getMyTickets = async (req, res) => {
   try {
-    const or = [{ purchased_by_user_id: req.user.id }];
+    const conditions = [{ purchased_by_user_id: req.user.id }];
     if (req.user.phone) {
-      or.push({ visitor_phone: { [Op.iLike]: String(req.user.phone).trim() } });
+      const cleanPhone = String(req.user.phone).trim();
+      conditions.push({ visitor_phone: { [Op.iLike]: cleanPhone } });
+      const digits = cleanPhone.replace(/\D/g, '');
+      if (digits.length >= 9) {
+        conditions.push({ visitor_phone: { [Op.iLike]: `%${digits.slice(-9)}%` } });
+      }
     }
 
     const tickets = await Ticket.findAll({
-      where: { [Op.or]: or },
+      where: { [Op.or]: conditions },
       order: [['created_at', 'DESC']],
       limit: 100,
     });
@@ -252,13 +257,22 @@ const getMyTickets = async (req, res) => {
 
 const getMyBookings = async (req, res) => {
   try {
-    const email = req.user.email;
-    if (!email) {
-      return sendSuccess(res, 200, 'Bookings retrieved', { bookings: [] });
+    const conditions = [{ created_by: req.user.id }];
+    if (req.user.email) {
+      conditions.push({ contact_email: { [Op.iLike]: req.user.email.trim() } });
     }
+    if (req.user.phone) {
+      const cleanPhone = String(req.user.phone).trim();
+      conditions.push({ contact_phone: { [Op.iLike]: cleanPhone } });
+      const digits = cleanPhone.replace(/\D/g, '');
+      if (digits.length >= 9) {
+        conditions.push({ contact_phone: { [Op.iLike]: `%${digits.slice(-9)}%` } });
+      }
+    }
+
     const bookings = await GroupBooking.findAll({
-      where: { contact_email: { [Op.iLike]: email } },
-      order: [['visit_date', 'DESC']],
+      where: { [Op.or]: conditions },
+      order: [['created_at', 'DESC']],
       limit: 50,
     });
     return sendSuccess(res, 200, 'Bookings retrieved', { bookings });

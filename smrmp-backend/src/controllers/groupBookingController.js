@@ -80,6 +80,11 @@ const createGroupBooking = async (req, res) => {
     const guideRequired = Boolean(req.body.guide_required);
     const { pricePerPerson, totalAmount } = calculatePricing(count, guideRequired);
 
+    const payment_status = req.body.payment_status || 'pending';
+    const payment_reference = req.body.payment_reference || null;
+    const initialStatus =
+      req.body.status || (payment_status === 'completed' ? 'confirmed' : 'pending');
+
     const booking = await GroupBooking.create({
       booking_reference: generateBookingReference(),
       group_name: String(group_name).trim(),
@@ -94,8 +99,10 @@ const createGroupBooking = async (req, res) => {
       special_requirements: req.body.special_requirements || null,
       price_per_person: pricePerPerson,
       total_amount: totalAmount,
-      status: 'pending',
-      payment_status: 'pending',
+      status: initialStatus,
+      payment_status,
+      payment_reference,
+      confirmed_at: payment_status === 'completed' ? new Date() : null,
       created_by: req.user?.id || null,
     });
 

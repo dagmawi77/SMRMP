@@ -14,13 +14,13 @@ const {
   getBookingCalendar,
   generateInvoice,
 } = require('../controllers/groupBookingController');
-const { protect } = require('../middleware/auth');
+const { protect, optionalProtect } = require('../middleware/auth');
 const { requirePermission } = require('../middleware/permissionGuard');
 
 const router = express.Router();
 
-// Public submission
-router.post('/', createGroupBooking);
+// Public submission (attaches req.user if Bearer token present)
+router.post('/', optionalProtect, createGroupBooking);
 
 // Static paths before /:id
 router.get('/today', protect, requirePermission('bookings.read'), getTodaysBookings);

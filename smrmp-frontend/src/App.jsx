@@ -83,7 +83,7 @@ export default function App() {
           <Route
             path="/book-group-visit"
             element={(
-              <RedirectVisitorsToPortal to="/portal/bookings/new">
+              <RedirectVisitorsToPortal to="/portal/tickets/buy?tab=group">
                 <PublicGroupBookingPage />
               </RedirectVisitorsToPortal>
             )}
@@ -151,7 +151,7 @@ export default function App() {
           <Route
             path="/maintenance/tasks"
             element={(
-              <PrivateRoute permissions="maintenance.read" roles={['maintenance']}>
+              <PrivateRoute permissions="maintenance.read" roles={['maintenance', 'admin']}>
                 <AssignedTasksPage />
               </PrivateRoute>
             )}
@@ -371,11 +371,7 @@ export default function App() {
             />
             <Route
               path="bookings"
-              element={(
-                <PrivateRoute roles={['visitor']} permissions="portal.bookings">
-                  <PortalBookingsPage />
-                </PrivateRoute>
-              )}
+              element={<Navigate to="/portal/tickets?tab=group" replace />}
             />
             <Route
               path="bookings/new"
