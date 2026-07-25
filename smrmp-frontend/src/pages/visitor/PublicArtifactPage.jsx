@@ -1,5 +1,5 @@
 ﻿import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, CheckCircleIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
 import { useArtifactByQR } from '../../hooks/useArtifacts';
 import Badge from '../../components/ui/Badge';
 import Spinner from '../../components/ui/Spinner';
@@ -144,6 +144,47 @@ export default function PublicArtifactPage() {
           origin={artifact.origin}
           period={artifact.historical_period}
         />
+
+        {/* Public Verified Curator Sign-off Card */}
+        <div className="rounded-2xl border border-[#D4A017]/40 bg-gradient-to-r from-[#FAF6F0] via-[#FAF0D8]/50 to-[#FAF6F0] p-5 shadow-2xs space-y-3">
+          <div className="flex items-center justify-between border-b border-[#E2D6C5] pb-2">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#7C4A2D] flex items-center gap-1.5">
+              <ShieldCheckIcon className="h-4 w-4 text-[#D4A017]" />
+              <span>Catalog Provenance &amp; Verification</span>
+            </span>
+            <span className="text-[10px] font-mono text-[#374B07] bg-white px-2 py-0.5 rounded border border-[#E2D6C5]">
+              SEAL-ADW-2026
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3.5">
+            {artifact.curator?.avatar ? (
+              <img
+                src={artifact.curator.avatar}
+                alt={artifact.curator?.name || 'Curator'}
+                className="h-14 w-14 rounded-2xl object-cover border-2 border-[#D4A017] shadow-sm shrink-0"
+              />
+            ) : (
+              <div className="h-14 w-14 rounded-2xl bg-[#374B07] text-[#D4A017] font-display font-bold text-xl flex items-center justify-center border-2 border-[#D4A017]/40 shadow-sm shrink-0">
+                {(artifact.curator?.name || 'Kassahun Tadesse').charAt(0).toUpperCase()}
+              </div>
+            )}
+            <div>
+              <div className="flex items-center gap-1.5">
+                <p className="text-sm font-bold text-[#2B1B12]">
+                  {artifact.curator?.name || 'Kassahun Tadesse'}
+                </p>
+                <CheckCircleIcon className="h-4 w-4 text-emerald-600" title="Verified Curator" />
+              </div>
+              <p className="text-xs text-[#7C4A2D] font-semibold">
+                Senior Curator of Adwa Victory Collections
+              </p>
+              <p className="text-[11px] text-[#6E5445] mt-0.5">
+                Adwa Victory Memorial Museum Authority • Reviewed &amp; Verified
+              </p>
+            </div>
+          </div>
+        </div>
 
         <footer className="pb-8 text-center text-xs text-[#6E5445]">
           <p className="font-semibold">{MUSEUM_NAME}</p>

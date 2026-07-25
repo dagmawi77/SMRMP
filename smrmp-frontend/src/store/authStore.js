@@ -16,6 +16,17 @@ const useAuthStore = create(
           isAuthenticated: Boolean(token && user),
         }),
 
+      updateUser: (partialUser) =>
+        set((state) => {
+          const updatedUser = state.user
+            ? { ...state.user, ...partialUser }
+            : partialUser;
+          if (updatedUser) {
+            localStorage.setItem('smrmp_user', JSON.stringify(updatedUser));
+          }
+          return { user: updatedUser };
+        }),
+
       setToken: (token) =>
         set((state) => ({
           token,

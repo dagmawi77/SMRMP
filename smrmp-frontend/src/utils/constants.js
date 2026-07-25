@@ -76,6 +76,7 @@ export const NAV_ITEMS = [
       { label: 'Permission catalog', path: '/admin/permissions' },
     ],
   },
+  { label: 'Settings', path: '/settings', permissions: [] },
 ];
 
 export const STAFF_ROLE_OPTIONS = [
