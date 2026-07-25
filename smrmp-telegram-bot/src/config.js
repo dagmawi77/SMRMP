@@ -11,7 +11,7 @@ function required(name) {
 
 const config = {
   botToken: required('TELEGRAM_BOT_TOKEN'),
-  apiUrl: (process.env.SMRMP_API_URL || 'http://localhost:5000/api').replace(/\/$/, ''),
+  apiUrl: (process.env.SMRMP_API_URL || 'http://127.0.0.1:5000/api').replace(/\/$/, ''),
   frontendUrl: (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, ''),
   museumName: process.env.MUSEUM_NAME || 'Adwa Victory Memorial Museum',
   museumPhone: process.env.MUSEUM_PHONE || null,

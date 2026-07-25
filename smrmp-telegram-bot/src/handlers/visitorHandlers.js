@@ -172,32 +172,50 @@ async function showExhibitions(ctx) {
 
 async function showTickets(ctx) {
   ensureSession(ctx);
+  let types = [];
+  let info = {};
+
   try {
-    const [types, info] = await Promise.all([
+    [types, info] = await Promise.all([
       api.getTicketTypes(),
-      api.getMuseumInfo().catch(() => ({})),
+      api.getMuseumInfo().catch(() => fallbackMuseumInfo()),
     ]);
-    const ticketsUrl = info.tickets_url || `${config.frontendUrl}/tickets`;
+  } catch (error) {
+    console.error('[tickets] API error:', error.message);
+    const ticketsUrl = `${config.frontendUrl}/tickets`;
+    await ctx.reply(
+      `${tr(ctx, 'apiDown')}\n\nYou can still buy tickets here:\n${ticketsUrl}`,
+      {
+        ...ticketsKeyboard(ctx, ticketsUrl),
+        ...mainMenu(ctx),
+      }
+    );
+    return;
+  }
 
-    const lines = [tr(ctx, 'ticketsTitle'), ''];
-    if (!types.length) {
-      lines.push('_No ticket types configured yet._');
-    } else {
-      types.forEach((t) => {
-        lines.push(
-          `*${escapeMd(t.label)}* — ${Number(t.price_etb).toFixed(0)} ETB`,
-          t.description ? truncate(escapeMd(t.description), 200) : null,
-          ''
-        );
-      });
-    }
+  const ticketsUrl = info.tickets_url || `${config.frontendUrl}/tickets`;
+  const lines = [tr(ctx, 'ticketsTitle').replace(/\*/g, ''), ''];
 
-    await ctx.reply(lines.filter((x) => x !== null).join('\n'), {
-      parse_mode: 'Markdown',
-      ...ticketsKeyboard(ctx, ticketsUrl),
+  if (!types.length) {
+    lines.push('No ticket types configured yet.');
+  } else {
+    types.forEach((ticketType) => {
+      const price = Number(ticketType.price_etb);
+      const priceText = Number.isFinite(price) ? `${price.toFixed(0)} ETB` : 'Price TBA';
+      lines.push(`• ${ticketType.label || ticketType.type} — ${priceText}`);
+      if (ticketType.description) {
+        lines.push(`  ${truncate(String(ticketType.description), 200)}`);
+      }
     });
-  } catch (_e) {
-    await ctx.reply(tr(ctx, 'apiDown'), mainMenu(ctx));
+  }
+
+  lines.push('', `Buy online: ${ticketsUrl}`);
+
+  try {
+    await ctx.reply(lines.join('\n'), ticketsKeyboard(ctx, ticketsUrl));
+  } catch (error) {
+    console.error('[tickets] Telegram send error:', error.message);
+    await ctx.reply(lines.join('\n'), mainMenu(ctx));
   }
 }
 
