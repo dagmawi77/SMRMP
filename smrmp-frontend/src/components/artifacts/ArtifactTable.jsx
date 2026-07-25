@@ -57,8 +57,13 @@ export default function ArtifactTable({ artifacts, loading, onRowClick }) {
     },
     {
       key: 'condition_status',
-      label: 'Condition',
-      render: (row) => <Badge variant={row.condition_status}>{row.condition_status}</Badge>,
+      label: 'Condition / Status',
+      render: (row) => (
+        <div className="flex flex-wrap items-center gap-1.5">
+          <Badge variant={row.condition_status}>{row.condition_status}</Badge>
+          {row.is_on_loan && <Badge variant="on_loan">On Loan</Badge>}
+        </div>
+      ),
     },
     {
       key: 'created_at',
