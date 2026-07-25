@@ -14,7 +14,7 @@ export const ROLE_REDIRECTS = {
   admin: '/dashboard',
   curator: '/dashboard',
   conservation: '/dashboard',
-  maintenance: '/maintenance',
+  maintenance: '/dashboard',
   researcher: '/artifacts',
   visitor: '/tickets/buy',
 };
@@ -62,11 +62,11 @@ export const PAYMENT_METHODS = [
 ];
 
 export const NAV_ITEMS = [
-  { label: 'Dashboard', path: '/dashboard', permissions: ['dashboard.read'], roles: ['admin', 'curator', 'conservation'] },
+  { label: 'Dashboard', path: '/dashboard', permissions: ['dashboard.read'], roles: ['admin', 'curator', 'conservation', 'maintenance'] },
+  { label: 'Assigned Tasks', path: '/maintenance/tasks', roles: ['maintenance'] },
   { label: 'Artifacts', path: '/artifacts', permissions: ['artifacts.read'], roles: ['admin', 'curator', 'conservation', 'researcher'] },
   { label: 'Exhibitions', path: '/exhibitions', permissions: ['exhibitions.read'], roles: ['curator'] },
-  { label: 'Maintenance', path: '/maintenance', roles: ['maintenance'] },
-  { label: 'Tickets', path: '/tickets/manage', permissions: ['tickets.list'] },
+  { label: 'Tickets', path: '/tickets/manage', permissions: ['tickets.list'], excludeRoles: ['maintenance'] },
   {
     label: 'Access control',
     path: '/admin/users',
