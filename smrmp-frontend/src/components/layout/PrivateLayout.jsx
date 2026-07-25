@@ -7,9 +7,11 @@ export default function PrivateLayout({ children }) {
       <Sidebar />
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <Navbar />
-        <main className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6 max-w-7xl w-full mx-auto">
-          {children}
-        </main>
+        <div className="min-h-0 flex-1 overflow-y-auto w-full">
+          <main className="p-4 sm:p-6 max-w-7xl w-full mx-auto">
+            {children}
+          </main>
+        </div>
       </div>
     </div>
   );
