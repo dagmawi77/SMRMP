@@ -28,8 +28,15 @@ export function useGroupBooking(id) {
 }
 
 export function useCreateGroupBooking() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data) => groupBookingApi.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['portal-bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['portal-tickets'] });
+      queryClient.invalidateQueries({ queryKey: ['portal-dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['group-bookings'] });
+    },
   });
 }
 
