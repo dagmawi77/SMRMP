@@ -106,7 +106,7 @@ export default function Sidebar() {
             </div>
             {(!isCollapsed || isMobileOpen) && (
               <div className="min-w-0 truncate">
-                <p className="truncate font-display text-base font-bold tracking-tight text-[#2B1B12] transition-colors group-hover:text-[#7C4A2D]">SMRMP</p>
+                <p className="truncate font-display text-xs font-bold tracking-tight text-[#2B1B12] transition-colors group-hover:text-[#7C4A2D]" title="Adwa Victory Memorial">Adwa Victory Memorial</p>
                 <p className="truncate text-[10px] font-bold uppercase tracking-wider text-[#6E5445]">{portalTitle}</p>
               </div>
             )}
@@ -128,7 +128,6 @@ export default function Sidebar() {
         </div>
 
         <nav aria-label="Primary navigation" className="flex-1 space-y-1.5 overflow-y-auto px-3 py-6">
-          <p className={`px-3.5 pb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[#8B7668] ${isCollapsed && !isMobileOpen ? 'sr-only' : ''}`}>Museum operations</p>
           {visibleItems.map((item) => {
             const Icon = navIconMap[item.path] || Squares2X2Icon;
             const active = isPathActive(item.path);
