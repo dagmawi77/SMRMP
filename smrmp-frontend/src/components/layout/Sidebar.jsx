@@ -8,9 +8,9 @@ import {
   ChevronRightIcon,
   Cog6ToothIcon,
   ShieldCheckIcon,
+  ClipboardDocumentCheckIcon,
   Squares2X2Icon,
   TicketIcon,
-  WrenchScrewdriverIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { NAV_ITEMS, ROLE_REDIRECTS } from '../../utils/constants';
@@ -20,9 +20,9 @@ import { LogoMark } from '../ui/Logo';
 
 const navIconMap = {
   '/dashboard': Squares2X2Icon,
+  '/maintenance/tasks': ClipboardDocumentCheckIcon,
   '/artifacts': ArchiveBoxIcon,
   '/exhibitions': BuildingLibraryIcon,
-  '/maintenance': WrenchScrewdriverIcon,
   '/tickets': TicketIcon,
   '/tickets/manage': TicketIcon,
   '/admin': ShieldCheckIcon,
@@ -72,6 +72,9 @@ export default function Sidebar() {
   const portalTitle = getPortalTitle(user?.role);
 
   const visibleItems = NAV_ITEMS.filter((item) => {
+    if (item.excludeRoles?.length && item.excludeRoles.some((role) => hasRole(role))) {
+      return false;
+    }
     if (item.permissions?.length) {
       return canAny(...item.permissions);
     }
