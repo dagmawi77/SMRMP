@@ -20,7 +20,9 @@ const navIconMap = {
   '/artifacts': ArchiveBoxIcon,
   '/exhibitions': BuildingLibraryIcon,
   '/tickets': TicketIcon,
+  '/tickets/manage': TicketIcon,
   '/admin': ShieldCheckIcon,
+  '/admin/users': ShieldCheckIcon,
 };
 
 const PORTAL_TITLE_MAP = {
@@ -42,11 +44,25 @@ export default function Sidebar() {
   const location = useLocation();
   const { user, hasRole, canAny } = useAuthStore();
   const { isMobileOpen, isCollapsed, closeMobile, toggleCollapsed } = useUiStore();
-  const [isExhibitionsOpen, setIsExhibitionsOpen] = useState(location.pathname.startsWith('/exhibitions'));
+  const [openMenus, setOpenMenus] = useState(() => {
+    const initial = {};
+    if (location.pathname.startsWith('/exhibitions')) initial['/exhibitions'] = true;
+    if (location.pathname.startsWith('/admin')) initial['/admin/users'] = true;
+    return initial;
+  });
 
   useEffect(() => {
-    if (location.pathname.startsWith('/exhibitions')) setIsExhibitionsOpen(true);
+    if (location.pathname.startsWith('/exhibitions')) {
+      setOpenMenus((prev) => ({ ...prev, '/exhibitions': true }));
+    }
+    if (location.pathname.startsWith('/admin')) {
+      setOpenMenus((prev) => ({ ...prev, '/admin/users': true }));
+    }
   }, [location.pathname]);
+
+  const toggleMenu = (path) => {
+    setOpenMenus((prev) => ({ ...prev, [path]: !prev[path] }));
+  };
 
   const portalTitle = getPortalTitle(user?.role);
 
@@ -149,17 +165,17 @@ export default function Sidebar() {
                   {(!isCollapsed || isMobileOpen) && (
                     <button
                       type="button"
-                      aria-label={`${isExhibitionsOpen ? 'Collapse' : 'Expand'} ${item.label} menu`}
-                      aria-expanded={isExhibitionsOpen}
-                      onClick={() => setIsExhibitionsOpen((open) => !open)}
+                      aria-label={`${openMenus[item.path] ? 'Collapse' : 'Expand'} ${item.label} menu`}
+                      aria-expanded={Boolean(openMenus[item.path])}
+                      onClick={() => toggleMenu(item.path)}
                       className="mr-2 rounded-lg p-1.5 text-[#7C4A2D] transition hover:bg-[#FAF0E4] focus:outline-none focus:ring-2 focus:ring-smrmp-gold/60"
                     >
-                      <ChevronDownIcon className={`h-4 w-4 transition-transform ${isExhibitionsOpen ? 'rotate-180' : ''}`} />
+                      <ChevronDownIcon className={`h-4 w-4 transition-transform ${openMenus[item.path] ? 'rotate-180' : ''}`} />
                     </button>
                   )}
                 </div>
 
-                {(!isCollapsed || isMobileOpen) && isExhibitionsOpen && (
+                {(!isCollapsed || isMobileOpen) && Boolean(openMenus[item.path]) && (
                   <div className="ml-5 mt-1 space-y-0.5 border-l border-[#D8C8B8] pl-3">
                     {item.children.map((child) => {
                       const childIsActive = isPathActive(child.path);

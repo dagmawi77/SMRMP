@@ -41,8 +41,8 @@ export default function AdminPermissionsPage() {
         title="Permission catalog"
         description="All assignable permission codes (GET /api/roles/permissions)."
         showBack
-        backPath="/admin"
-        backLabel="Back to Access control"
+        backPath="/admin/users"
+        backLabel="Back to User accounts"
         action={(
           <Link
             to="/admin/roles"

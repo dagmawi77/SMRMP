@@ -19,8 +19,7 @@ import TicketManagementPage from './pages/tickets/TicketManagementPage';
 import TicketDetailPage from './pages/tickets/TicketDetailPage';
 import VisitorRegistrationPage from './pages/visitor/VisitorRegistrationPage';
 import ExhibitionDashboardPage from './pages/exhibitions/ExhibitionDashboardPage';
-import AdminAccessPage from './pages/admin/AdminAccessPage';
-import AdminUsersPage from './pages/admin/AdminUsersPage';
+import UsersPage from './pages/users/UsersPage';
 import AdminRolesPage from './pages/admin/AdminRolesPage';
 import AdminPermissionsPage from './pages/admin/AdminPermissionsPage';
 
@@ -115,19 +114,12 @@ export default function App() {
               </PrivateRoute>
             )}
           />
-          <Route
-            path="/admin"
-            element={(
-              <PrivateRoute permissions={['users.read', 'roles.read']} anyPermission>
-                <AdminAccessPage />
-              </PrivateRoute>
-            )}
-          />
+          <Route path="/admin" element={<Navigate to="/admin/users" replace />} />
           <Route
             path="/admin/users"
             element={(
               <PrivateRoute permissions="users.read">
-                <AdminUsersPage />
+                <UsersPage />
               </PrivateRoute>
             )}
           />
