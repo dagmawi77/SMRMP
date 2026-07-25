@@ -17,6 +17,7 @@ export default function PortalVisitsPage() {
     <>
       <PortalPageHeader
         showTitle={false}
+        showBack={false}
         icon={CalendarDaysIcon}
         title="Visit history"
         description={`${data?.total_visits ?? 0} recorded visit(s) at the museum.`}

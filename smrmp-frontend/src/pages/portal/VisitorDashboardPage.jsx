@@ -8,6 +8,7 @@ import {
   TicketIcon,
   UserGroupIcon,
 } from '@heroicons/react/24/outline';
+import BuyTicketsDropdown from '../../components/tickets/BuyTicketsDropdown';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import Spinner from '../../components/ui/Spinner';
@@ -17,7 +18,7 @@ import { formatDate } from '../../utils/formatters';
 
 const FALLBACK_QUICK_LINKS = [
   { label: 'Buy tickets', path: '/portal/tickets/buy', icon: ShoppingBagIcon },
-  { label: 'Book a group visit', path: '/portal/bookings/new', icon: UserGroupIcon },
+  { label: 'Book a group visit', path: '/portal/tickets/buy?tab=group', icon: UserGroupIcon },
   { label: 'Leave feedback', path: '/portal/feedback', icon: BuildingLibraryIcon },
 ];
 
@@ -47,13 +48,7 @@ export default function VisitorDashboardPage() {
               Manage your passes, membership, and museum visits from your personal dashboard.
             </p>
           </div>
-          <Link
-            to="/portal/tickets/buy"
-            className="inline-flex items-center gap-2 rounded-xl bg-smrmp-gold px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-[#1C120B] transition hover:bg-white"
-          >
-            <ShoppingBagIcon className="h-4 w-4" aria-hidden="true" />
-            <span>Buy tickets</span>
-          </Link>
+          <BuyTicketsDropdown variant="gold" size="lg" buttonText="Buy tickets" />
         </div>
         <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-smrmp-gold/10 blur-2xl" />
       </section>
