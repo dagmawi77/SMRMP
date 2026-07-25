@@ -13,6 +13,7 @@ const ArtifactImage = sequelize.define(
       type: DataTypes.UUID,
       allowNull: false,
       references: { model: 'artifacts', key: 'id' },
+      onDelete: 'CASCADE',
     },
     file_path: {
       type: DataTypes.STRING(500),

@@ -1,4 +1,18 @@
-﻿// TODO: implement useDashboard
-export default function useDashboard() {
-  return {};
+﻿import { useQuery } from '@tanstack/react-query';
+import { dashboardApi } from '../api/dashboardApi';
+
+export function useDashboardStats() {
+  return useQuery({
+    queryKey: ['dashboard', 'stats'],
+    queryFn: () => dashboardApi.getStats(),
+    select: (res) => res.data.data,
+  });
+}
+
+export function useDashboardCharts() {
+  return useQuery({
+    queryKey: ['dashboard', 'charts'],
+    queryFn: () => dashboardApi.getCharts(),
+    select: (res) => res.data.data,
+  });
 }
