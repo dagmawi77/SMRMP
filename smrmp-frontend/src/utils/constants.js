@@ -16,8 +16,12 @@ export const ROLE_REDIRECTS = {
   conservation: '/dashboard',
   maintenance: '/maintenance',
   researcher: '/artifacts',
-  visitor: '/tickets/buy',
+  visitor: '/portal',
 };
+
+export function getHomePath(role) {
+  return ROLE_REDIRECTS[role] || '/dashboard';
+}
 
 export const ARTIFACT_CATEGORIES = [
   { value: 'weapon', label: 'Weapon' },
@@ -68,6 +72,20 @@ export const NAV_ITEMS = [
   { label: 'Maintenance', path: '/maintenance', roles: ['maintenance'] },
   { label: 'Tickets', path: '/tickets/manage', permissions: ['tickets.list'] },
   {
+    // Curator Portal only — not shown in Admin sidebar
+    label: 'Visitor Relations',
+    path: '/visitors',
+    roles: ['curator'],
+    permissions: ['visitors.read', 'members.read', 'bookings.read', 'feedback.read'],
+    children: [
+      { label: 'Visitors', path: '/visitors', roles: ['curator'], permissions: ['visitors.read'] },
+      { label: 'Analytics', path: '/visitors/analytics', roles: ['curator'], permissions: ['visitors.read'] },
+      { label: 'Memberships', path: '/memberships', roles: ['curator'], permissions: ['members.read'] },
+      { label: 'Group Bookings', path: '/group-bookings', roles: ['curator'], permissions: ['bookings.read'] },
+      { label: 'Feedback', path: '/feedback/dashboard', roles: ['curator'], permissions: ['feedback.read'] },
+    ],
+  },
+  {
     label: 'Access control',
     path: '/admin/users',
     permissions: ['users.read', 'roles.read'],
@@ -82,7 +100,7 @@ export const NAV_ITEMS = [
 
 export const STAFF_ROLE_OPTIONS = [
   { value: 'admin', label: 'Administrator', description: 'Full system configuration, security & user management' },
-  { value: 'curator', label: 'Curator', description: 'Exhibition management, cataloging & ticketing control' },
+  { value: 'curator', label: 'Curator', description: 'Exhibitions, cataloging, ticketing & Visitor Relations monitoring' },
   { value: 'conservation', label: 'Conservation Specialist', description: 'Artifact condition logging, environmental monitoring & restoration' },
   { value: 'maintenance', label: 'Maintenance Staff', description: 'Facility maintenance, casing security & physical upkeep' },
   { value: 'researcher', label: 'Researcher', description: 'Archival research, historical notes & documentation access' },
@@ -103,4 +121,163 @@ export const ROLE_BADGE_VARIANTS = {
   maintenance: 'poor',
   researcher: 'purple',
   visitor: 'default',
+};
+
+// ─── Module 8 — Visitor & Member Management ──────────────────────
+
+export const VISITOR_TYPES = [
+  { value: 'individual', label: 'Individual' },
+  { value: 'group', label: 'Group' },
+  { value: 'student', label: 'Student' },
+  { value: 'vip', label: 'VIP' },
+  { value: 'member', label: 'Member' },
+  { value: 'researcher', label: 'Researcher' },
+];
+
+export const VISITOR_TYPE_BADGE = {
+  individual: 'default',
+  group: 'good',
+  student: 'fair',
+  vip: 'gold',
+  member: 'excellent',
+  researcher: 'purple',
+};
+
+export const GENDER_OPTIONS = [
+  { value: 'male', label: 'Male' },
+  { value: 'female', label: 'Female' },
+  { value: 'other', label: 'Other' },
+  { value: 'prefer_not_to_say', label: 'Prefer not to say' },
+];
+
+export const LANGUAGE_OPTIONS = [
+  { value: 'en', label: 'English' },
+  { value: 'am', label: 'Amharic' },
+  { value: 'or', label: 'Oromo' },
+  { value: 'ti', label: 'Tigrinya' },
+  { value: 'fr', label: 'French' },
+];
+
+export const ENTRY_METHODS = [
+  { value: 'qr_ticket', label: 'QR Ticket' },
+  { value: 'membership_card', label: 'Membership Card' },
+  { value: 'group_booking', label: 'Group Booking' },
+  { value: 'cash_counter', label: 'Cash Counter' },
+  { value: 'comp', label: 'Complimentary' },
+  { value: 'staff_assisted', label: 'Staff Assisted' },
+];
+
+export const MEMBERSHIP_PAYMENT_METHODS = [
+  { value: 'telebirr', label: 'Telebirr' },
+  { value: 'chapa', label: 'Chapa' },
+  { value: 'cash', label: 'Cash' },
+  { value: 'bank', label: 'Bank Transfer' },
+];
+
+export const MEMBERSHIP_STATUS_BADGE = {
+  pending: 'fair',
+  active: 'excellent',
+  expired: 'poor',
+  cancelled: 'critical',
+};
+
+export const GROUP_TYPES = [
+  { value: 'school', label: 'School' },
+  { value: 'tourist', label: 'Tourist Group' },
+  { value: 'corporate', label: 'Corporate' },
+  { value: 'family', label: 'Family' },
+  { value: 'other', label: 'Other' },
+];
+
+export const BOOKING_STATUS_BADGE = {
+  pending: 'fair',
+  confirmed: 'good',
+  completed: 'excellent',
+  cancelled: 'critical',
+};
+
+export const FEEDBACK_CATEGORIES = [
+  { value: 'exhibition', label: 'Exhibition' },
+  { value: 'staff', label: 'Staff' },
+  { value: 'facility', label: 'Facility' },
+  { value: 'ticketing', label: 'Ticketing' },
+  { value: 'overall', label: 'Overall Experience' },
+  { value: 'other', label: 'Other' },
+];
+
+export const FEEDBACK_STATUS_BADGE = {
+  new: 'fair',
+  reviewed: 'good',
+  responded: 'excellent',
+  published: 'gold',
+  archived: 'default',
+};
+
+// ─── Visitor Portal ───────────────────────────────────────────────
+
+/**
+ * Visitor Portal sidebar navigation (implemented features only).
+ * Sections: main · services · account
+ */
+export const VISITOR_NAV_SECTIONS = [
+  {
+    id: 'main',
+    label: 'My museum',
+    items: [
+      { label: 'Dashboard', path: '/portal', icon: 'dashboard' },
+      {
+        label: 'Tickets',
+        path: '/portal/tickets',
+        icon: 'tickets',
+        children: [
+          { label: 'My Tickets', path: '/portal/tickets' },
+          { label: 'Buy Tickets', path: '/portal/tickets/buy' },
+        ],
+      },
+      { label: 'Membership', path: '/portal/membership', icon: 'membership' },
+      { label: 'Visit History', path: '/portal/visits', icon: 'visits' },
+      {
+        label: 'Group Bookings',
+        path: '/portal/bookings',
+        icon: 'bookings',
+        children: [
+          { label: 'My Bookings', path: '/portal/bookings' },
+          { label: 'Book a Group Visit', path: '/portal/bookings/new' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'services',
+    label: 'Services',
+    items: [
+      { label: 'Leave Feedback', path: '/portal/feedback', icon: 'feedback' },
+    ],
+  },
+  {
+    id: 'account',
+    label: 'Account',
+    items: [
+      { label: 'Profile', path: '/portal/profile', icon: 'profile' },
+    ],
+  },
+];
+
+/** Flat list for title/breadcrumb lookups */
+export const VISITOR_NAV_ITEMS = VISITOR_NAV_SECTIONS.flatMap((section) =>
+  section.items.flatMap((item) => (item.children?.length ? [item, ...item.children] : [item])),
+);
+
+export const VISITOR_PAGE_META = {
+  '/portal': { title: 'Dashboard', crumb: 'Home' },
+  '/portal/profile': { title: 'Profile', crumb: 'Profile' },
+  '/portal/membership': { title: 'Membership', crumb: 'Membership' },
+  '/portal/tickets': { title: 'My Tickets', crumb: 'Tickets' },
+  '/portal/tickets/buy': { title: 'Buy Tickets', crumb: 'Buy Tickets', parentCrumb: 'Tickets', parentPath: '/portal/tickets' },
+  '/portal/visits': { title: 'Visit History', crumb: 'Visits' },
+  '/portal/bookings': { title: 'Group Bookings', crumb: 'Bookings' },
+  '/portal/bookings/new': { title: 'Book a Group Visit', crumb: 'New Booking', parentCrumb: 'Bookings', parentPath: '/portal/bookings' },
+  '/portal/feedback': { title: 'Leave Feedback', crumb: 'Feedback' },
+  '/portal/change-password': { title: 'Change Password', crumb: 'Security' },
+  '/change-password': { title: 'Change Password', crumb: 'Security' },
 };

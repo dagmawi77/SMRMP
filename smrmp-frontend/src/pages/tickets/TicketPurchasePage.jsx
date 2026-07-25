@@ -1,19 +1,21 @@
 ﻿import { useEffect, useRef, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useQuery } from '@tanstack/react-query';
 import TicketSelector from '../../components/tickets/TicketSelector';
 import PaymentFlow from '../../components/tickets/PaymentFlow';
 import DigitalTicket from '../../components/tickets/DigitalTicket';
 import Button from '../../components/ui/Button';
-import Logo from '../../components/ui/Logo';
+import PublicSiteShell from '../../components/layout/PublicSiteShell';
+import PortalPageHeader from '../../components/layout/PortalPageHeader';
 import { ticketApi } from '../../api/ticketApi';
-import { MUSEUM_NAME } from '../../utils/constants';
 import { TELEBIRR_RESULT_KEY } from '../../utils/telebirrCheckout';
 import { ArrowLeftIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import usePortalEmbed from '../../hooks/usePortalEmbed';
 
 export default function TicketPurchasePage() {
   const location = useLocation();
+  const embedded = usePortalEmbed();
   const telebirrHandled = useRef(false);
   const [step, setStep] = useState(1);
   const [ticketType, setTicketType] = useState('');
@@ -59,7 +61,6 @@ export default function TicketPurchasePage() {
     }
   };
 
-  // Return from Telebirr H5 paygate → complete ticket purchase
   useEffect(() => {
     if (!location.state?.telebirrPaid || telebirrHandled.current) return;
     telebirrHandled.current = true;
@@ -79,18 +80,13 @@ export default function TicketPurchasePage() {
       return;
     }
 
-    setTicketType(result.ticket_type || '');
-    setQuantity(result.quantity || 1);
-    setVisitDate(result.visit_date || '');
-    setIssuingFromTelebirr(true);
-
     handlePurchase({
-      visitor_name: result.visitor_name,
-      visitor_phone: result.visitor_phone,
-      payment_method: 'telebirr',
       ticket_type: result.ticket_type,
       quantity: result.quantity,
       visit_date: result.visit_date,
+      visitor_name: result.visitor_name,
+      visitor_phone: result.visitor_phone || result.phone,
+      payment_method: 'telebirr',
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.state?.telebirrPaid]);
@@ -107,115 +103,127 @@ export default function TicketPurchasePage() {
     toast('Telebirr payment cancelled', { icon: 'ℹ️' });
   }, [location.state?.telebirrCancelled, location.state?.restore]);
 
-  if (purchasedTicket) {
-    return (
-      <div className="visitor-shell min-h-screen bg-smrmp-parchment py-10 font-sans text-[#2B1B12]">
-        <div className="mx-auto max-w-lg px-4">
-          <DigitalTicket ticket={purchasedTicket} paymentInfo={paymentInfo} />
-          <div className="mt-8 text-center">
-            <Link to="/" className="inline-flex items-center gap-2 text-xs font-bold text-[#374B07] hover:underline">
-              <ArrowLeftIcon className="h-3.5 w-3.5" />
-              <span>Return to Museum Portal Overview</span>
-            </Link>
-          </div>
+  const wrap = (node, { title, description, maxWidth = 'max-w-2xl' } = {}) => {
+    if (embedded) {
+      return (
+        <div className={maxWidth}>
+          {title ? (
+            <PortalPageHeader
+              showTitle={false}
+              title={title}
+              description={description}
+            />
+          ) : null}
+          {node}
         </div>
-      </div>
+      );
+    }
+    return (
+      <PublicSiteShell
+        subtitle="Ticketing"
+        pageTitle={title}
+        pageDescription={description}
+        contentClassName={maxWidth}
+      >
+        {node}
+      </PublicSiteShell>
+    );
+  };
+
+  if (purchasedTicket) {
+    return wrap(
+      <DigitalTicket ticket={purchasedTicket} paymentInfo={paymentInfo} />,
+      {
+        title: 'Your digital pass',
+        description: 'Save or screenshot this pass for museum entry.',
+        maxWidth: 'max-w-lg',
+      },
     );
   }
 
   if (issuingFromTelebirr) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-smrmp-parchment px-4">
+    return wrap(
+      <div className="flex flex-col items-center justify-center py-20">
         <div className="h-10 w-10 animate-spin rounded-full border-4 border-smrmp-green border-t-transparent" />
         <p className="mt-4 text-sm font-bold text-[#2B1B12]">Issuing your digital museum pass…</p>
         <p className="mt-1 text-xs text-[#6E5445]">Payment confirmed via telebirr</p>
-      </div>
+      </div>,
+      { maxWidth: 'max-w-lg' },
     );
   }
 
-  return (
-    <div className="visitor-shell min-h-screen bg-smrmp-parchment font-sans text-[#2B1B12]">
-      <header className="bg-gradient-to-r from-[#1C120B] via-[#241710] to-[#120D08] px-6 py-8 text-smrmp-parchment shadow-md border-b border-smrmp-gold/30">
-        <div className="mx-auto max-w-2xl text-center">
-          <Logo className="mx-auto mb-3 h-14 w-auto" decorative />
-          <div className="flex items-center justify-center gap-2 text-smrmp-gold text-xs font-bold uppercase tracking-widest mb-1">
-            <span>{MUSEUM_NAME}</span>
-          </div>
-          <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-white">
-            Purchase Museum Entry Passes
-          </h1>
-          <p className="mt-1 text-xs text-smrmp-parchment/75">Instant digital pass issuance & QR validation</p>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-2xl px-4 py-8">
-        <div className="mb-8 flex justify-center items-center gap-3 sm:gap-6">
-          {['1. Select Pass', '2. Telebirr Checkout', '3. Pass Issued'].map((label, i) => (
-            <div
-              key={label}
-              className={`flex items-center gap-2 text-xs font-bold ${
-                step > i + 1 ? 'text-[#374B07]' : step === i + 1 ? 'text-[#2B1B12]' : 'text-[#887060]'
+  return wrap(
+    <>
+      <div className="mb-8 flex items-center justify-center gap-3 sm:gap-6">
+        {['1. Select Pass', '2. Telebirr Checkout', '3. Pass Issued'].map((label, i) => (
+          <div
+            key={label}
+            className={`flex items-center gap-2 text-xs font-bold ${
+              step > i + 1 ? 'text-[#374B07]' : step === i + 1 ? 'text-[#2B1B12]' : 'text-[#887060]'
+            }`}
+          >
+            <span
+              className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all ${
+                step >= i + 1
+                  ? 'bg-gradient-to-br from-smrmp-green to-smrmp-deep-green text-white shadow-xs'
+                  : 'border border-[#D8C8B8] bg-[#EFE5D8] text-[#7C4A2D]'
               }`}
             >
-              <span
-                className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all ${
-                  step >= i + 1
-                    ? 'bg-gradient-to-br from-smrmp-green to-smrmp-deep-green text-white shadow-xs'
-                    : 'bg-[#EFE5D8] text-[#7C4A2D] border border-[#D8C8B8]'
-                }`}
-              >
-                {step > i + 1 ? <CheckCircleIcon className="h-4 w-4" /> : i + 1}
-              </span>
-              <span className="hidden sm:inline">{label}</span>
-            </div>
-          ))}
-        </div>
+              {step > i + 1 ? <CheckCircleIcon className="h-4 w-4" aria-hidden="true" /> : i + 1}
+            </span>
+            <span className="hidden sm:inline">{label}</span>
+          </div>
+        ))}
+      </div>
 
-        <div className="rounded-3xl border border-[#E2D6C5] bg-[#FAF6F0] p-6 sm:p-8 shadow-xl">
-          {step === 1 && (
-            <>
-              <TicketSelector
-                selected={ticketType}
-                quantity={quantity}
-                onSelect={setTicketType}
-                onQuantityChange={setQuantity}
-                visitDate={visitDate}
-                onDateChange={setVisitDate}
-              />
-              <Button
-                variant="primary"
-                size="lg"
-                disabled={!ticketType || !visitDate}
-                onClick={() => setStep(2)}
-                className="mt-6 w-full"
-              >
-                Continue to Payment Checkout
-              </Button>
-            </>
-          )}
+      <div className="rounded-2xl border border-[#E2D6C5] bg-[#FAF6F0] p-6 shadow-md sm:p-8">
+        {step === 1 && (
+          <>
+            <TicketSelector
+              selected={ticketType}
+              quantity={quantity}
+              onSelect={setTicketType}
+              onQuantityChange={setQuantity}
+              visitDate={visitDate}
+              onDateChange={setVisitDate}
+            />
+            <Button
+              variant="primary"
+              size="lg"
+              disabled={!ticketType || !visitDate}
+              onClick={() => setStep(2)}
+              className="mt-6 w-full"
+            >
+              Continue to Payment Checkout
+            </Button>
+          </>
+        )}
 
-          {step === 2 && (
-            <>
-              <button
-                type="button"
-                onClick={() => setStep(1)}
-                className="mb-4 inline-flex items-center gap-1.5 text-xs font-bold text-[#374B07] hover:underline"
-              >
-                <ArrowLeftIcon className="h-3.5 w-3.5" />
-                <span>Back to ticket selection</span>
-              </button>
-              <PaymentFlow
-                onSubmit={handlePurchase}
-                loading={loading}
-                totalAmount={totalAmount}
-                ticketType={ticketType}
-                quantity={quantity}
-                visitDate={visitDate}
-              />
-            </>
-          )}
-        </div>
-      </main>
-    </div>
+        {step === 2 && (
+          <>
+            <button
+              type="button"
+              onClick={() => setStep(1)}
+              className="mb-4 inline-flex items-center gap-1.5 text-xs font-bold text-[#374B07] hover:underline"
+            >
+              <ArrowLeftIcon className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Back to ticket selection</span>
+            </button>
+            <PaymentFlow
+              onSubmit={handlePurchase}
+              loading={loading}
+              totalAmount={totalAmount}
+              ticketType={ticketType}
+              quantity={quantity}
+              visitDate={visitDate}
+            />
+          </>
+        )}
+      </div>
+    </>,
+    {
+      title: 'Purchase museum entry passes',
+      description: 'Instant digital pass issuance and QR validation',
+    },
   );
 }
