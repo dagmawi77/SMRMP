@@ -67,7 +67,7 @@ export const PAYMENT_METHODS = [
 
 export const NAV_ITEMS = [
   { label: 'Dashboard', path: '/dashboard', permissions: ['dashboard.read'], roles: ['admin', 'curator', 'conservation', 'maintenance'] },
-  { label: 'Assigned Tasks', path: '/maintenance/tasks', roles: ['maintenance'] },
+  { label: 'Assigned Tasks', path: '/maintenance/tasks', permissions: ['maintenance.read'], roles: ['maintenance', 'admin'] },
   { label: 'Artifacts', path: '/artifacts', permissions: ['artifacts.read'], roles: ['admin', 'curator', 'conservation', 'researcher'] },
   { label: 'Exhibitions', path: '/exhibitions', permissions: ['exhibitions.read'], roles: ['curator'] },
   { label: 'Tickets', path: '/tickets/manage', permissions: ['tickets.list'], excludeRoles: ['maintenance'] },
@@ -225,26 +225,9 @@ export const VISITOR_NAV_SECTIONS = [
     label: 'My museum',
     items: [
       { label: 'Dashboard', path: '/portal', icon: 'dashboard' },
-      {
-        label: 'Tickets',
-        path: '/portal/tickets',
-        icon: 'tickets',
-        children: [
-          { label: 'My Tickets', path: '/portal/tickets' },
-          { label: 'Buy Tickets', path: '/portal/tickets/buy' },
-        ],
-      },
+      { label: 'My Tickets', path: '/portal/tickets', icon: 'tickets' },
       { label: 'Membership', path: '/portal/membership', icon: 'membership' },
       { label: 'Visit History', path: '/portal/visits', icon: 'visits' },
-      {
-        label: 'Group Bookings',
-        path: '/portal/bookings',
-        icon: 'bookings',
-        children: [
-          { label: 'My Bookings', path: '/portal/bookings' },
-          { label: 'Book a Group Visit', path: '/portal/bookings/new' },
-        ],
-      },
     ],
   },
   {

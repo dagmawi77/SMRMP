@@ -9,38 +9,47 @@ const EXACT_PARENTS = {
   '/portal/profile': {
     parent: PORTAL_HOME,
     backLabel: 'Back to Dashboard',
+    showBack: false,
   },
   '/portal/membership': {
     parent: PORTAL_HOME,
     backLabel: 'Back to Dashboard',
+    showBack: false,
   },
   '/portal/tickets': {
     parent: PORTAL_HOME,
     backLabel: 'Back to Dashboard',
+    showBack: false,
   },
   '/portal/tickets/buy': {
-    parent: PORTAL_HOME,
-    backLabel: 'Back to Dashboard',
+    parent: '/portal/tickets',
+    backLabel: 'Back to Tickets',
+    showBack: true,
   },
   '/portal/visits': {
     parent: PORTAL_HOME,
     backLabel: 'Back to Dashboard',
+    showBack: false,
   },
   '/portal/bookings': {
     parent: PORTAL_HOME,
     backLabel: 'Back to Dashboard',
+    showBack: false,
   },
   '/portal/bookings/new': {
     parent: '/portal/bookings',
     backLabel: 'Back to Bookings',
+    showBack: true,
   },
   '/portal/feedback': {
     parent: PORTAL_HOME,
     backLabel: 'Back to Dashboard',
+    showBack: false,
   },
   '/portal/change-password': {
     parent: '/portal/profile',
     backLabel: 'Back to Profile',
+    showBack: true,
   },
 };
 
@@ -82,7 +91,7 @@ export function getPortalBackTarget(pathname) {
   }
 
   const exact = EXACT_PARENTS[pathname];
-  if (exact) return { ...exact, showBack: true };
+  if (exact) return { showBack: true, ...exact };
 
   for (const rule of PREFIX_PARENTS) {
     if (rule.test(pathname)) {

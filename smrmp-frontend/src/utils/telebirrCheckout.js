@@ -11,7 +11,13 @@ export function buildTelebirrCheckoutSession({
   quantity,
   visit_date,
   merchantName = MUSEUM_NAME,
+  booking_type = 'individual',
+  group_data = null,
 }) {
+  const isGroup = booking_type === 'group';
+  const groupName = group_data?.group_name || 'Group';
+  const visitorCount = group_data?.visitor_count || 0;
+
   return {
     amount,
     phone,
@@ -19,9 +25,13 @@ export function buildTelebirrCheckoutSession({
     ticket_type,
     quantity,
     visit_date,
+    booking_type,
+    group_data,
     merchantName,
-    subject: `Museum Ticket — ${String(ticket_type || 'pass').replace(/_/g, ' ')} × ${quantity}`,
-    outTradeNo: `TKT${Date.now()}${Math.floor(Math.random() * 900 + 100)}`,
+    subject: isGroup
+      ? `Group Visit Pass — ${groupName} (${visitorCount} visitors)`
+      : `Museum Ticket — ${String(ticket_type || 'pass').replace(/_/g, ' ')} × ${quantity}`,
+    outTradeNo: `${isGroup ? 'GRP' : 'TKT'}${Date.now()}${Math.floor(Math.random() * 900 + 100)}`,
     createdAt: new Date().toISOString(),
   };
 }
