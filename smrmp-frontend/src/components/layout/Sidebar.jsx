@@ -58,7 +58,7 @@ export default function Sidebar() {
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-[#FFFDF9] text-[#2B1B12] shadow-none transition-all duration-300 border-r border-[#E2D6C5] lg:static lg:z-20 ${
+        className={`fixed inset-y-0 left-0 z-50 flex h-dvh flex-col bg-[#FFFDF9] text-[#2B1B12] shadow-none transition-all duration-300 border-r border-[#E2D6C5] lg:relative lg:z-40 lg:shrink-0 ${
           isMobileOpen ? 'translate-x-0 w-72 shadow-xl' : '-translate-x-full lg:translate-x-0'
         } ${isCollapsed ? 'lg:w-20' : 'lg:w-64'}`}
       >
@@ -100,7 +100,7 @@ export default function Sidebar() {
             type="button"
             onClick={toggleCollapsed}
             title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-            className="hidden lg:flex absolute -right-3 top-6 h-6 w-6 items-center justify-center rounded-full bg-[#FAF0D8] text-[#7C4A2D] hover:bg-smrmp-gold hover:text-black transition-transform hover:scale-110 border border-[#D4A017]/50"
+            className="hidden lg:flex absolute -right-3 top-6 z-10 h-6 w-6 items-center justify-center rounded-full bg-[#FAF0D8] text-[#7C4A2D] hover:bg-smrmp-gold hover:text-black transition-transform hover:scale-110 border border-[#D4A017]/50 shadow-xs"
           >
             {isCollapsed ? (
               <ChevronRightIcon className="h-3.5 w-3.5 stroke-[3]" />
