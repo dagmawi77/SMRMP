@@ -5,9 +5,6 @@ import {
   PhoneIcon,
   BuildingOfficeIcon,
   ShieldCheckIcon,
-  KeyIcon,
-  EyeIcon,
-  EyeSlashIcon,
   InformationCircleIcon,
   CheckCircleIcon,
 } from '@heroicons/react/24/outline';
@@ -23,7 +20,6 @@ import toast from 'react-hot-toast';
 
 export default function AddUserModal({ isOpen, onClose, onSuccess }) {
   const createUserMutation = useCreateUser();
-  const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
   const [formData, setFormData] = useState({
@@ -32,7 +28,6 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }) {
     phone: '',
     department: 'Administration & IT',
     role: 'curator',
-    password: '',
     status: 'active',
   });
 
@@ -68,12 +63,6 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }) {
       errors.role = 'Visitor role cannot be selected for staff management';
     }
 
-    if (!formData.password) {
-      errors.password = 'Initial password is required';
-    } else if (formData.password.length < 6) {
-      errors.password = 'Password must be at least 6 characters';
-    }
-
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -91,11 +80,10 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }) {
         phone: formData.phone.trim(),
         department: formData.department,
         role: formData.role,
-        password: formData.password,
         status: formData.status,
       });
 
-      toast.success(`Staff user "${formData.name}" created successfully!`);
+      toast.success(`Staff user "${formData.name}" invited successfully! Invitation email dispatched.`);
       
       // Reset form
       setFormData({
@@ -104,7 +92,6 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }) {
         phone: '',
         department: 'Administration & IT',
         role: 'curator',
-        password: '',
         status: 'active',
       });
       setFormErrors({});
@@ -122,18 +109,18 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }) {
     <Modal
       open={isOpen}
       onClose={onClose}
-      title="Add New Staff User"
+      title="Invite New Staff User"
       size="lg"
     >
       <div className="space-y-5">
-        {/* Informative banner explaining staff roles vs visitors */}
+        {/* Informative banner explaining staff invite process */}
         <div className="rounded-xl border border-amber-200 bg-[#FAF0D8]/70 p-4 text-xs text-[#5C4233]">
           <div className="flex items-start gap-2.5">
             <InformationCircleIcon className="h-5 w-5 shrink-0 text-[#D4A017] mt-0.5" />
             <div>
-              <p className="font-bold text-[#2B1B12] text-sm">Staff Account Provisioning</p>
+              <p className="font-bold text-[#2B1B12] text-sm">Supabase Auth Email Invitation</p>
               <p className="mt-1 leading-relaxed">
-                This form creates official museum staff and administrative user accounts. Visitor accounts are created automatically during ticket booking and visitor self-registration and are excluded here.
+                Inviting a staff user sends an official email invitation with a magic link via Supabase Auth. The recipient will click the invitation link in their email to access the museum portal and establish their credentials.
               </p>
             </div>
           </div>
@@ -214,33 +201,6 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }) {
             )}
           </div>
 
-          {/* Password & Show/Hide Toggle */}
-          <div className="relative">
-            <Input
-              label="Initial Password"
-              name="password"
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Min. 6 characters"
-              icon={KeyIcon}
-              value={formData.password}
-              onChange={handleChange}
-              error={formErrors.password}
-              required
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-[38px] text-[#7C4A2D] hover:text-[#2B1B12]"
-              title={showPassword ? 'Hide password' : 'Show password'}
-            >
-              {showPassword ? (
-                <EyeSlashIcon className="h-4 w-4" />
-              ) : (
-                <EyeIcon className="h-4 w-4" />
-              )}
-            </button>
-          </div>
-
           {/* Account Status Selection */}
           <div className="space-y-1.5">
             <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-[#5C4233]">
@@ -298,7 +258,7 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }) {
               variant="primary"
               loading={createUserMutation.isPending}
             >
-              Create Staff User
+              Send Supabase Invite
             </Button>
           </div>
         </form>

@@ -62,22 +62,15 @@ export const PAYMENT_METHODS = [
 ];
 
 export const NAV_ITEMS = [
-<<<<<<< HEAD
   { label: 'Dashboard', path: '/dashboard', permissions: ['dashboard.read'] },
   { label: 'Artifacts', path: '/artifacts', permissions: ['artifacts.read'] },
+  { label: 'Exhibitions', path: '/exhibitions', permissions: ['exhibitions.read'] },
   { label: 'Tickets', path: '/tickets', roles: ['admin', 'visitor'] },
   {
     label: 'Access control',
     path: '/admin',
     permissions: ['users.read', 'roles.read'],
   },
-=======
-  { label: 'Dashboard', path: '/dashboard', roles: ['admin', 'curator', 'conservation', 'maintenance'] },
-  { label: 'Artifacts', path: '/artifacts', roles: ['admin', 'curator', 'conservation', 'researcher'] },
-  { label: 'Exhibitions', path: '/exhibitions', roles: ['curator'] },
-  { label: 'Tickets', path: '/tickets', roles: ['admin', 'curator', 'visitor'] },
-  { label: 'Users', path: '/users', roles: ['admin'] },
->>>>>>> 3ca739a9eaad6200a8d402037808bf1bfc854ffa
 ];
 
 export const STAFF_ROLE_OPTIONS = [

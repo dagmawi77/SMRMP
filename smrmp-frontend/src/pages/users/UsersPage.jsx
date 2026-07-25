@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import {
   UserPlusIcon,
+  EnvelopeIcon,
   MagnifyingGlassIcon,
   FunnelIcon,
   ArrowPathIcon,
@@ -248,8 +249,8 @@ export default function UsersPage() {
             onClick={() => setIsAddModalOpen(true)}
             className="shadow-sm"
           >
-            <UserPlusIcon className="h-4 w-4" />
-            <span>Add New User</span>
+            <EnvelopeIcon className="h-4 w-4" />
+            <span>Invite Staff Member</span>
           </Button>
         }
       />

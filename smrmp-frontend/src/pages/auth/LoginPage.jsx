@@ -10,6 +10,7 @@ import useAuth from '../../hooks/useAuth';
 import getApiErrorMessage from '../../utils/apiError';
 import LandingFooter from '../landing/components/LandingFooter';
 import LandingNav from '../landing/components/LandingNav';
+import ForgotPasswordModal from '../../components/auth/ForgotPasswordModal';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -18,6 +19,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -212,12 +214,13 @@ export default function LoginPage() {
                     />
                     Remember this device
                   </label>
-                  <a
+                  <button
+                    type="button"
+                    onClick={() => setIsForgotModalOpen(true)}
                     className="text-xs font-semibold text-smrmp-gold transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-smrmp-gold"
-                    href="#recovery"
                   >
                     Recover access
-                  </a>
+                  </button>
                 </div>
 
                 <button
@@ -284,6 +287,11 @@ export default function LoginPage() {
           </div>
         </section>
       </main>
+
+      <ForgotPasswordModal
+        isOpen={isForgotModalOpen}
+        onClose={() => setIsForgotModalOpen(false)}
+      />
 
       <LandingFooter />
     </div>

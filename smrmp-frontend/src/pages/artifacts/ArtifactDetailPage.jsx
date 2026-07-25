@@ -40,23 +40,16 @@ export default function ArtifactDetailPage() {
         description="Full artifact profile and digital identity"
         backPath="/artifacts"
         backLabel="Back to Catalog"
-<<<<<<< HEAD
-        action={can('artifacts.delete') && artifact && (
-          <Button variant="danger" onClick={() => setShowDeleteModal(true)}>
-            Delete
-          </Button>
-        )}
-=======
-        action={
+action={
           artifact && (
             <div className="flex flex-wrap items-center gap-2">
-              {hasRole('admin', 'curator') && (
+              {can('artifacts.update') && (
                 <Button variant="secondary" onClick={() => navigate(`/artifacts/${id}/edit`)}>
                   <PencilSquareIcon className="h-4 w-4" />
                   <span>Edit Artifact</span>
                 </Button>
               )}
-              {hasRole('admin') && (
+              {can('artifacts.delete') && (
                 <Button variant="danger" onClick={() => setShowDeleteModal(true)}>
                   <TrashIcon className="h-4 w-4" />
                   <span>Delete</span>
@@ -65,7 +58,6 @@ export default function ArtifactDetailPage() {
             </div>
           )
         }
->>>>>>> 3ca739a9eaad6200a8d402037808bf1bfc854ffa
       />
 
       {isLoading && <Spinner className="py-24" />}

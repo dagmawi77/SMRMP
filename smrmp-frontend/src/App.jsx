@@ -5,6 +5,7 @@ import useSessionRestore from './hooks/useSessionRestore';
 import LandingPage from './pages/landing/LandingPage';
 import LoginPage from './pages/auth/LoginPage';
 import ChangePasswordPage from './pages/auth/ChangePasswordPage';
+import SetPasswordPage from './pages/auth/SetPasswordPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import ArtifactsPage from './pages/artifacts/ArtifactsPage';
 import AddArtifactPage from './pages/artifacts/AddArtifactPage';
@@ -12,21 +13,16 @@ import ArtifactDetailPage from './pages/artifacts/ArtifactDetailPage';
 import EditArtifactPage from './pages/artifacts/EditArtifactPage';
 import PublicArtifactPage from './pages/visitor/PublicArtifactPage';
 import TicketPurchasePage from './pages/tickets/TicketPurchasePage';
-<<<<<<< HEAD
 import TelebirrPaygatePage from './pages/tickets/TelebirrPaygatePage';
-import VisitorRegistrationPage from './pages/visitor/VisitorRegistrationPage';
-import AdminAccessPage from './pages/admin/AdminAccessPage';
-import AdminUsersPage from './pages/admin/AdminUsersPage';
-import AdminRolesPage from './pages/admin/AdminRolesPage';
-import AdminPermissionsPage from './pages/admin/AdminPermissionsPage';
-=======
 import TicketVerificationPage from './pages/tickets/TicketVerificationPage';
 import TicketManagementPage from './pages/tickets/TicketManagementPage';
 import TicketDetailPage from './pages/tickets/TicketDetailPage';
 import VisitorRegistrationPage from './pages/visitor/VisitorRegistrationPage';
 import ExhibitionDashboardPage from './pages/exhibitions/ExhibitionDashboardPage';
-import UsersPage from './pages/users/UsersPage';
->>>>>>> 3ca739a9eaad6200a8d402037808bf1bfc854ffa
+import AdminAccessPage from './pages/admin/AdminAccessPage';
+import AdminUsersPage from './pages/admin/AdminUsersPage';
+import AdminRolesPage from './pages/admin/AdminRolesPage';
+import AdminPermissionsPage from './pages/admin/AdminPermissionsPage';
 
 export default function App() {
   useSessionRestore();
@@ -37,15 +33,13 @@ export default function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/set-password" element={<SetPasswordPage />} />
           <Route path="/artifact/:code" element={<PublicArtifactPage />} />
-<<<<<<< HEAD
           <Route path="/tickets" element={<TicketPurchasePage />} />
+          <Route path="/tickets/buy" element={<Navigate to="/tickets" replace />} />
           <Route path="/tickets/telebirr/paygate" element={<TelebirrPaygatePage />} />
-=======
-          <Route path="/tickets/buy" element={<TicketPurchasePage />} />
           <Route path="/tickets/verify" element={<TicketVerificationPage />} />
           <Route path="/tickets/verify/:code" element={<TicketVerificationPage />} />
->>>>>>> 3ca739a9eaad6200a8d402037808bf1bfc854ffa
           <Route path="/register" element={<VisitorRegistrationPage />} />
 
           <Route
@@ -58,17 +52,17 @@ export default function App() {
           />
 
           <Route
-            path="/tickets"
+            path="/tickets/manage"
             element={(
-              <PrivateRoute roles={['curator']}>
+              <PrivateRoute permissions="tickets.list">
                 <TicketManagementPage />
               </PrivateRoute>
             )}
           />
           <Route
-            path="/tickets/:id"
+            path="/tickets/manage/:id"
             element={(
-              <PrivateRoute roles={['curator']}>
+              <PrivateRoute permissions="tickets.list">
                 <TicketDetailPage />
               </PrivateRoute>
             )}
@@ -92,7 +86,7 @@ export default function App() {
           <Route
             path="/exhibitions/*"
             element={(
-              <PrivateRoute roles={['curator']}>
+              <PrivateRoute permissions="exhibitions.read">
                 <ExhibitionDashboardPage />
               </PrivateRoute>
             )}
@@ -114,22 +108,22 @@ export default function App() {
             )}
           />
           <Route
-<<<<<<< HEAD
-            path="/admin"
-            element={(
-              <PrivateRoute permissions={['users.read', 'roles.read']} anyPermission>
-                <AdminAccessPage />
-=======
             path="/artifacts/:id/edit"
             element={(
-              <PrivateRoute roles={['admin', 'curator']}>
+              <PrivateRoute permissions="artifacts.update">
                 <EditArtifactPage />
->>>>>>> 3ca739a9eaad6200a8d402037808bf1bfc854ffa
               </PrivateRoute>
             )}
           />
           <Route
-<<<<<<< HEAD
+            path="/admin"
+            element={(
+              <PrivateRoute permissions={['users.read', 'roles.read']} anyPermission>
+                <AdminAccessPage />
+              </PrivateRoute>
+            )}
+          />
+          <Route
             path="/admin/users"
             element={(
               <PrivateRoute permissions="users.read">
@@ -150,15 +144,10 @@ export default function App() {
             element={(
               <PrivateRoute permissions="roles.read">
                 <AdminPermissionsPage />
-=======
-            path="/users"
-            element={(
-              <PrivateRoute roles={['admin']}>
-                <UsersPage />
->>>>>>> 3ca739a9eaad6200a8d402037808bf1bfc854ffa
               </PrivateRoute>
             )}
           />
+          <Route path="/users" element={<Navigate to="/admin/users" replace />} />
 
           <Route path="/public/artifacts/:id" element={<Navigate to="/artifacts" replace />} />
           <Route path="*" element={<Navigate to="/" replace />} />

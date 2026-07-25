@@ -66,6 +66,19 @@ const changePasswordValidation = [
   validateRequest,
 ];
 
+const forgotPasswordValidation = [
+  body('email').isEmail().normalizeEmail().withMessage('Valid email address is required'),
+  validateRequest,
+];
+
+const updatePasswordValidation = [
+  body('password')
+    .notEmpty()
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least 6 characters long'),
+  validateRequest,
+];
+
 const loadUserWithRole = (where) =>
   User.findOne({
     where,
@@ -305,14 +318,96 @@ const changePassword = async (req, res) => {
   }
 };
 
+const forgotPassword = async (req, res) => {
+  try {
+    const email = req.body.email.toLowerCase().trim();
+    const user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      return sendSuccess(
+        res,
+        200,
+        'If that email address is registered, a password reset link has been sent.'
+      );
+    }
+
+    const redirectUrl = process.env.FRONTEND_URL
+      ? `${process.env.FRONTEND_URL}/set-password`
+      : 'http://localhost:3000/set-password';
+
+    try {
+      const { error } = await getSupabaseAuth().auth.resetPasswordForEmail(email, {
+        redirectTo: redirectUrl,
+      });
+
+      if (error) {
+        console.warn('[AUTH] Supabase resetPasswordForEmail failed:', error.message);
+      }
+    } catch (supabaseErr) {
+      console.warn('[AUTH] Supabase resetPasswordForEmail error:', supabaseErr.message);
+    }
+
+    await writeAuditLog({
+      userId: user.id,
+      action: 'REQUEST_PASSWORD_RESET',
+      tableName: 'users',
+      recordId: user.id,
+      ipAddress: req.ip,
+    });
+
+    return sendSuccess(
+      res,
+      200,
+      'If that email address is registered, a password reset link has been sent.'
+    );
+  } catch (error) {
+    return sendError(res, 500, 'Failed to request password reset', error.message);
+  }
+};
+
+const updatePassword = async (req, res) => {
+  try {
+    const { password } = req.body;
+    const userId = req.user.id;
+
+    try {
+      const admin = getSupabaseAdmin();
+      await admin.auth.admin.updateUserById(userId, { password });
+    } catch (authErr) {
+      console.warn('[AUTH] Supabase password update failed:', authErr.message);
+    }
+
+    await User.update(
+      { must_change_password: false },
+      { where: { id: userId } }
+    );
+
+    await writeAuditLog({
+      userId,
+      action: 'UPDATE_PASSWORD',
+      tableName: 'users',
+      recordId: userId,
+      ipAddress: req.ip,
+    });
+
+    return sendSuccess(res, 200, 'Password updated successfully');
+  } catch (error) {
+    return sendError(res, 500, 'Failed to update password', error.message);
+  }
+};
+
 module.exports = {
   register,
   login,
   logout,
   getMe,
   changePassword,
+  forgotPassword,
+  updatePassword,
   registerValidation,
   loginValidation,
   changePasswordValidation,
+  forgotPasswordValidation,
+  updatePasswordValidation,
   STRONG_PASSWORD_RE,
 };

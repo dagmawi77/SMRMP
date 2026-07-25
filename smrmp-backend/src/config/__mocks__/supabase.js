@@ -55,6 +55,21 @@ const getSupabaseAuth = () => ({
 const getSupabaseAdmin = () => ({
   auth: {
     admin: {
+      inviteUserByEmail: async (email, options) => {
+        const normalizedEmail = String(email).toLowerCase();
+        if (sessions.has(normalizedEmail)) {
+          return {
+            data: { user: null },
+            error: { message: 'User already registered' },
+          };
+        }
+        const userId = randomUUID();
+        registerAuthUser({ id: userId, email: normalizedEmail, password: 'DefaultInvitePassword!' });
+        return {
+          data: { user: { id: userId, email: normalizedEmail, user_metadata: options?.data } },
+          error: null,
+        };
+      },
       createUser: async ({ email, password, id }) => {
         const normalizedEmail = String(email).toLowerCase();
         if (sessions.has(normalizedEmail)) {

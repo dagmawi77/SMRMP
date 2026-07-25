@@ -6,6 +6,8 @@ export const authApi = {
   logout: () => api.post('/auth/logout'),
   getMe: () => api.get('/auth/me'),
   changePassword: (payload) => api.post('/auth/change-password', payload),
+  forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
+  updatePassword: (password) => api.post('/auth/update-password', { password }),
 };
 
 export default authApi;

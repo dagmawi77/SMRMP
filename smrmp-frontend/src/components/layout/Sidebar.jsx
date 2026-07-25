@@ -2,18 +2,13 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   ArchiveBoxIcon,
-<<<<<<< HEAD
-  TicketIcon,
-  ShieldCheckIcon,
-=======
   BuildingLibraryIcon,
   ChevronDownIcon,
->>>>>>> 3ca739a9eaad6200a8d402037808bf1bfc854ffa
   ChevronLeftIcon,
   ChevronRightIcon,
+  ShieldCheckIcon,
   Squares2X2Icon,
   TicketIcon,
-  UserGroupIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { NAV_ITEMS } from '../../utils/constants';
@@ -25,11 +20,7 @@ const navIconMap = {
   '/artifacts': ArchiveBoxIcon,
   '/exhibitions': BuildingLibraryIcon,
   '/tickets': TicketIcon,
-<<<<<<< HEAD
   '/admin': ShieldCheckIcon,
-=======
-  '/users': UserGroupIcon,
->>>>>>> 3ca739a9eaad6200a8d402037808bf1bfc854ffa
 };
 
 const PORTAL_TITLE_MAP = {
@@ -58,7 +49,6 @@ export default function Sidebar() {
   }, [location.pathname]);
 
   const portalTitle = getPortalTitle(user?.role);
-<<<<<<< HEAD
 
   const visibleItems = NAV_ITEMS.filter((item) => {
     if (item.permissions?.length) {
@@ -69,11 +59,6 @@ export default function Sidebar() {
     }
     return true;
   });
-=======
-  const visibleItems = NAV_ITEMS.filter(
-    (item) => !item.roles || item.roles.some((role) => hasRole(role)),
-  );
->>>>>>> 3ca739a9eaad6200a8d402037808bf1bfc854ffa
 
   const isPathActive = (path) => location.pathname === path || (path !== '/dashboard' && location.pathname.startsWith(`${path}/`));
 
