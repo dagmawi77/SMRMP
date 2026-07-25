@@ -16,7 +16,7 @@ export const ROLE_REDIRECTS = {
   conservation: '/dashboard',
   maintenance: '/dashboard',
   researcher: '/artifacts',
-  visitor: '/tickets',
+  visitor: '/tickets/buy',
 };
 
 export const ARTIFACT_CATEGORIES = [
@@ -64,5 +64,5 @@ export const PAYMENT_METHODS = [
 export const NAV_ITEMS = [
   { label: 'Dashboard', path: '/dashboard', roles: ['admin', 'curator', 'conservation', 'maintenance'] },
   { label: 'Artifacts', path: '/artifacts', roles: ['admin', 'curator', 'conservation', 'researcher'] },
-  { label: 'Tickets', path: '/tickets', roles: ['admin', 'visitor'] },
+  { label: 'Tickets', path: '/tickets', roles: ['curator'] },
 ];
