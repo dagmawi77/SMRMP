@@ -366,7 +366,7 @@ export default function RegistrationForm({ onSuccess }) {
           <button
             type="button"
             onClick={handlePrevStep}
-            className="flex h-12 w-full sm:w-auto items-center justify-center gap-2 border border-white/25 px-6 text-xs font-bold uppercase tracking-widest text-smrmp-parchment transition-colors duration-500 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-smrmp-gold rounded-none"
+            className="flex h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-white/25 px-6 text-xs font-bold uppercase tracking-widest text-smrmp-parchment transition-colors duration-500 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-smrmp-gold"
           >
             <ArrowLeftIcon className="h-4 w-4 shrink-0" />
             <span>{t.buttons.back}</span>
@@ -384,7 +384,7 @@ export default function RegistrationForm({ onSuccess }) {
           <button
             type="button"
             onClick={handleNextStep}
-            className="group flex h-12 w-full sm:w-auto sm:min-w-[180px] items-center justify-center gap-3 bg-smrmp-gold px-6 text-xs font-bold uppercase tracking-widest text-black transition-colors duration-500 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-smrmp-gold rounded-none"
+            className="group flex h-12 w-full sm:w-auto sm:min-w-[180px] items-center justify-center gap-3 rounded-xl bg-smrmp-gold px-6 text-xs font-bold uppercase tracking-widest text-black transition-colors duration-500 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-smrmp-gold"
           >
             <span>{t.buttons.next}</span>
             <ArrowRightIcon className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
@@ -393,7 +393,7 @@ export default function RegistrationForm({ onSuccess }) {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="group flex h-12 w-full sm:w-auto sm:min-w-[200px] items-center justify-center gap-3 bg-smrmp-gold px-6 text-xs font-bold uppercase tracking-widest text-black transition-colors duration-500 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-smrmp-gold disabled:cursor-wait disabled:opacity-70 rounded-none"
+            className="group flex h-12 w-full sm:w-auto sm:min-w-[200px] items-center justify-center gap-3 rounded-xl bg-smrmp-gold px-6 text-xs font-bold uppercase tracking-widest text-black transition-colors duration-500 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-smrmp-gold disabled:cursor-wait disabled:opacity-70"
           >
             <span>{isSubmitting ? t.buttons.creating : t.buttons.create}</span>
             <ArrowRightIcon className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
