@@ -258,6 +258,13 @@ export default function LoginPage() {
               Not staff?{' '}
               <Link
                 className="font-semibold text-smrmp-gold transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-smrmp-gold"
+                to="/register"
+              >
+                Create a visitor account
+              </Link>
+              {' · '}
+              <Link
+                className="font-semibold text-smrmp-gold transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-smrmp-gold"
                 to="/"
               >
                 Return to the platform overview

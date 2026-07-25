@@ -1,11 +1,14 @@
-﻿import { useParams } from 'react';
+﻿import { useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { useArtifactByQR } from '../../hooks/useArtifacts';
 import Badge from '../../components/ui/Badge';
 import Spinner from '../../components/ui/Spinner';
+import AudioNarrationPlayer from '../../components/artifacts/AudioNarrationPlayer';
 import { MUSEUM_NAME } from '../../utils/constants';
 
 export default function PublicArtifactPage() {
   const { code } = useParams();
+  const navigate = useNavigate();
   const { data, isLoading, isError } = useArtifactByQR(code);
 
   const artifact = data?.artifact || data;
@@ -32,6 +35,14 @@ export default function PublicArtifactPage() {
           <p className="mt-2 text-sm text-[#6E5445]">
             This QR code does not match any artifact in our collection.
           </p>
+          <button
+            type="button"
+            onClick={() => navigate('/artifacts')}
+            className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-smrmp-green px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#243205] transition-colors"
+          >
+            <ArrowLeftIcon className="h-4 w-4" />
+            <span>Go to Catalog</span>
+          </button>
         </div>
       </div>
     );
@@ -42,16 +53,43 @@ export default function PublicArtifactPage() {
   return (
     <div className="visitor-shell min-h-screen bg-smrmp-parchment text-[#2B1B12]">
       <header className="bg-gradient-to-r from-[#1C120B] via-[#241710] to-[#120D08] px-4 py-4 text-smrmp-parchment border-b border-smrmp-gold/30">
-        <div className="mx-auto flex max-w-2xl items-center gap-3">
-          <span className="text-2xl">🏛️</span>
-          <div>
-            <p className="text-sm font-bold text-smrmp-gold">{MUSEUM_NAME}</p>
-            <p className="text-xs text-smrmp-parchment/70">Digital Artifact Explorer</p>
+        <div className="mx-auto flex max-w-2xl items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => navigate('/artifacts')}
+              className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/10 text-smrmp-gold border border-smrmp-gold/30 hover:bg-white/20 transition-all"
+              aria-label="Back to Catalog"
+              title="Back to Catalog"
+            >
+              <ArrowLeftIcon className="h-4 w-4" />
+            </button>
+            <span className="text-2xl">🏛️</span>
+            <div>
+              <p className="text-sm font-bold text-smrmp-gold">{MUSEUM_NAME}</p>
+              <p className="text-xs text-smrmp-parchment/70">Digital Artifact Explorer</p>
+            </div>
           </div>
+          <button
+            type="button"
+            onClick={() => navigate('/artifacts')}
+            className="text-xs font-bold text-smrmp-gold hover:underline"
+          >
+            Catalog
+          </button>
         </div>
       </header>
 
       <main className="mx-auto max-w-2xl space-y-6 px-4 py-6">
+        <button
+          type="button"
+          onClick={() => navigate('/artifacts')}
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#7C4A2D] hover:text-[#2B1B12] transition-colors group"
+        >
+          <ArrowLeftIcon className="h-4 w-4 text-smrmp-gold group-hover:-translate-x-1 transition-transform" />
+          <span>Back to Artifacts Catalog</span>
+        </button>
+
         {primaryImage ? (
           <div className="overflow-hidden rounded-2xl bg-[#EFE5D8] border border-[#E2D6C5] shadow-md">
             <img src={primaryImage.file_url} alt={artifact.name} className="h-72 w-full object-cover" />
@@ -100,13 +138,12 @@ export default function PublicArtifactPage() {
           </div>
         )}
 
-        <button
-          type="button"
-          onClick={() => alert('Audio narration coming soon!')}
-          className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-smrmp-gold/40 bg-[#FAF0D8]/50 py-3 text-sm font-bold text-[#7C4A2D] hover:bg-[#FAF0D8] transition-colors"
-        >
-          🔊 Listen to Story (Coming Soon)
-        </button>
+        <AudioNarrationPlayer
+          artifactName={artifact.name}
+          description={artifact.description}
+          origin={artifact.origin}
+          period={artifact.historical_period}
+        />
 
         <footer className="pb-8 text-center text-xs text-[#6E5445]">
           <p className="font-semibold">{MUSEUM_NAME}</p>

@@ -12,7 +12,10 @@ const AuditLog = sequelize.define(
     user_id: {
       type: DataTypes.UUID,
       allowNull: true,
-      references: { model: 'users', key: 'id' },
+      references: {
+        model: 'users',
+        key: 'id',
+      },
     },
     action: {
       type: DataTypes.STRING(100),
@@ -20,7 +23,7 @@ const AuditLog = sequelize.define(
     },
     table_name: {
       type: DataTypes.STRING(100),
-      allowNull: false,
+      allowNull: true,
     },
     record_id: {
       type: DataTypes.UUID,
@@ -38,12 +41,19 @@ const AuditLog = sequelize.define(
       type: DataTypes.STRING(45),
       allowNull: true,
     },
+    user_agent: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
   },
   {
     tableName: 'audit_logs',
-    timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
+    timestamps: false,
   }
 );
 

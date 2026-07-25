@@ -12,8 +12,8 @@ export const ROLES = {
 
 export const ROLE_REDIRECTS = {
   admin: '/dashboard',
-  curator: '/artifacts',
-  conservation: '/artifacts',
+  curator: '/dashboard',
+  conservation: '/dashboard',
   maintenance: '/dashboard',
   researcher: '/artifacts',
   visitor: '/tickets',

@@ -31,6 +31,7 @@ export default function ArtifactForm({ onSubmit, loading, initialData, onCancel 
       description: '',
       location: '',
       condition_status: 'good',
+      is_on_loan: false,
     },
   });
 
@@ -80,21 +81,39 @@ export default function ArtifactForm({ onSubmit, loading, initialData, onCancel 
     <form onSubmit={handleSubmit(submitHandler)} className="space-y-6">
       <div className="grid gap-6 md:grid-cols-2">
         <Input
-          label="Artifact Name *"
+          label="Artifact Name"
+          required
+          placeholder="e.g. Ras Alula Battle Shield"
           error={errors.name?.message}
           {...register('name', { required: 'Name is required' })}
         />
         <Select
-          label="Category *"
+          label="Category"
+          required
           options={ARTIFACT_CATEGORIES}
           error={errors.category?.message}
           {...register('category', { required: 'Category is required' })}
         />
-        <Input label="Historical Period" {...register('historical_period')} />
-        <Input label="Origin" {...register('origin')} />
-        <Input label="Materials" {...register('materials')} />
         <Input
-          label="Gallery Location *"
+          label="Historical Period"
+          placeholder="e.g. 1896 Adwa Victory Era"
+          {...register('historical_period')}
+        />
+        <Input
+          label="Origin"
+          placeholder="e.g. Tigray / Adwa Region, Ethiopia"
+          {...register('origin')}
+        />
+        <Input
+          label="Materials"
+          placeholder="e.g. Leather, brass embellishments, velvet"
+          {...register('materials')}
+        />
+        <Input
+          label="Gallery Location"
+          required
+          placeholder="e.g. Adwa Victory Gallery A-3, Display Case 12, or Storage Vault 4"
+          hint="Physical location where the artifact is displayed or stored in the museum"
           error={errors.location?.message}
           {...register('location', { required: 'Location is required' })}
         />
@@ -103,7 +122,21 @@ export default function ArtifactForm({ onSubmit, loading, initialData, onCancel 
           options={CONDITION_STATUSES}
           {...register('condition_status')}
         />
-        <Input label="Keywords (comma-separated)" {...register('keywords')} />
+        <Input
+          label="Keywords (comma-separated)"
+          placeholder="e.g. battle, 1896, shield, commander"
+          {...register('keywords')}
+        />
+        <div className="flex items-center gap-3 pt-6">
+          <label className="flex items-center gap-2.5 cursor-pointer text-xs font-bold text-[#2B1B12]">
+            <input
+              type="checkbox"
+              className="h-4 w-4 rounded border-[#E2D6C5] text-smrmp-green focus:ring-smrmp-green"
+              {...register('is_on_loan')}
+            />
+            <span>Currently On Loan to Partner Institution</span>
+          </label>
+        </div>
       </div>
 
       <div>

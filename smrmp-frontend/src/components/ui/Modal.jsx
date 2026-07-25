@@ -1,9 +1,11 @@
 ﻿import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useEffect } from 'react';
 
-export default function Modal({ open, onClose, title, children, size = 'md' }) {
+export default function Modal({ open, isOpen, onClose, title, children, size = 'md' }) {
+  const isModalOpen = open ?? isOpen;
+
   useEffect(() => {
-    if (!open) return undefined;
+    if (!isModalOpen) return undefined;
 
     const handleEscape = (e) => {
       if (e.key === 'Escape') onClose();
@@ -16,9 +18,9 @@ export default function Modal({ open, onClose, title, children, size = 'md' }) {
       document.removeEventListener('keydown', handleEscape);
       document.body.style.overflow = '';
     };
-  }, [open, onClose]);
+  }, [isModalOpen, onClose]);
 
-  if (!open) return null;
+  if (!isModalOpen) return null;
 
   const sizes = {
     sm: 'max-w-md',

@@ -1,19 +1,23 @@
-﻿import { useNavigate } from 'react-router-dom';
+﻿import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
   ArrowRightOnRectangleIcon,
   MagnifyingGlassIcon,
   BuildingLibraryIcon,
   Bars3Icon,
+  QrCodeIcon,
 } from '@heroicons/react/24/outline';
 import { authApi } from '../../api/authApi';
 import useAuthStore from '../../store/authStore';
 import useUiStore from '../../store/uiStore';
+import QRScannerModal from '../artifacts/QRScannerModal';
 
 export default function Navbar() {
   const navigate = useNavigate();
   const { user, clearAuth } = useAuthStore();
   const { toggleMobileOpen } = useUiStore();
+  const [showScanner, setShowScanner] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -63,18 +67,27 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Center: Search Trigger */}
-      <div className="hidden md:flex items-center max-w-xs w-full mx-4">
+      {/* Center: Search Trigger & QR Scan */}
+      <div className="hidden md:flex items-center gap-2 max-w-sm w-full mx-4">
         <button
           type="button"
           onClick={() => navigate('/artifacts')}
-          className="flex w-full items-center gap-2 rounded-lg border border-[#E2D6C5] bg-[#FFFDF9] px-3 py-1 text-xs text-[#6E5445] transition-all hover:bg-[#FAF0E4] hover:border-[#D4A017]/40"
+          className="flex flex-1 items-center gap-2 rounded-lg border border-[#E2D6C5] bg-[#FFFDF9] px-3 py-1 text-xs text-[#6E5445] transition-all hover:bg-[#FAF0E4] hover:border-[#D4A017]/40"
         >
           <MagnifyingGlassIcon className="h-3.5 w-3.5 shrink-0 text-[#7C4A2D]" />
           <span className="truncate">Search catalog...</span>
           <kbd className="ml-auto rounded bg-[#EFE5D8] px-1.5 py-0.5 text-[9px] font-semibold text-[#5C4233] border border-[#D8C8B8]">
             ⌘K
           </kbd>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setShowScanner(true)}
+          className="flex items-center gap-1.5 rounded-lg border border-smrmp-gold/50 bg-[#FAF0D8] px-2.5 py-1 text-xs font-bold text-[#7C4A2D] shadow-2xs hover:bg-[#FAF0D8]/80 transition-colors"
+        >
+          <QrCodeIcon className="h-3.5 w-3.5 text-smrmp-gold shrink-0" />
+          <span>Scan QR</span>
         </button>
       </div>
 
@@ -96,6 +109,8 @@ export default function Navbar() {
           <span className="hidden sm:inline">Logout</span>
         </button>
       </div>
+
+      <QRScannerModal isOpen={showScanner} onClose={() => setShowScanner(false)} />
     </header>
   );
 }

@@ -5,7 +5,16 @@ export function useArtifacts(params = {}) {
   return useQuery({
     queryKey: ['artifacts', params],
     queryFn: () => artifactApi.getAll(params),
-    select: (res) => res.data.data,
+    select: (res) => {
+      const data = res?.data?.data;
+      if (data && typeof data === 'object' && Array.isArray(data.artifacts)) {
+        return data;
+      }
+      return {
+        artifacts: Array.isArray(data) ? data : [],
+        pagination: { total: Array.isArray(data) ? data.length : 0, page: 1, limit: 50, totalPages: 1 },
+      };
+    },
   });
 }
 
@@ -13,7 +22,13 @@ export function useArtifact(id) {
   return useQuery({
     queryKey: ['artifact', id],
     queryFn: () => artifactApi.getById(id),
-    select: (res) => res.data.data,
+    select: (res) => {
+      const data = res?.data?.data;
+      if (data && typeof data === 'object' && data.artifact) {
+        return data.artifact;
+      }
+      return data;
+    },
     enabled: Boolean(id),
   });
 }
@@ -22,7 +37,13 @@ export function useArtifactByQR(code) {
   return useQuery({
     queryKey: ['artifact-qr', code],
     queryFn: () => artifactApi.getByQR(code),
-    select: (res) => res.data.data,
+    select: (res) => {
+      const data = res?.data?.data;
+      if (data && typeof data === 'object' && data.artifact) {
+        return data.artifact;
+      }
+      return data;
+    },
     enabled: Boolean(code),
   });
 }

@@ -12,16 +12,21 @@ const Exhibition = sequelize.define(
     name: {
       type: DataTypes.STRING(500),
       allowNull: false,
-      validate: { notEmpty: true },
+      validate: {
+        notEmpty: true,
+      },
     },
     description: {
       type: DataTypes.TEXT,
       allowNull: true,
     },
-    status: {
-      type: DataTypes.ENUM('draft', 'upcoming', 'active', 'ended'),
-      allowNull: false,
-      defaultValue: 'draft',
+    theme: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    gallery: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
     },
     start_date: {
       type: DataTypes.DATEONLY,
@@ -31,14 +36,31 @@ const Exhibition = sequelize.define(
       type: DataTypes.DATEONLY,
       allowNull: true,
     },
-    location: {
-      type: DataTypes.STRING(255),
+    status: {
+      type: DataTypes.ENUM('planning', 'active', 'closed', 'cancelled'),
+      defaultValue: 'planning',
+    },
+    expected_visitors: {
+      type: DataTypes.INTEGER,
       allowNull: true,
+      validate: {
+        min: 0,
+      },
+    },
+    actual_visitors: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      validate: {
+        min: 0,
+      },
     },
     created_by: {
       type: DataTypes.UUID,
       allowNull: true,
-      references: { model: 'users', key: 'id' },
+      references: {
+        model: 'users',
+        key: 'id',
+      },
     },
   },
   {

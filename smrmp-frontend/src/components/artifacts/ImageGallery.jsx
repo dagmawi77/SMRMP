@@ -3,7 +3,13 @@
 export default function ImageGallery({ images = [] }) {
   const [activeIndex, setActiveIndex] = useState(0);
 
-  if (!images.length) {
+  const safeImages = Array.isArray(images)
+    ? images
+    : typeof images === 'string'
+    ? [{ id: '1', file_url: images }]
+    : [];
+
+  if (!safeImages.length) {
     return (
       <div className="flex aspect-[4/3] items-center justify-center rounded-2xl bg-[#EFE5D8] border border-[#E2D6C5] text-6xl shadow-2xs">
         🏺
@@ -11,20 +17,20 @@ export default function ImageGallery({ images = [] }) {
     );
   }
 
-  const active = images[activeIndex] || images[0];
+  const active = safeImages[activeIndex] || safeImages[0];
 
   return (
     <div>
       <div className="overflow-hidden rounded-2xl bg-[#EFE5D8] border border-[#E2D6C5] shadow-2xs">
         <img
-          src={active.file_url}
+          src={active?.file_url}
           alt="Artifact"
           className="aspect-[4/3] w-full object-cover"
         />
       </div>
-      {images.length > 1 && (
+      {safeImages.length > 1 && (
         <div className="mt-3 flex gap-2 overflow-x-auto">
-          {images.map((img, index) => (
+          {safeImages.map((img, index) => (
             <button
               key={img.id || index}
               type="button"
