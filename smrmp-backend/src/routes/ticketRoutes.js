@@ -15,7 +15,7 @@ const {
   verifyTicket,
   purchaseValidation,
 } = require('../controllers/ticketController');
-const { protect } = require('../middleware/auth');
+const { protect, optionalProtect } = require('../middleware/auth');
 const { requirePermission } = require('../middleware/permissionGuard');
 
 const router = express.Router();
@@ -25,7 +25,8 @@ router.post('/types', protect, requirePermission('tickets.list'), createTicketTy
 router.put('/types/:id', protect, requirePermission('tickets.list'), updateTicketType);
 router.delete('/types/:id', protect, requirePermission('tickets.list'), deleteTicketType);
 
-router.post('/purchase', purchaseValidation, purchaseTicket);
+// Public purchase; if Bearer token present, ticket is linked to that user
+router.post('/purchase', optionalProtect, purchaseValidation, purchaseTicket);
 
 router.get('/verify/:code', protect, requirePermission('tickets.verify'), verifyTicket);
 router.get('/', protect, requirePermission('tickets.list'), listTickets);

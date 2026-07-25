@@ -7,6 +7,7 @@ const {
   ROLE_INCLUDE,
   getPermissionCodes,
   toPublicUser,
+  ensureRbacRoleLinked,
 } = require('../services/rbacService');
 
 /** Short-lived cache so burst API calls after login don't re-hit Supabase Auth. */
@@ -101,7 +102,7 @@ const protect = async (req, res, next) => {
 
     const email = authUser.email?.toLowerCase();
 
-    const user = await User.findOne({
+    let user = await User.findOne({
       where: {
         is_active: true,
         [Op.or]: [{ id: authUser.id }, ...(email ? [{ email }] : [])],
@@ -112,6 +113,8 @@ const protect = async (req, res, next) => {
     if (!user) {
       return sendError(res, 401, 'User not found or deactivated.');
     }
+
+    user = await ensureRbacRoleLinked(user);
 
     const permissions = getPermissionCodes(user);
     const publicUser = toPublicUser(user, permissions);
@@ -147,4 +150,47 @@ const protect = async (req, res, next) => {
   }
 };
 
-module.exports = { protect };
+/**
+ * Optional auth — attaches req.user when a valid Bearer token is present,
+ * otherwise continues anonymously. Used for public purchase that can link
+ * to a logged-in visitor without requiring login.
+ */
+const optionalProtect = async (req, res, next) => {
+  try {
+    let token;
+    if (req.headers.authorization?.startsWith('Bearer ')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+    if (!token) return next();
+
+    const authUser = await resolveAuthUser(token);
+    if (!authUser) return next();
+
+    const email = authUser.email?.toLowerCase();
+    let user = await User.findOne({
+      where: {
+        is_active: true,
+        [Op.or]: [{ id: authUser.id }, ...(email ? [{ email }] : [])],
+      },
+      include: [ROLE_INCLUDE],
+    });
+    if (!user) return next();
+
+    user = await ensureRbacRoleLinked(user);
+
+    const permissions = getPermissionCodes(user);
+    const publicUser = toPublicUser(user, permissions);
+    req.user = {
+      ...user.get({ plain: true }),
+      ...publicUser,
+      permissions,
+      rbacRole: user.rbacRole,
+    };
+    req.authUser = authUser;
+    return next();
+  } catch {
+    return next();
+  }
+};
+
+module.exports = { protect, optionalProtect };

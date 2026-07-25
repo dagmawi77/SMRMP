@@ -25,4 +25,13 @@ const generateTicketQR = async () => {
   return { qrTicketCode, qrDataUrl };
 };
 
-module.exports = { generateArtifactQR, generateTicketQR };
+/** Module 8 — Membership card QR — MBR-XXXXXXXX */
+const generateMembershipQR = async (code) => {
+  const qrCode = code || `MBR-${uuidv4().split('-')[0].toUpperCase()}`;
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  const publicUrl = `${frontendUrl}/memberships/verify/${qrCode}`;
+  const qrDataUrl = await QRCode.toDataURL(publicUrl, QR_OPTIONS);
+  return { qrCode, qrDataUrl, publicUrl };
+};
+
+module.exports = { generateArtifactQR, generateTicketQR, generateMembershipQR };

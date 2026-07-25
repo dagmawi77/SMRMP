@@ -8,7 +8,14 @@ const aiRoutes = require('./aiRoutes');
 const userRoutes = require('./userRoutes');
 const roleRoutes = require('./roleRoutes');
 const notificationRoutes = require('./notificationRoutes');
+const publicVisitorRoutes = require('./publicVisitorRoutes');
 const visitorRoutes = require('./visitorRoutes');
+const membershipRoutes = require('./membershipRoutes');
+const membershipTierRoutes = require('./membershipTierRoutes');
+const groupBookingRoutes = require('./groupBookingRoutes');
+const feedbackRoutes = require('./feedbackRoutes');
+const visitLogRoutes = require('./visitLogRoutes');
+const portalRoutes = require('./portalRoutes');
 
 const router = require('express').Router();
 
@@ -22,6 +29,19 @@ router.use('/ai', aiRoutes);
 router.use('/users', userRoutes);
 router.use('/roles', roleRoutes);
 router.use('/notifications', notificationRoutes);
-router.use('/visitor', visitorRoutes);
+
+// Public Telegram / visitor surfaces
+router.use('/visitor', publicVisitorRoutes);
+
+// ─── Module 8 — Visitor & Member Management (staff CRM) ──────────
+router.use('/visitors', visitorRoutes);
+router.use('/memberships', membershipRoutes);
+router.use('/membership-tiers', membershipTierRoutes);
+router.use('/group-bookings', groupBookingRoutes);
+router.use('/feedback', feedbackRoutes);
+router.use('/visit-logs', visitLogRoutes);
+
+// ─── Visitor Portal (authenticated self-service) ─────────────────
+router.use('/portal', portalRoutes);
 
 module.exports = router;
