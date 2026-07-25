@@ -11,6 +11,7 @@ const {
   toPublicUser,
   findRoleBySlug,
   getPermissionCodes,
+  ensureRbacRoleLinked,
 } = require('../services/rbacService');
 
 const STRONG_PASSWORD_RE =
@@ -160,6 +161,14 @@ const register = async (req, res) => {
       is_active: true,
     });
 
+    // Bridge auth account → CRM visitor profile for the Visitor Portal
+    try {
+      const { ensureVisitorForUser } = require('../services/visitorProfileService');
+      await ensureVisitorForUser(user);
+    } catch (linkError) {
+      console.error('[AUTH] Visitor CRM link failed (non-fatal):', linkError.message);
+    }
+
     await writeAuditLog({
       userId: user.id,
       action: 'REGISTER',
@@ -169,8 +178,13 @@ const register = async (req, res) => {
       ipAddress: req.ip,
     });
 
+    const hydrated = await loadUserWithRole({ id: user.id });
+    const permissions = getPermissionCodes(hydrated);
     return sendSuccess(res, 201, 'Visitor account created successfully', {
-      user: toPublicUser({ ...user.get({ plain: true }), rbacRole: visitorRole }, []),
+      user: toPublicUser(
+        hydrated || { ...user.get({ plain: true }), rbacRole: visitorRole },
+        permissions
+      ),
     });
   } catch (error) {
     if (authUserId) {
@@ -218,9 +232,11 @@ const login = async (req, res) => {
       return sendError(
         res,
         403,
-        'This account is authenticated but has no active staff profile.'
+        'This account is authenticated but has no active profile in SMRMP.'
       );
     }
+
+    user = await ensureRbacRoleLinked(user);
 
     const ipAddress = req.ip;
     Promise.resolve()
