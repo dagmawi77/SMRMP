@@ -6,7 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 module.exports = {
   async up(queryInterface) {
     const [users] = await queryInterface.sequelize.query(
-      `SELECT id FROM users WHERE email = 'curator@adwa.museum' LIMIT 1;`
+      `SELECT id FROM users WHERE email = 'curator@smrmp.dev' LIMIT 1;`
     );
     const [artifacts] = await queryInterface.sequelize.query(
       `SELECT id FROM artifacts WHERE deleted_at IS NULL ORDER BY created_at ASC LIMIT 12;`

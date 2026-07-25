@@ -49,7 +49,7 @@ module.exports = {
     await queryInterface.bulkInsert('tickets', tickets);
 
     const [users] = await queryInterface.sequelize.query(
-      `SELECT id FROM users WHERE email = 'conservation@adwa.museum' LIMIT 1;`
+      `SELECT id FROM users WHERE email = 'conservation@smrmp.dev' LIMIT 1;`
     );
     const [artifacts] = await queryInterface.sequelize.query(
       `SELECT id, condition_status FROM artifacts WHERE condition_status IN ('poor', 'critical', 'fair') LIMIT 5;`
