@@ -7,6 +7,7 @@ import ArtifactForm from '../../components/artifacts/ArtifactForm';
 import QRDisplay from '../../components/artifacts/QRDisplay';
 import Button from '../../components/ui/Button';
 import { useCreateArtifact } from '../../hooks/useArtifacts';
+import getApiErrorMessage from '../../utils/apiError';
 
 export default function AddArtifactPage() {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ export default function AddArtifactPage() {
       setCreatedArtifact({ artifact, qr_data_url });
       toast.success('Artifact created successfully!');
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to create artifact');
+      toast.error(getApiErrorMessage(error, 'Failed to create artifact'));
     }
   };
 

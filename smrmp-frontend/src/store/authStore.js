@@ -7,18 +7,31 @@ const useAuthStore = create(
       user: null,
       token: null,
       isAuthenticated: false,
+      // Not persisted, so every page load re-verifies the stored token against
+      // /auth/me before protected routes are allowed to render.
+      isRestoringSession: true,
 
-      setAuth: (user, token) => {
-        localStorage.setItem('smrmp_token', token);
-        localStorage.setItem('smrmp_user', JSON.stringify(user));
-        set({ user, token, isAuthenticated: true });
-      },
+      setAuth: (user, token) =>
+        set({
+          user,
+          token,
+          isAuthenticated: Boolean(token && user),
+        }),
+
+      setToken: (token) =>
+        set((state) => ({
+          token,
+          isAuthenticated: Boolean(token && state.user),
+        })),
 
       clearAuth: () => {
+        // Older builds mirrored the session into standalone keys.
         localStorage.removeItem('smrmp_token');
         localStorage.removeItem('smrmp_user');
         set({ user: null, token: null, isAuthenticated: false });
       },
+
+      finishRestoringSession: () => set({ isRestoringSession: false }),
 
       hasRole: (...roles) => {
         const { user } = get();

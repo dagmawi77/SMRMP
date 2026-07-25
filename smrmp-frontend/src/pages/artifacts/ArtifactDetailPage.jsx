@@ -9,6 +9,7 @@ import EmptyState from '../../components/ui/EmptyState';
 import Modal from '../../components/ui/Modal';
 import { useArtifact, useDeleteArtifact } from '../../hooks/useArtifacts';
 import useAuthStore from '../../store/authStore';
+import getApiErrorMessage from '../../utils/apiError';
 import { useState } from 'react';
 
 export default function ArtifactDetailPage() {
@@ -27,7 +28,7 @@ export default function ArtifactDetailPage() {
       toast.success('Artifact removed from catalog');
       navigate('/artifacts');
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to delete artifact');
+      toast.error(getApiErrorMessage(error, 'Failed to delete artifact'));
     }
   };
 
