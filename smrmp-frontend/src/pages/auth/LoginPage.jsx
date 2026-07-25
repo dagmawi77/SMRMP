@@ -397,18 +397,6 @@ export default function LoginPage() {
                 </form>
               )}
 
-              {!isForgotMode && (
-                <div className="mt-6 rounded-lg bg-smrmp-green/20 p-4 text-sm text-smrmp-parchment/80">
-                  <p className="mb-2 font-medium text-smrmp-gold">Demo accounts</p>
-                  <p>Admin: admin@smrmp.dev</p>
-                  <p>Curator: curator@smrmp.dev</p>
-                  <p>Password: Demo@2026!</p>
-                  <p className="mt-2 text-xs text-smrmp-parchment/60">
-                    Requires <code className="text-smrmp-parchment/80">npm run auth:sync</code> (service role key).
-                  </p>
-                </div>
-              )}
-
               <p className="mt-6 border-t border-white/10 pt-5 text-xs leading-5 text-smrmp-parchment/50">
                 <span className="font-semibold text-smrmp-parchment/70">Protected & Secure.</span>{' '}
                 Your connection is encrypted and secured with modern authentication protocols.
