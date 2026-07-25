@@ -7,18 +7,25 @@ import {
   BuildingLibraryIcon,
   Bars3Icon,
   QrCodeIcon,
+  Cog6ToothIcon,
+  BellIcon,
 } from '@heroicons/react/24/outline';
 import { authApi } from '../../api/authApi';
 import { supabase } from '../../lib/supabase';
 import useAuthStore from '../../store/authStore';
 import useUiStore from '../../store/uiStore';
+import { useNotificationStore } from '../../store/notificationStore';
 import QRScannerModal from '../artifacts/QRScannerModal';
+import NotificationModal from '../notifications/NotificationModal';
 
 export default function Navbar() {
   const navigate = useNavigate();
   const { user, clearAuth } = useAuthStore();
   const { toggleMobileOpen } = useUiStore();
+  const { toggleModal, getUnreadCount } = useNotificationStore();
   const [showScanner, setShowScanner] = useState(false);
+
+  const unreadCount = getUnreadCount();
 
   const handleLogout = async () => {
     try {
@@ -97,14 +104,46 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Right: Compact User Profile & Logout */}
-      <div className="flex items-center gap-2.5">
-        <div className="hidden sm:block text-right">
-          <p className="text-xs font-bold text-[#2B1B12] leading-tight">{user?.name || 'Staff User'}</p>
-          <p className="text-[10px] capitalize text-[#7C4A2D] font-bold tracking-wide">{user?.role || 'Staff'}</p>
-        </div>
+      {/* Right: Notifications, User Profile, Settings & Logout */}
+      <div className="flex items-center gap-2">
+        {/* Notification Bell Button */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleModal();
+          }}
+          title="Toggle System Notifications"
+          className="relative inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[#E2D6C5] bg-[#FFFDF9] text-[#7C4A2D] hover:bg-[#FAF0E4] hover:text-[#2B1B12] transition-colors"
+        >
+          <BellIcon className="h-4 w-4" />
+          {unreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-600 px-1 text-[9px] font-black text-white ring-2 ring-[#FAF6F0] animate-pulse">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
+        </button>
 
-        <div className="h-5 w-px bg-[#E2D6C5] hidden sm:block" />
+        <button
+          type="button"
+          onClick={() => navigate('/settings')}
+          className="hidden sm:block text-right cursor-pointer group rounded-lg px-2 py-1 hover:bg-[#FAF0E4] transition-colors"
+          title="Open Curator Settings"
+        >
+          <p className="text-xs font-bold text-[#2B1B12] leading-tight group-hover:text-[#7C4A2D] transition-colors">{user?.name || 'Staff User'}</p>
+          <p className="text-[10px] capitalize text-[#7C4A2D] font-bold tracking-wide">{user?.role || 'Staff'}</p>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => navigate('/settings')}
+          title="Settings & Preferences"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[#E2D6C5] bg-[#FFFDF9] text-[#7C4A2D] hover:bg-[#FAF0E4] hover:text-[#2B1B12] transition-colors"
+        >
+          <Cog6ToothIcon className="h-4 w-4" />
+        </button>
+
+        <div className="h-5 w-px bg-[#E2D6C5]" />
 
         <button
           type="button"
@@ -117,6 +156,7 @@ export default function Navbar() {
       </div>
 
       <QRScannerModal isOpen={showScanner} onClose={() => setShowScanner(false)} />
+      <NotificationModal />
     </header>
   );
 }

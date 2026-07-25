@@ -6,6 +6,7 @@ import {
   ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  Cog6ToothIcon,
   ShieldCheckIcon,
   Squares2X2Icon,
   TicketIcon,
@@ -23,6 +24,7 @@ const navIconMap = {
   '/tickets/manage': TicketIcon,
   '/admin': ShieldCheckIcon,
   '/admin/users': ShieldCheckIcon,
+  '/settings': Cog6ToothIcon,
 };
 
 const PORTAL_TITLE_MAP = {
