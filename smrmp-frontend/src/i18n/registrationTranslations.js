@@ -59,7 +59,7 @@ export const translations = {
     success: {
       title: 'Registration Successful',
       welcome: 'Welcome',
-      verify: 'Your visitor account is ready. Sign in with your email and password to book tickets and explore the museum.',
+      verify: 'Your visitor account is ready. Sign in with your email and password to open your Visitor Portal — book tickets, manage membership, and explore the museum.',
     },
     errors: {
       required: 'This field is required',
@@ -132,7 +132,7 @@ export const translations = {
     success: {
       title: 'Registration Successful',
       welcome: 'Welcome',
-      verify: 'መለያዎ ዝግጁ ነው። በኢሜይልና password ይግቡ።',
+      verify: 'መለያዎ ዝግጁ ነው። የጎብኚ ፖርታልዎን ለመክፈት በኢሜይልና password ይግቡ።',
     },
     errors: {
       required: 'Required',
