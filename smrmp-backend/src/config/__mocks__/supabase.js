@@ -1,5 +1,7 @@
 /** Jest manual mock for Supabase Auth used by API tests. */
 
+const { randomUUID } = require('crypto');
+
 const sessions = new Map();
 
 function resetAuthMock() {
@@ -50,7 +52,36 @@ const getSupabaseAuth = () => ({
   },
 });
 
-const getSupabaseAdmin = jest.fn();
+const getSupabaseAdmin = () => ({
+  auth: {
+    admin: {
+      createUser: async ({ email, password, id }) => {
+        const normalizedEmail = String(email).toLowerCase();
+        if (sessions.has(normalizedEmail)) {
+          return {
+            data: { user: null },
+            error: { message: 'User already registered' },
+          };
+        }
+        const userId = id || randomUUID();
+        registerAuthUser({ id: userId, email: normalizedEmail, password });
+        return {
+          data: { user: { id: userId, email: normalizedEmail } },
+          error: null,
+        };
+      },
+      deleteUser: async (userId) => {
+        for (const [email, entry] of sessions.entries()) {
+          if (entry.user.id === userId) {
+            sessions.delete(email);
+            break;
+          }
+        }
+        return { data: {}, error: null };
+      },
+    },
+  },
+});
 
 module.exports = {
   getSupabaseAuth,
