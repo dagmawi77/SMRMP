@@ -222,7 +222,7 @@ export default function LoginPage() {
                       <button
                         type="button"
                         onClick={switchToLogin}
-                        className="mt-4 inline-flex h-11 w-full items-center justify-center bg-smrmp-gold px-5 text-xs font-bold uppercase tracking-widest text-black transition-colors duration-300 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-smrmp-gold"
+                        className="mt-4 inline-flex h-11 w-full items-center justify-center rounded-xl bg-smrmp-gold px-5 text-xs font-bold uppercase tracking-widest text-black transition-colors duration-300 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-smrmp-gold"
                       >
                         Back to Sign In
                       </button>
@@ -270,7 +270,7 @@ export default function LoginPage() {
                       </div>
 
                       <button
-                        className="group flex h-12 w-full items-center justify-center gap-3 bg-smrmp-gold px-5 text-xs font-bold uppercase tracking-widest text-black transition-colors duration-500 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-smrmp-gold disabled:cursor-wait disabled:opacity-70"
+                        className="group flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-smrmp-gold px-5 text-xs font-bold uppercase tracking-widest text-black transition-colors duration-500 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-smrmp-gold disabled:cursor-wait disabled:opacity-70"
                         disabled={isResetting}
                         type="submit"
                       >
@@ -393,7 +393,7 @@ export default function LoginPage() {
                   </div>
 
                   <button
-                    className="group flex h-12 w-full items-center justify-center gap-3 bg-smrmp-gold px-5 text-xs font-bold uppercase tracking-widest text-black transition-colors duration-500 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-smrmp-gold disabled:cursor-wait disabled:opacity-70"
+                    className="group flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-smrmp-gold px-5 text-xs font-bold uppercase tracking-widest text-black transition-colors duration-500 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-smrmp-gold disabled:cursor-wait disabled:opacity-70"
                     disabled={isSubmitting}
                     type="submit"
                   >

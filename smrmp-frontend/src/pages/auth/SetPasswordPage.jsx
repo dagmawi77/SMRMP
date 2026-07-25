@@ -315,7 +315,7 @@ export default function SetPasswordPage() {
                   <button
                     type="submit"
                     disabled={isSubmitting || !isValidPassword}
-                    className="group flex h-12 w-full items-center justify-center gap-3 bg-smrmp-gold px-5 text-xs font-bold uppercase tracking-widest text-black transition-colors duration-300 hover:bg-white focus:outline-none focus:ring-2 focus:ring-smrmp-gold disabled:cursor-not-allowed disabled:opacity-50"
+                    className="group flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-smrmp-gold px-5 text-xs font-bold uppercase tracking-widest text-black transition-colors duration-300 hover:bg-white focus:outline-none focus:ring-2 focus:ring-smrmp-gold disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <span>{isSubmitting ? 'Updating Password...' : 'Set New Password'}</span>
                     <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" />
