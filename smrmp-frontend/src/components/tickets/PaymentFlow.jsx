@@ -1,5 +1,5 @@
 ﻿import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Alert from '../ui/Alert';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
@@ -20,6 +20,7 @@ export default function PaymentFlow({
   visitDate,
 }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [form, setForm] = useState({
     visitor_name: '',
     visitor_phone: '',
@@ -45,6 +46,10 @@ export default function PaymentFlow({
         visit_date: visitDate,
         merchantName: MUSEUM_NAME,
       });
+      // Return into the portal purchase route when checkout started there
+      session.returnPath = location.pathname.startsWith('/portal')
+        ? '/portal/tickets/buy'
+        : '/tickets';
       sessionStorage.setItem(TELEBIRR_SESSION_KEY, JSON.stringify(session));
       navigate('/tickets/telebirr/paygate');
       return;
