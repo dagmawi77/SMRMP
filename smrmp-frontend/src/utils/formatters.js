@@ -4,5 +4,9 @@
 }
 
 export function formatCurrency(amount, currency = 'ETB') {
-  return new Intl.NumberFormat('en-ET', { style: 'currency', currency }).format(amount || 0);
+  try {
+    return new Intl.NumberFormat('en-ET', { style: 'currency', currency }).format(amount || 0);
+  } catch {
+    return `${Number(amount || 0).toLocaleString()} ${currency}`;
+  }
 }

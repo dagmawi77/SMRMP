@@ -1,9 +1,165 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-  margin: 0;
-  min-height: 100vh;
-  font-family: system-ui, -apple-system, sans-serif;
+:root {
+  --color-brown-dark: #2b1b12;
+  --color-brown-earth: #7c4a2d;
+  --color-green-museum: #374b07;
+  --color-green-deep: #243205;
+  --color-gold: #d4a017;
+  --color-parchment: #f5efe6;
+  --color-warm-card: #faf6f0;
+  --color-border: #e2d6c5;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+    overflow-x: clip;
+    background-color: #4a2c1b;
+    color: var(--color-parchment);
+    font-family: 'Inter', Arial, sans-serif;
+  }
+
+  /* Admin & visitor pages use warm heritage parchment backgrounds */
+  .admin-shell,
+  .visitor-shell {
+    background-color: var(--color-parchment);
+    color: #2b1b12;
+  }
+
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  ::selection {
+    background-color: var(--color-gold);
+    color: #000;
+  }
+}
+
+body::after {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  content: '';
+  background-image: url('https://www.transparenttextures.com/patterns/p6.png');
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+@layer components {
+  .glass-panel {
+    border: 1px solid rgba(212, 160, 23, 0.25);
+    background: rgba(26, 18, 12, 0.75);
+    backdrop-filter: blur(20px);
+  }
+
+  .glass-panel-light {
+    border: 1px solid rgba(226, 214, 197, 0.9);
+    background: rgba(250, 246, 240, 0.92);
+    backdrop-filter: blur(16px);
+  }
+
+  .hairline-gold {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+    opacity: 0.5;
+  }
+
+  .paper-texture {
+    background-color: #cdb28f;
+    background-image: linear-gradient(rgba(205, 178, 143, 0.38), rgba(205, 178, 143, 0.38)), url('https://images.unsplash.com/photo-1686806372726-388d03ff49c8?auto=format&w=1280&q=80&fit=crop');
+    background-blend-mode: multiply;
+    background-position: center;
+    background-size: cover;
+  }
+
+  .monument-step {
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  }
+
+  .monument-step:hover {
+    transform: translateY(-12px);
+    border-color: rgba(212, 160, 23, 0.4);
+  }
+
+  .nav-link {
+    position: relative;
+  }
+
+  .nav-link::after {
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    content: '';
+    background-color: var(--color-gold);
+    transition: width 300ms ease;
+  }
+
+  .nav-link:hover::after,
+  .nav-link:focus-visible::after {
+    width: 100%;
+  }
+
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 900ms ease, transform 900ms ease;
+  }
+
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .trust-ring {
+    animation: spin 20s linear infinite;
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
 }
