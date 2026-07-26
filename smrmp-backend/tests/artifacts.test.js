@@ -83,6 +83,71 @@ describe('Artifacts API', () => {
     expect(list.body.data.artifacts.length).toBeGreaterThan(0);
   });
 
+  test('public QR lookup returns visitor details without staff-only fields', async () => {
+    const create = await request(app)
+      .post('/api/artifacts')
+      .set('Authorization', `Bearer ${curatorToken}`)
+      .field('name', 'Emperor Menelik War Drum')
+      .field('category', 'ceremonial')
+      .field('location', 'Gallery 2')
+      .field('historical_period', '19th Century')
+      .field('origin', 'Shewa, Ethiopia')
+      .field('materials', 'Wood, hide')
+      .field('description', 'A ceremonial drum carried at Adwa.')
+      .field('amharic_description', 'በአድዋ ጦርነት የተያዘ ከበሮ።')
+      .field('video_url', 'https://www.youtube.com/watch?v=abc123')
+      .field('staff_notes', 'Stored in vault B, handle with gloves.')
+      .field('keywords', 'adwa,ceremonial');
+
+    expect(create.status).toBe(201);
+    const { qr_code: qrCode } = create.body.data.artifact;
+
+    // No Authorization header — this must work for an anonymous visitor.
+    const res = await request(app).get(`/api/artifacts/qr/${qrCode}`);
+
+    expect(res.status).toBe(200);
+    const { artifact } = res.body.data;
+
+    expect(artifact).toMatchObject({
+      name: 'Emperor Menelik War Drum',
+      category: 'ceremonial',
+      historical_period: '19th Century',
+      origin: 'Shewa, Ethiopia',
+      materials: 'Wood, hide',
+      description: 'A ceremonial drum carried at Adwa.',
+      amharic_description: 'በአድዋ ጦርነት የተያዘ ከበሮ።',
+      video_url: 'https://www.youtube.com/watch?v=abc123',
+      location: 'Gallery 2',
+      qr_code: qrCode,
+    });
+    expect(artifact.keywords).toEqual(['adwa', 'ceremonial']);
+    expect(Array.isArray(artifact.images)).toBe(true);
+    expect(Array.isArray(artifact.exhibitions)).toBe(true);
+    expect(res.body.data.qr_data_url).toMatch(/^data:image\/png;base64,/);
+
+    for (const internalField of [
+      'staff_notes',
+      'ai_description',
+      'description_source',
+      'created_by',
+      'last_edited_by',
+      'deleted_at',
+    ]) {
+      expect(artifact).not.toHaveProperty(internalField);
+    }
+  });
+
+  test('public QR lookup accepts a lowercase code', async () => {
+    const artifact = await Artifact.findOne({ where: { name: 'Emperor Menelik War Drum' } });
+
+    const res = await request(app).get(
+      `/api/artifacts/qr/${artifact.qr_code.toLowerCase()}`,
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.artifact.qr_code).toBe(artifact.qr_code);
+  });
+
   test('visitor role cannot list artifacts', async () => {
     const visitor = await User.create({
       name: 'Visitor',

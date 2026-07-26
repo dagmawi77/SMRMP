@@ -6,6 +6,7 @@ const Permission = require('./Permission');
 const RolePermission = require('./RolePermission');
 const Artifact = require('./Artifact');
 const ArtifactImage = require('./ArtifactImage');
+const ArtifactNarration = require('./ArtifactNarration');
 const Exhibition = require('./Exhibition');
 const ConservationLog = require('./ConservationLog');
 const Ticket = require('./Ticket');
@@ -72,6 +73,11 @@ Artifact.hasMany(ConservationLog, {
   foreignKey: 'artifact_id',
 });
 
+Artifact.hasMany(ArtifactNarration, {
+  as: 'narrations',
+  foreignKey: 'artifact_id',
+});
+
 Artifact.belongsToMany(Exhibition, {
   through: 'exhibition_artifacts',
   foreignKey: 'artifact_id',
@@ -82,6 +88,17 @@ Artifact.belongsToMany(Exhibition, {
 // ─── ARTIFACT IMAGE ASSOCIATIONS ─────────────────────────────────
 ArtifactImage.belongsTo(Artifact, {
   foreignKey: 'artifact_id',
+});
+
+// ─── ARTIFACT NARRATION ASSOCIATIONS ─────────────────────────────
+ArtifactNarration.belongsTo(Artifact, {
+  foreignKey: 'artifact_id',
+  as: 'artifact',
+});
+
+ArtifactNarration.belongsTo(User, {
+  foreignKey: 'generated_by',
+  as: 'generatedBy',
 });
 
 // ─── EXHIBITION ASSOCIATIONS ─────────────────────────────────────
@@ -149,6 +166,7 @@ module.exports = {
   RolePermission,
   Artifact,
   ArtifactImage,
+  ArtifactNarration,
   Exhibition,
   ConservationLog,
   Ticket,
