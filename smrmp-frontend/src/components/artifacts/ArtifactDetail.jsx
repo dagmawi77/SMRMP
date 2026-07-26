@@ -11,24 +11,8 @@ import DuplicateDetectorModal from './DuplicateDetectorModal';
 import { formatDate } from '../../utils/formatters';
 import { useUpdateArtifact } from '../../hooks/useArtifacts';
 import getApiErrorMessage from '../../utils/apiError';
+import getEmbedVideoUrl from '../../utils/videoEmbed';
 import { CalendarIcon, SparklesIcon, TagIcon, CheckCircleIcon, DocumentDuplicateIcon, VideoCameraIcon } from '@heroicons/react/24/outline';
-
-function getEmbedVideoUrl(url) {
-  if (!url) return null;
-  const trimmed = url.trim();
-  const ytMatch = trimmed.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]+)/);
-  if (ytMatch) {
-    return { type: 'iframe', src: `https://www.youtube.com/embed/${ytMatch[1]}` };
-  }
-  const vimeoMatch = trimmed.match(/vimeo\.com\/(?:video\/)?([0-9]+)/);
-  if (vimeoMatch) {
-    return { type: 'iframe', src: `https://player.vimeo.com/video/${vimeoMatch[1]}` };
-  }
-  if (trimmed.match(/\.(mp4|webm|ogg)($|\?)/i)) {
-    return { type: 'video', src: trimmed };
-  }
-  return { type: 'iframe', src: trimmed };
-}
 import toast from 'react-hot-toast';
 
 export default function ArtifactDetail({ artifact, qrDataUrl }) {
@@ -125,6 +109,7 @@ export default function ArtifactDetail({ artifact, qrDataUrl }) {
         )}
         <AudioNarrationPlayer
           artifactName={artifact.name}
+          artifactCode={artifact.qr_code}
           description={artifact.description}
           amharicDescription={artifact.amharic_description}
           origin={artifact.origin}
