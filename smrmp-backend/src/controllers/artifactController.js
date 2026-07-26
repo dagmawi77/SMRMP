@@ -1,6 +1,6 @@
 ﻿const { Op } = require('sequelize');
 const { body } = require('express-validator');
-const { Artifact, ArtifactImage, User } = require('../models');
+const { Artifact, ArtifactImage, Exhibition, User } = require('../models');
 const { generateArtifactQR } = require('../services/qrService');
 const { uploadArtifactImages } = require('../services/imageService');
 const { sendSuccess, sendError } = require('../utils/apiResponse');
@@ -21,6 +21,30 @@ const ARTIFACT_CATEGORIES = [
 ];
 
 const CONDITIONS = ['excellent', 'good', 'fair', 'poor', 'critical'];
+
+/**
+ * Fields safe to expose on the unauthenticated QR endpoint. This is an
+ * allowlist rather than an exclusion list so that new internal columns are
+ * private by default — `staff_notes`, `ai_description`, `description_source`
+ * and the `*_by` audit columns must never reach a public visitor.
+ */
+const PUBLIC_ARTIFACT_ATTRIBUTES = [
+  'id',
+  'name',
+  'category',
+  'historical_period',
+  'origin',
+  'materials',
+  'description',
+  'amharic_description',
+  'video_url',
+  'location',
+  'condition_status',
+  'qr_code',
+  'keywords',
+  'is_on_loan',
+  'created_at',
+];
 
 const createValidation = [
   body('name').trim().notEmpty().withMessage('name is required'),
@@ -132,11 +156,27 @@ const getArtifactById = async (req, res) => {
 const getArtifactByQR = async (req, res) => {
   try {
     const artifact = await Artifact.findOne({
-      where: { qr_code: req.params.code },
-      include: [{ model: ArtifactImage, as: 'images' }],
-      attributes: {
-        exclude: ['created_by', 'last_edited_by', 'ai_description', 'deleted_at'],
-      },
+      where: { qr_code: String(req.params.code).trim().toUpperCase() },
+      attributes: PUBLIC_ARTIFACT_ATTRIBUTES,
+      include: [
+        {
+          model: ArtifactImage,
+          as: 'images',
+          attributes: ['id', 'file_url', 'is_primary'],
+          required: false,
+        },
+        {
+          // Only currently running exhibitions — `planning` entries are
+          // unannounced internal programming.
+          model: Exhibition,
+          as: 'exhibitions',
+          attributes: ['id', 'name', 'theme', 'gallery', 'start_date', 'end_date'],
+          through: { attributes: [] },
+          where: { status: 'active' },
+          required: false,
+        },
+      ],
+      order: [[{ model: ArtifactImage, as: 'images' }, 'is_primary', 'DESC']],
     });
 
     if (!artifact) {

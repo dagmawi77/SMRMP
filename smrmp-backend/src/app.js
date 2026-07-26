@@ -13,9 +13,28 @@ app.set('trust proxy', 1);
 
 // Security middleware
 app.use(helmet());
+
+// FRONTEND_URL stays a single canonical origin (it is baked into QR codes and
+// emailed links). CORS_ORIGINS optionally adds more allowed browser origins —
+// e.g. a LAN address used for testing the visitor QR flow on a phone.
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  ...(process.env.CORS_ORIGINS || '').split(','),
+]
+  .map((origin) => origin && origin.trim().replace(/\/+$/, ''))
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: (origin, callback) => {
+      // Same-origin/non-browser callers (curl, native camera app) send no Origin.
+      if (!origin || allowedOrigins.includes(origin.replace(/\/+$/, ''))) {
+        return callback(null, true);
+      }
+      // Omit the CORS headers rather than throwing, so the browser blocks the
+      // response without the request surfacing as a 500.
+      return callback(null, false);
+    },
     credentials: true,
   })
 );
