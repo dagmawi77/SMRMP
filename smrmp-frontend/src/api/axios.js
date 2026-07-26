@@ -24,6 +24,7 @@ const isPublicPath = () => {
     pathname === '/' ||
     pathname.startsWith('/login') ||
     pathname.startsWith('/artifact/') ||
+    pathname.startsWith('/scan') ||
     pathname.startsWith('/tickets') ||
     pathname.startsWith('/register') ||
     pathname.startsWith('/feedback') ||
