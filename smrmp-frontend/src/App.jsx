@@ -15,6 +15,7 @@ import AddArtifactPage from './pages/artifacts/AddArtifactPage';
 import ArtifactDetailPage from './pages/artifacts/ArtifactDetailPage';
 import EditArtifactPage from './pages/artifacts/EditArtifactPage';
 import PublicArtifactPage from './pages/visitor/PublicArtifactPage';
+import PublicScanPage from './pages/visitor/PublicScanPage';
 import TicketPurchasePage from './pages/tickets/TicketPurchasePage';
 import TelebirrPaygatePage from './pages/tickets/TelebirrPaygatePage';
 import TicketVerificationPage from './pages/tickets/TicketVerificationPage';
@@ -59,6 +60,7 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/set-password" element={<SetPasswordPage />} />
           <Route path="/artifact/:code" element={<PublicArtifactPage />} />
+          <Route path="/scan" element={<PublicScanPage />} />
           <Route
             path="/tickets"
             element={(

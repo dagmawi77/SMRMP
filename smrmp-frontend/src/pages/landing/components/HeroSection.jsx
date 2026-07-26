@@ -1,4 +1,5 @@
-import { ArrowDownIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
+import { Link } from 'react-router-dom';
+import { ArrowDownIcon, ArrowRightIcon, QrCodeIcon } from '@heroicons/react/24/outline';
 
 export default function HeroSection() {
   return (
@@ -24,6 +25,10 @@ export default function HeroSection() {
             Explore the Adwa Pilot
             <ArrowRightIcon className="h-4 w-4" aria-hidden="true" />
           </a>
+          <Link to="/scan" className="inline-flex items-center justify-center gap-2.5 border border-smrmp-gold/60 bg-black/30 backdrop-blur-sm px-7 py-3.5 text-xs font-bold uppercase tracking-widest text-smrmp-gold transition-all duration-300 hover:bg-smrmp-gold hover:text-black">
+            <QrCodeIcon className="h-4 w-4" aria-hidden="true" />
+            Scan an Artifact QR
+          </Link>
           <a href="#capabilities" className="inline-flex items-center justify-center gap-2.5 border border-white/30 bg-black/30 backdrop-blur-sm px-7 py-3.5 text-xs font-bold uppercase tracking-widest text-smrmp-parchment transition-all duration-300 hover:bg-white/20 hover:border-white">
             View Platform Architecture
             <ArrowDownIcon className="h-4 w-4" aria-hidden="true" />
